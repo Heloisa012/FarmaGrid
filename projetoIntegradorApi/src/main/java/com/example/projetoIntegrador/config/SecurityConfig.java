@@ -1,0 +1,51 @@
+package com.example.projetoIntegrador.config;
+
+import com.example.projetoIntegrador.security.JwtFilter;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+@Configuration
+public class SecurityConfig {
+
+    @Autowired
+    private JwtFilter jwtFilter;
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .cors(cors -> {})
+                .csrf(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/auth/login", "/auth/cadastro", "/auth/db-status", "/auth/db-processlist", "/auth/db-kill/**").permitAll()
+                        .requestMatchers("/api/teleconsultas/**").hasAnyRole("PACIENTE", "MEDICO", "ADMIN")
+                        .requestMatchers("/api/receitas/**").hasAnyRole("PACIENTE", "MEDICO", "ADMIN")
+                        .requestMatchers("/api/vendas/**").hasAnyRole("PACIENTE", "CLIENTE_FARMACIA", "FUNCIONARIO", "ADMIN")
+                        .requestMatchers("/api/descontos/**").hasAnyRole("PACIENTE", "CLIENTE_FARMACIA", "FUNCIONARIO", "ADMIN")
+                        .requestMatchers("/api/estoques/**").hasAnyRole("MEDICO", "CLIENTE_FARMACIA", "FUNCIONARIO", "ADMIN")
+                        .requestMatchers("/api/medicamentos/**").authenticated()
+                        .requestMatchers("/api/pacientes/**").hasAnyRole("PACIENTE", "MEDICO", "ADMIN")
+                        .requestMatchers("/api/medicos/**").hasAnyRole("PACIENTE", "MEDICO", "ADMIN")
+                        .requestMatchers("/api/parcerias/**").hasAnyRole("ADMIN", "MEDICO")
+                        .anyRequest().authenticated()
+                )
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
+        return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+}
