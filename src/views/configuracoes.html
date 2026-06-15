@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: #F8F9F4;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden; 
+        }
+
+        .logo {
+            display: flex;
+            font-size: 30px;
+            font-weight: 700;
+            color: #355e3b;
+            margin-top: 10px;
+            margin-bottom: 2px;
+            letter-spacing: 0.6px;
+            text-align: center;
+        }
+
+        .logo span { color: #4BA94B; }
+
+        .plus-icon {
+            width: 30px;      
+            height: 30px;
+            position: relative;
+            top: -10px;
+        }
+
+        .titulo {
+            font-size: 15px;
+            font-weight: 700;
+            color: #2e462e;
+            text-align: center;
+        }
+
+        .colunaEsquerda {
+            width: 240px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background-color: #ffffff;
+            border-right: solid 1px;
+            padding-top: 15px;
+        }
+
+        .principal {
+            margin-right: 6px;
+            margin-left: 10px;
+            margin-bottom: 20px;
+        }
+
+        .icone {
+            width: 30px;
+            height: 30px;
+        }
+
+        button {
+            color: #234e2d;
+            border: none;
+            background-color: #ffffff00;
+            margin-bottom: 20px;
+            text-align: left;
+            margin-left: 15px;
+            font-weight: 550;
+        }
+
+        .info {
+            display: flex;
+            flex-direction: column;
+            background-color: #ffffff;
+            margin-bottom: 0px;
+            height: 25vh;
+            margin-top: auto;
+            border-top: solid 1px;
+            padding-top: 10px;
+            padding-left: 5px;
+        }
+
+        .perfil {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+
+        .foto {
+            background-color: #dff4df;
+            color: #234e2d;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .dados {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+
+        .nome {
+            color: #234e2d;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .crm {
+            color: #234e2d;
+            font-size: 13px;
+        }
+
+        .acoes {
+            display: flex;
+            flex-direction: column;
+            margin-top: 10px;
+        }
+
+        .botao {
+            gap: 6px;
+            background: none;
+            border: none;
+            color: #234e2d;
+            font-weight: 500;
+            font-size: 14px;
+            border-radius: 5px;
+            margin-left: 0px;
+            margin-right: 100px;
+            padding: 2px;
+        }
+
+        .botao:hover {
+            background-color: #234e2d;
+            color: #dff4df;
+            font-weight: 500;
+        }
+
+        .icone1 {
+            width: 18px;
+            height: 18px;
+        }
+
+        .icone2 {
+            width: 18px;
+            height: 18px;
+        }
+
+        #conf {
+            color: #ffffff;
+            background-color: #234e2d;
+            border-radius: 5px;
+            align-items: center;
+            display: flex;
+        }
+
+        .botao:hover .icone2 {
+            content: url("sairHover.png");
+        }
+
+        .btn-img:hover {
+            background-color: #234e2d;
+            color: #dff4df;
+            font-weight: 550;
+            border: none;
+            border-radius: 5px;
+            width: 170px;
+            text-align: center;
+        }
+
+        .btn-img{
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 16px;
+        }
+
+        .btn-img:hover #iconeP { content: url("prontuarioH.png"); }
+        .btn-img:hover #iconeT { content: url("videoCameraT.png"); }
+        .btn-img:hover #iconeI { content: url("brainI.png"); }
+        .btn-img:hover #iconePa { content: url("parceria.png"); }
+
+        .corpo {
+            display: flex;
+            flex: 1;
+            height: 100%;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 20px;
+        }
+
+        .containerPrincipal {
+            display: flex;
+            height: 100vh;
+        }
+
+        #opcoes{
+            height: 90%;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+            width: 23%;
+            margin-left: 40px;
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        #opcoes button{
+            width: 100%;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 16px;
+            margin-left: 0;
+            text-align: left;
+            cursor: pointer;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #opcoes button:hover {
+            background-color: #f0faf7;
+        }
+
+        #opcoes button.selecionado {
+            background-color: #d4ede8;
+            border-left: 4px solid #2e7d32;
+            border-radius: 0;
+            color: #1b5e20;
+            font-weight: 500;
+        }
+
+        #conteudo {
+            height: 90%;
+            flex: 1;
+            margin-right: 40px;
+            padding: 24px;
+            padding-top: 0;
+            overflow-y: auto;
+            scrollbar-width: none;
+        }
+
+        #conteudo::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tituloConteudo{
+            color: #1b5e20;
+            font-weight: 600;
+        }
+
+        .subtitulo{
+            color: rgb(121, 121, 121);
+            font-size: 15px;
+        }
+
+        .infoConteudo{
+            background-color: white;
+            height: auto;
+            width: 100%;
+            padding: 20px 0px 20px 20px;
+            margin-top: 10px;
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+        }
+
+        .circulo-avatar {
+            background-color: #dff4df;
+            color: #234e2d;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .fotoPerfil {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-top: 20px;
+        }
+
+        .acoesFotoPerfil {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .formatoFoto {
+            font-size: 12px;
+            color: gray;
+            margin: 0;
+        }
+
+        #alteraFoto{
+            background-color: #f0faf7;
+            border: 1px solid rgb(197, 197, 197);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 80%;
+            margin-bottom: 5px;
+            margin-left: 0;
+            padding: 5px;
+            color: rgb(63, 63, 63);
+            gap: 5px;
+            cursor: pointer;
+        }
+
+        #alteraFoto:hover{
+            background-color: #e0e9e6;
+        }
+
+        #nome{
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        .tituloInputs{
+            margin: 0; 
+            color: #234e2d;
+        }
+
+        .inputs{
+            border-radius: 5px;
+            width: 90%;
+            border: 1px solid gray;
+            padding: 3px;
+        }
+
+        .inputs:focus{
+            outline: none;
+            background-color: #f0faf7; 
+            border: 1px solid #1b5e20;
+        }
+
+        .inputs2{
+            border-radius: 5px;
+            width: 95%;
+            border: 1px solid gray;
+            padding: 3px;
+        }
+
+        .inputs2:focus{
+            outline: none;
+            background-color: #f0faf7; 
+            border: 1px solid #1b5e20; 
+        }
+
+        .inputs3{
+            border-radius: 5px;
+            width: 100%;
+            border: 1px solid gray;
+            padding: 3px;
+            padding-right: 30px;
+        }
+
+        .inputs3:focus{
+            outline: none;
+            background-color: #f0faf7; 
+            border: 1px solid #1b5e20; 
+        }
+
+        #editar{
+            border: none;
+            background-color: #1b5e20;
+            color: white;
+            text-align: center;
+            padding: 5px 10px 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #cancelar{
+            background-color: #f0faf7;
+            border: 1px solid rgb(209, 209, 209);
+            padding: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #salvarEdicao{
+            border: none;
+            background-color: #4BA94B;
+            padding: 5px;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+
+        #infoMedico{
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        #notificacao {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #1b5e20;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 999;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+        }
+
+        #infoConsulta{
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            margin-top: 15px;
+            width: 100%;
+        }
+
+        #atualizarSenha{
+            border: none;
+            background-color: #1b5e20;
+            padding: 5px;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            margin-top: 20px;
+            margin-bottom: -20px;
+            margin-left: 0;
+        }
+
+        .olho{
+            position:absolute; 
+            right:6px; top:50%; 
+            transform:translateY(-50%); 
+            cursor:pointer; 
+            font-size:16px;
+            display:flex; 
+            align-items:center; 
+            justify-content:center;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="containerPrincipal">
+        <div class="colunaEsquerda">
+
+            <div class="principal">
+                <div class="logo">
+                FARMA<span>GRID</span>
+                <img src="LogoFarmaGrid.png" alt="Símbolo de mais" class="plus-icon" />
+                </div>
+                <div class="titulo">Sistema para Farmácia</div>
+            </div>
+        
+            <button type="button" class="btn-img" id="bp">
+                <img src="folder.png" alt="Ícone" class="icone" id="iconeP">
+                Prontuários
+            </button>
+
+            <button type="button" class="btn-img" id="bt">
+                <img src="videoCamera.png" alt="Ícone" class="icone" id="iconeT">
+                Teleconsultas
+            </button>
+
+            <button type="button" class="btn-img" id="bi">
+                <img src="ia.png" alt="Ícone" class="icone" id="iconeI">
+                Assistente IA
+            </button>
+
+            <button type="button" class="btn-img" id="bpa">
+                <img src="parcerias.png" alt="Ícone" class="icone" id="iconePa">
+                Parcerias
+            </button>
+
+            <div class="info">
+            
+                <div class="perfil">
+                <div class="foto">DR</div>
+                    <div class="dados">
+                    <span class="nome">Dra. Rafaela Albiero</span>
+                    <span class="crm">CRM 12345-SP</span>
+                    </div>
+                </div>
+
+                <div class="acoes">
+
+                    <button class="botao" id="Sair">
+                    <img src="sair.png" alt="sair" class="icone2">
+                    Sair
+                    </button>
+                    <button class="botao" id="conf">
+                    <img src="configHover.png" alt="configuração" class="icone1">
+                    Configuração
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="corpo">
+            <div id="opcoes">
+                <p style="color: #234e2d; font-weight: 700; margin-top: 10px;">Configurações</p>
+                <p style="margin: 0; color: gray;">Gerencie seu perfil</p>
+                <hr style="border: none; height: 2px; background-color: #4BA94B; margin-top: 10px; margin-bottom: 15px;">
+                <button class="selecionado"><img src="perfilPessoal.png">Perfil pessoal</button>
+                <button><img src="maleta.png">Informações Profissionais</button>
+                <button><img src="escudo.png">Segurança</button>
+                <button><img src="paleta.png">Preferências</button>
+            </div>
+
+            <div id="conteudo">
+                
+            </div>
+        </div>
+
+    </div>
+
+    <div id="notificacao">✓ Alterações salvas com sucesso!</div>
+
+    <script>
+        window.addEventListener('DOMContentLoaded', async () => {
+            const botBp  = document.getElementById('bp');
+            const botBt  = document.getElementById('bt');
+            const botBi  = document.getElementById('bi');
+            const botBpa = document.getElementById('bpa');
+
+            botBp.addEventListener('click',  () => window.electronAPI.abrirJanelaIndex());
+            botBt.addEventListener('click',  () => window.electronAPI.abrirJanelaT());
+            botBi.addEventListener('click',  () => window.electronAPI.abrirJanelaIA());
+            botBpa.addEventListener('click', () => window.electronAPI.abrirJanelaParceria());
+
+            document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
+            document.getElementById('conf').addEventListener('click', () => window.electronAPI.abrirJanelaConfig());
+
+            document.querySelectorAll('#opcoes button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelector('#opcoes button.selecionado')?.classList.remove('selecionado');
+                    btn.classList.add('selecionado');
+
+                    const conteudo = document.getElementById('conteudo');
+                    switch(btn.textContent.trim()) {
+
+                        case 'Perfil pessoal':
+                            conteudo.innerHTML = `
+                                <div style="display:flex; justify-content: space-between; width: 100%;">
+                                    <div>
+                                        <h2 class="tituloConteudo">Perfil Pessoal</h2>
+                                        <p class="subtitulo">Atualize suas informações e preferências do sistema</p>
+                                    </div>
+                                    <div id="botaoEditar">
+                                        <button id="editar" onclick="editar()">Editar</button>
+                                    </div>
+                                </div>
+
+                                <div class="infoConteudo">
+                                    <h3 class="tituloConteudo">Foto de Perfil</h3>
+                                    <p class="subtitulo">Atualize sua foto de perfil visível no sistema</p>
+
+                                    <div class="fotoPerfil">
+                                        <div class="circulo-avatar" id="circulo-avatar">DR</div>
+                                        <div class="acoesFotoPerfil">
+                                            <button id="alteraFoto"><img src="camera.png" width="20n" height="20">Alterar Foto</button>
+                                            <input type="file" id="input-selecionar-foto" accept="image/*" style="display:none">
+                                            <span class="formatoFoto">JPG, PNG ou GIF. Máximo 5MB.</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="infoConteudo">
+                                    <h3 class="tituloConteudo">Informações Pessoais</h3>
+                                    <p class="subtitulo">Mantenha suas informações pessoais atualizadas</p>
+
+                                    <div id="nome">
+                                        <div style="display: flex; flex-direction: column; width: 100%;">
+                                            <p class="tituloInputs">Nome:</p>
+                                            <input type="text" name="primeiroNome" id="primeiroNome" class="inputs" readonly>
+                                        </div>
+
+                                        <div style="display: flex; flex-direction: column; width: 100%;">
+                                            <p class="tituloInputs">Sobrenome:</p>
+                                            <input type="text" name="sobrenome" id="sobrenome" class="inputs" readonly>
+                                        </div>
+                                    </div>
+
+                                    <div style="margin-top: 10px;">
+                                        <p class="tituloInputs">E-mail:</p>
+                                        <input type="email" name="email" id="email" class="inputs2" readonly>
+
+                                        <p class="tituloInputs" style="margin-top: 10px;">Telefone:</p>
+                                        <input type="tel" name="telefone" id="telefone" class="inputs2" maxlength="15" readonly>
+
+                                        <p class="tituloInputs" style="margin-top: 10px;">Data de Nascimento:</p>
+                                        <input type="date" name="nascimento" id="nascimento" class="inputs2" readonly>
+
+                                        <p class="tituloInputs" style="margin-top: 10px;">Endereço:</p>
+                                        <input type="text" name="endereco" id="endereco" class="inputs2" readonly>
+                                    </div>
+                                </div>
+                            `;
+                            break;
+
+                        case 'Informações Profissionais':
+                            conteudo.innerHTML = `
+                                <div style="display:flex; justify-content: space-between; width: 100%;">
+                                    <div>
+                                        <h2 class="tituloConteudo">Informações Profissionais</h2>
+                                        <p class="subtitulo">Atualize suas informações e preferências do sistema</p>
+                                    </div>
+                                    <div id="botaoEditar">
+                                        <button id="editar" onclick="editar()">Editar</button>
+                                    </div>
+                                </div>
+                                
+                                <div class="infoConteudo">
+                                    <h3 class="tituloConteudo">Credenciais Profissionais</h3>
+                                    <p class="subtitulo">Informações sobre seu registro e especialidades</p>
+
+                                    <div id="infoMedico">
+                                        <div style="display: flex; flex-direction: column; width: 100%;">
+                                            <p class="tituloInputs">CRM:</p>
+                                            <input type="text" name="crm" id="crm" class="inputs" maxlength="9" readonly>
+                                        </div>
+
+                                        <div style="display: flex; flex-direction: column; width: 100%;">
+                                            <p class="tituloInputs">RQE:</p>
+                                            <input type="text" name="rqe" id="rqe" class="inputs" maxlength="7" readonly>
+                                        </div>
+                                    </div>
+
+                                    <div style="margin-top: 10px;">
+                                        <p class="tituloInputs">Especialidade Principal:</p>
+                                        <input type="text" name="especialidade" id="especialidade" class="inputs2" readonly>
+
+                                        <p class="tituloInputs" style="margin-top: 10px;">Subespecialidades:</p>
+                                        <input type="tel" name="subespecialidades" id="subespecialidades" class="inputs2" readonly>
+                                    </div>
+                                </div>
+
+                                <div class="infoConteudo">
+                                    <h3 class="tituloConteudo">Informações da Clínica</h3>
+                                    <p class="subtitulo">Local de atendimento e horários</p>
+
+                                    <div style="margin-top: 10px;">
+                                        <p class="tituloInputs">Nome da Clínica/Hospital:</p>
+                                        <input type="text" name="clinicaHospital" id="clinicaHospital" class="inputs2" readonly>
+
+                                        <p class="tituloInputs" style="margin-top: 10px;">Endereço da Clínica/Hospital:</p>
+                                        <input type="tel" name="subespecialidades" id="subespecialidades" class="inputs2" readonly>
+                                    </div>
+
+                                    <div id="infoConsulta">
+                                        <div style="display: flex; flex-direction: column; width: 100%;">
+                                            <p class="tituloInputs">Tempo de consulta:</p>
+                                            <input type="text" name="tempoConsulta" id="tempoConsulta" class="inputs" readonly>
+                                        </div>
+
+                                        <div style="display: flex; flex-direction: column; width: 100%;">
+                                            <p class="tituloInputs">Valor da consulta:</p>
+                                            <input type="number" name="valorConsulta" id="valorConsulta" class="inputs" min="0" step="0.01" readonly>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            break;
+
+                            case 'Segurança':
+                            conteudo.innerHTML = `
+                                <h2 class="tituloConteudo">Segurança</h2>
+                                <p class="subtitulo">Atualize suas informações e preferências do sistema</p>
+
+                                <div class="infoConteudo">
+                                    <h3 class="tituloConteudo">Alterar Senha</h3>
+                                    <p class="subtitulo">Mantenha sua conta segura com uma senha forte</p>
+
+                                    <div style="margin-top: 10px;">
+                                        <p class="tituloInputs">Senha Atual:</p>
+                                        <div style="position: relative; width: 95%;">
+                                            <input type="password" name="senhaAtual" id="senhaAtual" class="inputs3">
+                                            <span onclick="toggleSenha('senhaAtual', this)" class="olho"><img src="olhoFechado.png" width="18" height="18"></span>
+                                        </div>
+
+                                        <p class="tituloInputs" style="margin-top: 10px;">Nova Senha:</p>
+                                        <div style="position: relative; width: 95%;">
+                                            <input type="password" name="novaSenha" id="novaSenha" class="inputs3">
+                                            <span onclick="toggleSenha('novaSenha', this)" class="olho"><img src="olhoFechado.png" width="18" height="18"></span>
+                                        </div>
+
+                                        <p class="tituloInputs" style="margin-top: 10px;">Confirmar Nova Senha:</p>
+                                        <div style="position: relative; width: 95%;">
+                                            <input type="password" name="confNovaSenha" id="confNovaSenha" class="inputs3">
+                                            <span onclick="toggleSenha('confNovaSenha', this)" class="olho"><img src="olhoFechado.png" width="18" height="18"></span>
+                                        </div>
+                                    </div>
+
+                                    <button id="atualizarSenha">Atualizar Senha</button>
+
+                                </div>                              
+                            `;
+                            break;
+
+                            case 'Preferências':
+                            conteudo.innerHTML = `
+                                <div style="display:flex; justify-content: space-between; width: 100%;">
+                                    <div>
+                                        <h2 class="tituloConteudo">Preferências</h2>
+                                        <p class="subtitulo">Atualize suas informações e preferências do sistema</p>
+                                    </div>
+                                    <div id="botaoEditar">
+                                        <button id="editar" onclick="editar()">Editar</button>
+                                    </div>
+                                </div>
+
+                                <div class="infoConteudo">
+                                    <h3 class="tituloConteudo">Preferências de Agenda</h3>
+                                    <p class="subtitulo">Configure sua agenda de atendimentos</p>
+
+                                    <div style="margin-top: 10px;">
+                                        <p class="tituloInputs">Horário De Inicio:</p>
+                                        <input type="time" name="hInicio" id="hInicio" class="inputs2" readonly>
+
+                                        <p class="tituloInputs" style="margin-top: 10px;">Horário de Término:</p>
+                                        <input type="time" name="hTermino" id="hTermino" class="inputs2" readonly>
+                                    </div>
+                                </div>                              
+                            `;
+                            break;
+                    }
+                });
+            });
+
+            document.querySelector('#opcoes button.selecionado')?.click();
+
+            document.getElementById('conteudo').addEventListener('click', (e) => {
+                if (e.target.id === 'alteraFoto' || e.target.closest('#alteraFoto')) {
+                    document.getElementById('input-selecionar-foto').click();
+                }
+            });
+
+            document.getElementById('conteudo').addEventListener('change', (e) => {
+                if (e.target.id === 'input-selecionar-foto') {
+                    const arquivo = e.target.files[0];
+                    if (arquivo) {
+                        const urlTemporaria = URL.createObjectURL(arquivo);
+                        const circulo = document.getElementById('circulo-avatar');
+                        circulo.style.backgroundImage = `url(${urlTemporaria})`;
+                        circulo.style.backgroundSize = 'cover';
+                        circulo.style.backgroundPosition = 'center';
+                        circulo.textContent = '';
+                    }
+                }
+            });
+
+            document.getElementById('conteudo').addEventListener('input', (e) => {
+                if (e.target.id === 'crm') {
+                    let valor = e.target.value.replace(/[^0-9A-Za-z]/g, '').toUpperCase();
+                    valor = valor.replace(/^(\d{4,6})([A-Z]{1,2})$/, '$1-$2');
+                    e.target.value = valor;
+                }
+            });
+
+            document.getElementById('conteudo').addEventListener('blur', (e) => {
+                if (e.target.id === 'crm') {
+                    const valorDigitado = e.target.value;
+                    const regexValidaCrm = /^\d{4,6}-[A-Z]{2}$/;
+                    if (valorDigitado !== "" && !regexValidaCrm.test(valorDigitado)) {
+                        mostrarNotificacao('❌ CRM inválido! Formato correto: 1234-SP');
+                    }
+                }
+            }, true);
+
+            document.getElementById('conteudo').addEventListener('input', (e) => {
+                if (e.target.id === 'telefone') {
+                    let valor = e.target.value.replace(/\D/g, ''); // remove tudo que não é número
+
+                    if (valor.length <= 10) {
+                        valor = valor.replace(/^(\d{2})(\d{4})(\d{0,4})/, '($1) $2-$3');
+                    } else {
+                        valor = valor.replace(/^(\d{2})(\d{5})(\d{0,4})/, '($1) $2-$3');
+                    }
+
+                    e.target.value = valor;
+                }
+            });
+        });
+
+        function editar(){
+            const todosInputs = document.querySelectorAll('.inputs, .inputs2');
+            const botoes = document.getElementById('botaoEditar');
+
+            botoes.innerHTML = `
+                <div style="display:flex; gap: 1px;">
+                    <button id="cancelar" onclick="cancelarEdicao()">Cancelar</button>
+                    <button id="salvarEdicao" onclick="salvarEdicao()">Salvar Edição</button>
+                </div>
+            `;
+
+            todosInputs.forEach(input => {
+                input.readOnly = false;
+            })
+        }
+
+        function cancelarEdicao(){
+            const todosInputs = document.querySelectorAll('.inputs, .inputs2');
+            const botoes = document.getElementById('botaoEditar');
+
+            botoes.innerHTML = `
+               <button id="editar" onclick="editar()">Editar</button>
+            `;
+
+            todosInputs.forEach(input => {
+                input.readOnly = true;
+            })
+        }
+
+        function salvarEdicao(){
+
+            const crm = document.getElementById('crm');
+                if (crm) {
+                    const regexValidaCrm = /^\d{4,6}-[A-Z]{2}$/;
+                    if (crm.value !== "" && !regexValidaCrm.test(crm.value)) {
+                        return;
+                    }
+                }
+
+            const todosInputs = document.querySelectorAll('.inputs, .inputs2');
+            const botoes = document.getElementById('botaoEditar');
+
+            botoes.innerHTML = `
+               <button id="editar" onclick="editar()">Editar</button>
+            `;
+
+            todosInputs.forEach(input => {
+                input.readOnly = true;
+            })
+
+            mostrarNotificacao('✓ Alterações salvas com sucesso!');
+        }
+
+        function mostrarNotificacao(msg) {
+            const notif = document.getElementById('notificacao');
+            notif.textContent = msg;
+            notif.style.display = 'block';
+            setTimeout(() => notif.style.display = 'none', 3000);
+        }
+
+
+        function toggleSenha(inputId, olho) {
+            const input = document.getElementById(inputId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                olho.innerHTML = '<img src="olhoAberto.png" width="18" height="18">';
+            } else {
+                input.type = 'password';
+                olho.innerHTML = '<img src="olhoFechado.png" width="18" height="18">';
+            }
+        }
+
+    </script>
+</body>
+</html>

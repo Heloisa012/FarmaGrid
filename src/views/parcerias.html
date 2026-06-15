@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmaGrid+</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
+    <style>
+
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body{
+      background-color: #F8F9F4;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+    
+    .navbar{
+      background-color: #ffffff;
+      border-bottom: solid 1px;
+    }
+
+    .logo {
+        display: flex;
+        font-size: 30px;
+        font-weight: 700;
+        color: #355e3b;
+        margin-top: 10px;
+        margin-bottom: 2px;
+        letter-spacing: 0.6px;
+        text-align: center;
+      }
+  
+      .logo span { color: #4BA94B; }
+  
+      .plus-icon {
+          width: 30px;      
+          height: 30px;
+          position: relative;
+          top: -10px;
+  
+      }
+  
+      .titulo {
+        font-size: 15px;
+        font-weight: 700;
+        color: #2e462e;
+        text-align: center;
+      }
+      
+      .prontuarioIcon {
+        width: 60px;
+        height: 60px;
+        margin-right: 12px;
+      }
+
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 1px;        
+        padding: 8px 12px;
+        text-decoration: none;
+      }
+
+      .menu-text {
+        display: flex;
+        flex-direction: column; 
+        line-height: 1.1;
+      }
+
+      .menu-title {
+        font-size: 25px;
+        font-weight: 600;
+        color: #234e2d;
+      }
+
+      .menu-date {
+        font-size: 14px;
+        font-weight: 500;
+        color: #2e462e;
+        margin-top: 3px;
+      }
+
+      #sinoNot{
+        width: 40px;
+        height: 40px;
+      }
+
+      .colunaEsquerda{
+        width: 240px;
+        margin-left:0px;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        background-color: #ffffff;
+        border-right: solid 1px;
+        padding-top: 15px;
+        justify-content: space-between;
+      }
+      
+
+      .borda{
+        border-right: solid 1px;
+      }
+
+      .principal{
+        margin-right: 6px;
+        margin-left: 10px;
+        margin-bottom: 20px;
+      }
+
+      .icone{
+        width: 30px;
+        height: 30px;
+      }
+
+      button{
+        color: #234e2d;
+        border: none;
+        background-color: #ffffff00;
+        margin-bottom: 20px;
+        text-align: left;
+        margin-left: 15px;
+        font-weight: 550;
+      }
+
+      .info{
+        display: flex;
+        flex-direction: column;
+        background-color: #ffffff;
+        margin-bottom: 0px;
+        height: 25vh;
+        margin-top: auto;
+        border-top: solid 1px;
+        padding-top: 10px;
+        padding-left: 5px;
+      }
+
+      .perfil {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 5px;
+      }
+
+      .foto {
+        background-color: #dff4df;
+        color: #234e2d;
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 16px;
+      }
+
+      .dados {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.2;
+      }
+
+      .nome {
+        color: #234e2d;
+        font-weight: 600;
+        font-size: 14px;
+      }
+
+      .crm {
+        color: #234e2d;
+        font-size: 13px;
+      }
+
+      .acoes {
+        display: flex;
+        flex-direction: column;
+        margin-top: 10px;
+      }
+
+      .botao {
+        gap: 6px;
+        background: none;
+        border: none;
+        color: #234e2d;
+        font-weight: 500;
+        font-size: 14px;
+        border-radius: 5px;
+        margin-left:0px;
+        margin-right: 100px;
+        padding: 2px;
+      }
+
+      .botaoNovoPac{
+        gap: 6px;
+        background:#234e2d;
+        border: none;
+        color: white;
+        padding: 5px;
+        border-radius: 5px;
+      }
+
+      .botao:hover {
+        background-color: #234e2d;
+        color: #dff4df;
+        font-weight: 500;
+      }
+
+      .icone1 {
+        width: 18px;
+        height: 18px;
+      }
+
+      .icone2 {
+        width: 18px;
+        height: 18px;
+      }
+
+      .botao:hover .icone1 {
+        content: url("configHover.png");
+      }
+
+      .botao:hover .icone2 {
+        content: url("sairHover.png");
+      }
+
+      .btn-img:hover{
+        background-color: #234e2d;
+        color: #dff4df;
+        font-weight: 550;
+        border: none;
+        border-radius: 5px;
+        width: 170px;
+        text-align: center;
+      }
+
+      .btn-img:hover #iconeP{
+        content: url("prontuarioH.png");
+      }
+
+      .btn-img:hover #iconeT{
+        content: url("videoCameraT.png");
+      }
+
+      .btn-img:hover #iconeI{
+        content: url("brainI.png");
+      }
+
+      .btn-img:hover #iconePa{
+        content: url("parceria.png");
+      }
+
+      .corpo{
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        scrollbar-width: none; 
+        -ms-overflow-style: none; 
+      }
+
+      .corpo::-webkit-scrollbar {
+  display: none;
+}
+
+      .containerPrincipal {
+        display: flex;
+        height: calc(100vh - 70px);
+      }
+
+      .inicio{
+        display: flex;
+        flex-direction: column; 
+        line-height: 1.1;
+        margin: 10px;
+      }
+
+      .tituloo{
+        font-size: 25px;
+        font-weight: 600;
+        color: #234e2d;
+      }
+
+      .subtitulo{
+        font-size: 14px;
+        font-weight: 500;
+        color: #42773b;
+        margin-top: 3px;
+      }
+
+      .container2{
+        display: flex;
+        flex-direction: row; 
+        width: 1000px;
+        position: relative;
+        margin-left: -10px;
+      }
+
+       #bpa{
+        background-color: #234e2d;
+        color: #dff4df;
+        font-weight: 550;
+        border: none;
+        border-radius: 5px;
+        width: 170px;
+        text-align: center;
+      }
+
+      .novaParceria{
+        gap: 6px;
+        background:#234e2d;
+        border: none;
+        color: white;
+        padding: 5px;
+        border-radius: 5px;
+        width: 150px;
+      }
+
+      .botaoAgenda{
+        position: absolute;
+        top: 10px;
+        right: 0px; 
+      }
+
+      .agendamentoDivs{
+        display: flex;
+        flex-direction: row;
+      }
+
+      .calendario{
+        background-color: #ffffff;
+        border: solid 1px;
+        height: auto;
+        border-radius: 8px;
+        margin-top: 0px;
+        padding: 5px;
+        margin-left: 10px;
+        display: flex;
+        flex-direction: column;
+        width: 350px;
+      }
+
+      .calendarioo{
+        font-size: 18px;
+        font-weight: 530;
+        color: #234e2d;
+      }
+
+     .consultas-container {
+        background: #ffffff;
+        border: 1px solid #000000;
+        border-radius: 10px;
+        padding: 15px;
+        width: 630px;
+        margin-left: 20px;
+    }
+
+    .consulta-card {
+        border: 1px solid #000000;
+        background: #ffffff;
+        border-radius: 8px;
+        padding: 10px;
+        margin-top: 8px;
+        position: relative;
+    }
+
+    .calendar-container {
+        background: #f7fdf9;
+        border: 1px solid #d4e9dd;
+        border-radius: 12px;
+        padding: 20px;
+        width: 280px; 
+        display: flex;
+        flex-direction: column;
+        align-items: center; 
+        justify-content: center;
+        margin: 0 auto; 
+        }
+
+        .flatpickr-calendar {
+        transform: scale(0.9);
+        transform-origin: center; 
+        }
+
+        .calendar-container h3,
+        .calendar-container p {
+        text-align: center;
+        }
+
+        #calendario{
+            border-radius: 5px;
+            border: solid 1px;
+            outline-color: #42773b;
+        }
+
+        
+
+      .statusP{
+        border: none;
+        border-radius: 5px;
+        background-color: #4BA94B;
+        padding: 2px;
+        color: white;
+        font-weight: 500;
+        font-size: 12px;
+      }
+
+      .iconeConsulta{
+        width: 20px;
+        height: 20px;
+        margin: 5px;
+      }
+
+      .texto{
+        font-weight: 500;
+        font-size: 14px;
+        margin-bottom: 2px;
+      }
+
+      .botoes{
+        position: absolute;
+        top: 11px;
+        right: 10px; 
+      }
+
+
+      /* ===== PARCERIAS ===== */
+    .parcerias-container {
+      background-color: #F8F9F4;
+      padding: 25px;
+      border-radius: 10px;
+      overflow-y: auto;
+      scrollbar-width: none; 
+      -ms-overflow-style: none; 
+      
+    }
+
+.parcerias-container::-webkit-scrollbar {
+  display: none;
+}
+
+/* Cards superiores */
+.cardsResumo {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 25px;
+}
+
+.cardResumo {
+  
+  background-color: #ffffff;
+  border: 1px solid #d4e9dd;
+  border-radius: 10px;
+  padding: 15px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 400px;
+}
+
+.cardResumo h2 {
+  margin: 5px 0;
+  color: #234e2d;
+  font-weight: 700;
+}
+
+.tituloCard {
+  color: #234e2d;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.descricaoCard {
+  font-size: 13px;
+  color: #4ba94b;
+  font-weight: 500;
+}
+
+/* ===== TABELA DE PARCEIROS ===== */
+.tabela-parceiros {
+  background: #ffffff;
+  border: 1px solid #d4e9dd;
+  border-radius: 12px;
+  padding: 16px 18px;
+  width: 100%;
+}
+
+.headerTabela {
+  margin-bottom: 10px;
+}
+
+.headerTabela h5 {
+  font-size: 16px;
+  color: #234e2d;
+  margin: 0;
+  font-weight: 600;
+}
+
+.subinfo {
+  font-size: 12px;
+  color: #4ba94b;
+}
+
+.tabelaCustom {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 13px;
+}
+
+.tabelaCustom thead th {
+  text-align: left;
+  color: #234e2d;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 6px 8px;
+  border-bottom: 1px solid #d4e9dd;
+}
+
+.tabelaCustom tbody tr {
+  border-bottom: 1px solid #e6f4ea;
+  transition: background 0.2s ease;
+}
+
+.tabelaCustom tbody tr:nth-child(even) {
+  background-color: #f9fdfb;
+}
+
+.tabelaCustom tbody tr:hover {
+  background-color: #f7fcf8;
+}
+
+.tabelaCustom tbody tr:last-child {
+  border-bottom: none; /* remove a borda duplicada no final */
+}
+
+.tabelaCustom tbody td {
+  padding: 6px 8px; 
+  color: #234e2d;
+  vertical-align: middle;
+  line-height: 1.1; /* reduz altura das linhas */
+}
+
+.parceiro-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.nomeParceiro {
+  font-weight: 600;
+  font-size: 13px;
+  color: #234e2d;
+}
+
+.desde {
+  font-size: 11px;
+  color: #4ba94b;
+  margin-top: 2px;
+}
+
+.tipo {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #e6f4ea;
+  font-weight: 500;
+  font-size: 11px;
+  white-space: nowrap;
+  color: #234e2d;
+}
+
+.contato {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+}
+
+.status-badge {
+  display: inline-block;
+  min-width: 60px;
+  text-align: center;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 600;
+  font-size: 11px;
+}
+
+.status-badge.ativo {
+  background-color: #4ba94b;
+}
+
+.status-badge.pendente {
+  background-color: #c7c60a;
+}
+
+.btn-detalhes {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #e6f4ea;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 12px;
+  color: #234e2d;
+  transition: background 0.2s ease;
+  width: 100px;
+  height: 28px; 
+}
+
+.btn-detalhes:hover {
+  background: #d4e9dd;
+}
+
+/* ===== Ajuste de colunas  ===== */
+.tabelaCustom th:nth-child(1),
+.tabelaCustom td:nth-child(1) { width: 25%; }
+
+.tabelaCustom th:nth-child(2),
+.tabelaCustom td:nth-child(2) { width: 14%; }
+
+.tabelaCustom th:nth-child(3),
+.tabelaCustom td:nth-child(3) { width: 25%; }
+
+/* ===== Ajuste fino de espaçamento entre colunas finais ===== */
+.tabelaCustom th:nth-child(4),
+.tabelaCustom td:nth-child(4) {
+  width: 8%;
+  text-align: center;
+}
+
+.tabelaCustom th:nth-child(5),
+.tabelaCustom td:nth-child(5) {
+  width: 9%;
+  text-align: center;
+  padding-right: 10px;
+}
+
+.tabelaCustom th:nth-child(6),
+.tabelaCustom td:nth-child(6) {
+  width: 10%;
+  text-align: center;
+  padding-left: 8px;
+  padding-right: 10px;
+}
+
+.tabelaCustom th:nth-child(7),
+.tabelaCustom td:nth-child(7) {
+  width: 12%;
+  text-align: center;
+}
+
+  /* -- POPUP NOVO PARCEIRO -- */
+      .tituloPopup{
+        color: #7FC6BBEE;
+        font-size: 25px;
+        font-weight: 600;
+      }
+
+      .popup-fundo {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+
+      .popup {
+        background: #ffffff;
+        padding: 25px 30px;
+        border-radius: 10px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        width: 350px;
+        animation: aparecer 0.3s ease;
+        border: 2px solid #7FC6BBEE;
+      }
+
+      .popup h2 {
+        text-align: center;
+        color: #2d6a4f;
+        margin-bottom: 15px;
+      }
+
+      .popup label {
+        display: block;
+        margin-top: 12px;
+        font-weight: bold;
+        color: #333;
+      }
+
+      .popup input {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        border: 1px solid #7FC6BBEE;
+        border-radius: 5px;
+        outline-color: #7FC6BBEE;
+      }
+
+      .btn-salvar{
+        border: solid 1px;
+        background-color: #7FC6BBEE;
+        border-radius: 5px;
+        height: 30px;
+        width: 250px;
+        text-align: center;
+        color: white;
+      }
+
+      /* ===== POPUP DETALHES PARCEIRO ===== */
+      .popup-detalhes {
+        background: #f3faf5;
+        padding: 25px;
+        border-radius: 12px;
+        width: 500px;
+        position: relative;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        color: #234e2d;
+      }
+
+      .btn-fechar {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 22px;
+        color: #234e2d;
+        cursor: pointer;
+      }
+
+      .subtituloDetalhes {
+        font-size: 13px;
+        color: #4ba94b;
+      }
+
+      .abas {
+        display: flex;
+        margin-top: 15px;
+        background: #e6f4ea;
+        border-radius: 8px;
+        overflow: hidden;
+        height: 40px;
+        width: 100%; 
+        box-sizing: border-box
+      }
+
+      .aba {
+        flex: 1;
+        padding: 8px;
+        border: none;
+        background: none;
+        font-weight: 600;
+        color: #234e2d;
+        cursor: pointer;
+        text-align: center;
+      }
+
+      .aba.ativa {
+        background: #ffffff;
+        border-radius: 8px;
+        height: 30px;
+        margin: 10px;
+        text-align: center;
+      }
+
+      .conteudoAba {
+          margin-top: 15px;
+        font-size: 14px;
+        line-height: 1.6;
+        background: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        width: 90%; 
+        box-sizing: border-box;
+        margin-left: auto;  
+        margin-right: auto; 
+      }
+
+
+
+      .status.ativo {
+        background: #4ba94b;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 5px;
+        font-size: 12px;
+      }
+
+      .tag-servico {
+        display: inline-block;
+        background: #e6f4ea;
+        color: #234e2d;
+        padding: 5px 10px;
+        border-radius: 20px;
+        font-size: 13px;
+        margin: 5px 5px 0 0;
+        width: auto; 
+        white-space: nowrap; /* dar espaço entre as tags */
+        align-self: flex-start; /* Para deixar do tamanho da escrita */
+      }
+
+      .btn-add {
+        margin-top: 30px;
+        margin-bottom: 5px; 
+        background: #234e2d;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 13px;
+        margin-left: 0px;
+      }
+
+      .btn-encaminhar {
+        width: 100%;
+        margin-top: 2px;
+        padding: 8px;
+        background: #e6f4ea;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        color: #234e2d;
+        text-align: center;
+        margin-left: 0px;
+      }
+
+      .popup-fundo {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+      }
+
+      .statusExibirMais{
+        display: inline-block;
+        min-width: 60px;
+        text-align: center;
+        border-radius: 6px;
+        color: #fff;
+        font-weight: 600;
+        font-size: 12px;
+        width: 40px;
+        background-color: #234e2d;
+      }
+
+      #conteudoInfo span {
+        display: block;
+        margin-top: 10px; 
+      }
+
+      #conteudoInfo p {
+        margin: 2px 0 8px 0; 
+      }
+
+      #listaServicos{
+        flex-direction: column;
+        display: flex;
+      }
+
+      .modal {
+        display: none; /* Inicialmente escondido */
+        position: fixed;
+        z-index: 1; /* Fica sobre o conteúdo da página */
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.4); /* Fundo semi-transparente */
+        align-items: center; /* centraliza verticalmente */
+        justify-content: center;
+    }  
+
+      .modal-content {
+        background-color: #fefefe;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 80%;
+        height: auto;
+        display: flex;
+        max-width: 500px;
+      }
+
+      .icone3{
+        width: 40px;
+        height: 40px;
+      }
+
+      .close{
+        cursor: pointer;
+      }
+
+      .busca{
+        height: 40px;
+        margin-top: -15px;
+        background-color: rgb(238, 238, 238);
+      }
+
+      .registrar{
+          background-color: #7FC6BB;
+          text-align: center;
+          color: white;
+          border-radius: 6px;
+          height: 35px;
+          width: 100%;
+          margin-left: -1px;
+      }
+
+    </style>
+
+   
+
+</head>
+<body>
+   
+<div class="containerPrincipal">
+<div class="colunaEsquerda">
+
+    <div class="principal">
+        <div class="logo">
+          FARMA<span>GRID</span>
+          <img src="LogoFarmaGrid.png" alt="Símbolo de mais" class="plus-icon" />
+        </div>
+        <div class="titulo">Sistema para Farmácia</div>
+      </div>
+  
+    <button type="button" class="btn-img" id="bp">
+        <img src="folder.png" alt="Ícone" class="icone" id="iconeP">
+        Prontuários
+    </button>
+
+    <button type="button" class="btn-img" id="bt">
+        <img src="videoCamera.png" alt="Ícone" class="icone" id="iconeT">
+        Teleconsultas
+    </button>
+
+    <button type="button" class="btn-img" id="bi">
+        <img src="ia.png" alt="Ícone" class="icone" id="iconeI">
+        Assistente IA
+    </button>
+
+    <button type="button" class="btn-img" id="bpa">
+        <img src="parceria.png" alt="Ícone" class="icone" id="iconePa">
+        Parcerias
+    </button>
+
+    <div class="info">
+      
+      <div class="perfil">
+       <div class="foto">DR</div>
+        <div class="dados">
+          <span class="nome">Dra. Rafaela Albiero</span>
+          <span class="crm">CRM 12345-SP</span>
+        </div>
+      </div>
+
+      <div class="acoes">
+
+        <button class="botao" id="Sair">
+          <img src="sair.png" alt="sair" class="icone2">
+          Sair
+        </button>
+        <button class="botao" id="conf">
+          <img src="config.png" alt="configuração" class="icone1">
+          Configuração
+        </button>
+      </div>
+
+    </div>
+  
+</div>
+
+  <div class="corpo">
+    <div class="parcerias-container">
+  <div class="container2">
+    <div class="inicio">
+        <span class="tituloo">Gerenciamento de Parcerias</span>
+        <span class="subtitulo">Gerencie parcerias com clínicas, laboratórios e farmácias</span>
+    </div>
+    
+    <div class="botaoAgenda">
+        <button class="novaParceria" id="openModalBtn">
+          <img src="plus.png" alt="agendar" class="icone2">
+          Nova Parceria
+        </button>
+    </div>
+
+  </div>
+
+  <!-- POP-UP de Nova Parceria -->
+<div class="popup-fundo" id="popupFundo">
+  <div class="popup">
+    <form id="formNovaParceria">
+      <span class="tituloPopup">Nova Parceria</span>
+
+      <label for="nomeParceria">Nome:</label>
+      <input type="text" id="nomeParceria" placeholder="Nome do Parceiro">
+
+      <label for="tipoParceria">Tipo:</label>
+      <input type="text" id="tipoParceria" placeholder="Ex: Laboratório, Clínica...">
+
+      <label for="emailParceria">Email:</label>
+      <input type="text" id="emailParceria" placeholder="Email para contato">
+
+      <label for="telefoneParceria">Telefone:</label>
+      <input type="text" id="telefoneParceria" placeholder="Ex: (19)99390-1111">
+
+      <label for="descontoParceria">Desconto:</label>
+      <input type="number" min="0" id="descontoParceria" placeholder="Desconto que o parceiro oferece">
+
+      <label for="dataParceria">Data:</label>
+      <input type="text" id="dataParceria" readonly>
+
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button type="submit" id="cadastrarBtn" class="btn-salvar">Cadastrar Parceiro</button>
+        <button type="button" id="fecharPopup" class="btn-cancelar">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+  <!-- Início do Conteúdo da Página de Parcerias -->
+
+  <div class="cardsResumo">
+    <div class="cardResumo">
+      <span class="tituloCard">Total de Parceiros</span>
+      <h2>4</h2>
+    </div>
+    <div class="cardResumo">
+      <span class="tituloCard">Encaminhamentos (mês)</span>
+      <h2>193</h2>
+    </div>
+  </div>
+
+  <div class="tabela-parceiros">
+    <div class="headerTabela">
+      <h5>Parceiros Cadastrados</h5>
+      <span class="subinfo">4 parceiros na rede</span>
+    </div>
+    <table class="tabelaCustom">
+      <thead>
+        <tr>
+          <th>Parceiro</th>
+          <th>Tipo</th>
+          <th>Contato</th>
+          <th>Desconto</th>
+          <th>Enc./mês</th>
+          <th>Status</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            <div class="parceiro-info">
+              <span class="nomeParceiro">Laboratório Diagnóstica</span>
+              <span class="desde">Desde 14/01/2024</span>
+            </div>
+          </td>
+          <td><span class="tipo tipo-lab">Laboratório</span></td>
+          <td>
+            <div class="contato">
+              <span>📧 contato@diagnostica.com</span><br>
+              <span>📞 (11) 3456-7890</span>
+            </div>
+          </td>
+          <td>15%</td>
+          <td>45</td>
+          <td><span class="status-badge ativo">Ativo</span></td>
+          <td><button class="btn-detalhes">Ver Detalhes</button></td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="parceiro-info">
+              <span class="nomeParceiro">Clínica Cardio+</span>
+              <span class="desde">Desde 19/03/2024</span>
+            </div>
+          </td>
+          <td><span class="tipo tipo-clin">Clínica Especializada</span></td>
+          <td>
+            <div class="contato">
+              <span>📧 parceria@cardioplus.com</span><br>
+              <span>📞 (11) 4567-8901</span>
+            </div>
+          </td>
+          <td>20%</td>
+          <td>28</td>
+          <td><span class="status-badge ativo">Ativo</span></td>
+          <td><button class="btn-detalhes">Ver Detalhes</button></td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="parceiro-info">
+              <span class="nomeParceiro">Farmácia Vida Saudável</span>
+              <span class="desde">Desde 09/11/2023</span>
+            </div>
+          </td>
+          <td><span class="tipo tipo-farm">Farmácia</span></td>
+          <td>
+            <div class="contato">
+              <span>📧 parcerias@vidasaudavel.com</span><br>
+              <span>📞 (11) 5678-9012</span>
+            </div>
+          </td>
+          <td>10%</td>
+          <td>120</td>
+          <td><span class="status-badge ativo">Ativo</span></td>
+          <td><button class="btn-detalhes">Ver Detalhes</button></td>
+        </tr>
+
+        <tr>
+          <td>
+            <div class="parceiro-info">
+              <span class="nomeParceiro">Centro de Imagem Avançada</span>
+              <span class="desde">Desde 30/09/2025</span>
+            </div>
+          </td>
+          <td><span class="tipo tipo-img">Centro de Imagem</span></td>
+          <td>
+            <div class="contato">
+              <span>📧 comercial@imagemavancada.com</span><br>
+              <span>📞 (11) 6789-0123</span>
+            </div>
+          </td>
+          <td>18%</td>
+          <td>0</td>
+          <td><span class="status-badge pendente">Inativo</span></td>
+          <td><button class="btn-detalhes">Ver Detalhes</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- POPUP DETALHES DO PARCEIRO -->
+<div class="popup-fundo" id="popupDetalhesFundo">
+  <div class="popup-detalhes">
+    <button class="btn-fechar" id="fecharDetalhes">×</button>
+    <h3>Laboratório Diagnóstica</h3>
+    <span class="subtituloDetalhes">Laboratório</span>
+
+    <!-- Abas -->
+    <div class="abas">
+      <button class="aba ativa" id="abaInfo">Informações</button>
+      <button class="aba" id="abaServicos">Serviços</button>
+    </div>
+
+    <!-- Conteúdo das abas -->
+    <div class="conteudoAba" id="conteudoInfo">
+      <span><strong>Status:</strong> </span>
+      <p class="statusExibirMais">Ativo</p>
+      <span><strong>Parceiro desde:</strong></span>
+      <p>14 de janeiro de 2024</p>
+      <span><strong>Email:</strong></span>
+      <p>contato@diagnostica.com</p>
+      <span><strong>Telefone:</strong></span>
+      <p>(11) 3456-7890</p>
+      <span><strong>Desconto Oferecido:</strong></span>
+      <p>15% para pacientes referenciados</p>
+    </div>
+
+    <div class="conteudoAba" id="conteudoServicos" style="display: none;">
+      <h6>Serviços Disponíveis</h6>
+      <div id="listaServicos">
+        <div class="tag-servico">Exames de sangue</div>
+        <div class="tag-servico">Raio-X</div>
+        <div class="tag-servico">Ultrassom</div>
+      </div>
+      <button id="btnAdicionarServico" class="btn-add">+ Adicionar Serviço</button>
+      <button class="btn-encaminhar">Encaminhar Paciente</button>
+    </div>
+  </div>
+</div>
+
+    <!-- MODAL NOVA PARCERIA-->
+    <div id="myModal" class="modal">
+      <div class="modal-content">
+        <span id="closeModalBtn" class="close">&times;</span>
+        <h4><img src="maos.png" alt="Ícone" class="icone3" > Cadastrar Nova Parceria</h4>
+        <small class="text-muted">Registre um novo parceiro na rede</small>
+
+        <div style="margin-top: 10px;">
+          <p style="margin-top: 6px; color: #59aa53; font-size: 14px;"><b>Nome do Parceiro</b></p>
+          <input type="text" class="form-control mb-3 busca"
+          placeholder="Nome da clínica/laborátorio">
+
+          <p style="margin-top: 6px; color: #59aa53; font-size: 14px;"><b>Tipo</b></p>
+          <input type="text" class="form-control mb-3 busca"
+          placeholder="Ex: Laboratório, Clínica, Farmácia">
+
+          <p style="margin-top: 6px; color: #59aa53; font-size: 14px;"><b>Email de contato</b></p>
+          <input type="email" class="form-control mb-3 busca"
+          placeholder="contato@parceiro.com">
+
+          <p style="margin-top: 6px; color: #59aa53; font-size: 14px;"><b>Telefone</b></p>
+          <input type="text" class="form-control mb-3 busca"
+          placeholder="(19) 99390-1111">
+
+          <p style="margin-top: 6px; color: #59aa53; font-size: 14px;"><b>Descontos Oferecidos (%)</b></p>
+          <input type="number" class="form-control mb-3 busca" min="0" placeholder="0%">
+
+          <p style="margin-top: 6px; color: #59aa53; font-size: 14px;"><b>Inicio da Parceria</b></p>
+          <input type="text" class="form-control mb-3 busca"  id="dataDeInicio" readonly>
+
+          <button class="registrar">Cadastrar Parceiro</button>
+        </div>
+       
+      </div>
+    </div>
+
+  </div>
+ 
+
+
+  <script>
+     window.addEventListener('DOMContentLoaded', () => {
+    const botBp = document.getElementById('bp');
+    const botBt = document.getElementById('bt');
+    const botBi = document.getElementById('bi');
+    const botBpa = document.getElementById('bpa');
+    document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
+
+    botBp.addEventListener('click', () => {
+      window.electronAPI.abrirJanelaIndex();
+    });
+
+    botBt.addEventListener('click', () => {
+      window.electronAPI.abrirJanelaT();
+    });
+
+    botBi.addEventListener('click', () => {
+      window.electronAPI.abrirJanelaIA();
+    });
+
+    botBpa.addEventListener('click', () => {
+      window.electronAPI.abrirJanelaParceria();
+    });
+
+     document.getElementById('conf').addEventListener('click', () => window.electronAPI.abrirJanelaConfig());
+  });
+
+      //DATA
+      function mostrarDataAtual() {
+      const hoje = new Date();
+
+      const dia = hoje.getDate();
+      const diaSemanaNum = hoje.getDay();
+      const mes = hoje.getMonth();
+      const ano = hoje.getFullYear();
+
+      const semana = [
+        "Domingo",
+        "Segunda-feira",
+        "Terça-feira",
+        "Quarta-feira",
+        "Quinta-feira",
+        "Sexta-feira",
+        "Sábado"
+      ];
+
+      const mesesAno = [
+        "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+        "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+      ];
+
+      const diaSemanaTexto = semana[diaSemanaNum];
+      const mesTexto = mesesAno[mes];
+
+      const dataFormatada = `${diaSemanaTexto}, ${dia} de ${mesTexto} de ${ano}`;
+
+      document.getElementById("dataAtual").textContent = dataFormatada;
+    }
+
+    document.addEventListener("DOMContentLoaded", mostrarDataAtual);
+
+    const modal = document.getElementById("myModal");
+    const openModalBtn = document.getElementById("openModalBtn");
+    const closeModalBtn = document.getElementById("closeModalBtn"); 
+    const dataDeInicio = document.getElementById("dataDeInicio");
+    const hoje = new Date();
+    const dia = String(hoje.getDate()).padStart(2, '0');
+    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+    const ano = hoje.getFullYear();
+    dataDeInicio.value = `${dia}/${mes}/${ano}`;
+
+    openModalBtn.addEventListener('click', async function() {
+      modal.style.display = "flex";
+    });
+
+    closeModalBtn.addEventListener('click', function() { 
+      modal.style.display = "none"; 
+    });
+
+    window.addEventListener('click', function(event) {
+      if (event.target === modal) modal.style.display = "none";
+    });
+
+
+    // --- CADASTRAR PARCEIRO --- //
+    const formulario = document.getElementById('formNovaParceria'); // id do form
+    formulario.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const novoParceiro = {
+        parceiro: document.getElementById('nomeParceria').value,
+        tipo: document.getElementById('tipoParceria').value,
+        email: document.getElementById('emailParceria').value,
+        telefone: document.getElementById('telefoneParceria').value,
+        desconto: document.getElementById('descontoParceria').value,
+        dataInicio: document.getElementById('dataParceria').value
+      };
+
+      try {
+        await window.electronAPI.cadastrarParceiro(novoParceiro);
+        alert('Parceiro cadastrado com sucesso!');
+        popupFundo.style.display = 'none';
+        formulario.reset();
+      } catch (error) {
+        console.error('Erro ao cadastrar parceiro:', error);
+        alert('Erro ao cadastrar parceiro.');
+      }
+    });
+
+
+     // Seletores do popup de detalhes
+    const popupDetalhesFundo = document.getElementById('popupDetalhesFundo');
+    const fecharDetalhes = document.getElementById('fecharDetalhes');
+    const botoesDetalhes = document.querySelectorAll('.btn-detalhes');
+
+    // Abertura do popup
+    botoesDetalhes.forEach(botao => {
+      botao.addEventListener('click', () => {
+        popupDetalhesFundo.style.display = 'flex';
+      });
+    });
+
+    // Fechamento
+    fecharDetalhes.addEventListener('click', () => {
+      popupDetalhesFundo.style.display = 'none';
+    });
+    popupDetalhesFundo.addEventListener('click', e => {
+      if (e.target === popupDetalhesFundo) popupDetalhesFundo.style.display = 'none';
+    });
+
+    // Alternância entre abas
+    const abaInfo = document.getElementById('abaInfo');
+    const abaServicos = document.getElementById('abaServicos');
+    const conteudoInfo = document.getElementById('conteudoInfo');
+    const conteudoServicos = document.getElementById('conteudoServicos');
+
+    abaInfo.addEventListener('click', () => {
+      abaInfo.classList.add('ativa');
+      abaServicos.classList.remove('ativa');
+      conteudoInfo.style.display = 'block';
+      conteudoServicos.style.display = 'none';
+    });
+
+    abaServicos.addEventListener('click', () => {
+      abaServicos.classList.add('ativa');
+      abaInfo.classList.remove('ativa');
+      conteudoInfo.style.display = 'none';
+      conteudoServicos.style.display = 'block';
+    });
+
+    // Adicionar novo serviço
+    const btnAdicionarServico = document.getElementById('btnAdicionarServico');
+    const listaServicos = document.getElementById('listaServicos');
+
+    btnAdicionarServico.addEventListener('click', () => {
+      const novoServico = prompt('Digite o nome do novo serviço:');
+      if (novoServico && novoServico.trim() !== '') {
+        const span = document.createElement('span');
+        span.className = 'tag-servico';
+        span.textContent = novoServico.trim();
+        listaServicos.appendChild(span);
+      }
+    });
+
+    //editar tabela de parceiros
+    document.addEventListener("DOMContentLoaded", () => {
+    const tabela = document.querySelector(".tabelaCustom tbody");
+
+    tabela.addEventListener("dblclick", function (e) {
+      const celula = e.target.closest("td");
+      if (!celula) return;
+
+      const linha = celula.parentElement;
+      const colIndex = celula.cellIndex;
+
+      // Permitir edição apenas das colunas Desconto (3) e Status (5)
+      if (colIndex === 3) {
+        editarDesconto(celula);
+      } else if (colIndex === 5) {
+        editarStatus(celula);
+      }
+    });
+
+    function editarDesconto(celula) {
+      const valorAtual = celula.innerText.replace('%', '').trim();
+      celula.innerHTML = `<input type="number" min="0" class="form-control form-control-sm" value="${valorAtual}" style="width:70px;">`;
+      const input = celula.querySelector("input");
+
+      input.focus();
+      input.select();
+
+      input.addEventListener("blur", () => {
+        const novoValor = input.value ? input.value + "%" : valorAtual + "%";
+        celula.textContent = novoValor;
+      });
+
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          input.blur();
+        } else if (event.key === "Escape") {
+          celula.textContent = valorAtual + "%";
+        }
+      });
+    }
+
+    function editarStatus(celula) {
+      const span = celula.querySelector(".status-badge");
+      const statusAtual = span ? span.innerText.trim().toLowerCase() : "ativo";
+
+      const selectHTML = `
+        <select class="form-select form-select-sm" style="width:100px;">
+          <option value="ativo" ${statusAtual === "ativo" ? "selected" : ""}>Ativo</option>
+          <option value="inativo" ${statusAtual === "inativo" ? "selected" : ""}>Inativo</option>
+        </select>
+      `;
+      celula.innerHTML = selectHTML;
+      const select = celula.querySelector("select");
+      select.focus();
+
+      select.addEventListener("blur", () => {
+        atualizarStatus(celula, select.value);
+      });
+
+      select.addEventListener("change", () => {
+        atualizarStatus(celula, select.value);
+      });
+    }
+
+    function atualizarStatus(celula, novoStatus) {
+      const texto = novoStatus.charAt(0).toUpperCase() + novoStatus.slice(1);
+      const corClasse = novoStatus === "ativo" ? "ativo" : "pendente";
+      celula.innerHTML = `<span class="status-badge ${corClasse}">${texto}</span>`;
+    }
+  });
+  </script>
+
+</body>
+</html>
