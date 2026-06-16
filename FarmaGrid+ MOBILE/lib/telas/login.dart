@@ -54,34 +54,28 @@ class _TelaLoginState extends State<TelaLogin> {
     }
 
     if (encontrado) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Row(
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
             children: [
-              Icon(Icons.check_circle, color: corVerdePrimario),
-              SizedBox(width: 8),
-              Text("Bem-vindo!"),
+              const Icon(Icons.check_circle, color: Colors.white, size: 20),
+              const SizedBox(width: 10),
+              Text("Bem-vindo! Entrando como $_perfilSelecionado..."),
             ],
           ),
-          content: Text("Login realizado com sucesso como $_perfilSelecionado."),
-          actions: [
-            TextButton(
-              child: const Text("Continuar", style: TextStyle(color: corVerdePrimario, fontWeight: FontWeight.bold)),
-              onPressed: () {
-                Navigator.of(context).pop();
-                if (_perfilSelecionado == 'Paciente') {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => TelaHomePaciente()));
-                } else {
-                  Navigator.push(context, MaterialPageRoute(builder: (_) => const TelaHomeMedico()));
-                }
-              },
-            ),
-          ],
+          backgroundColor: corVerdePrimario,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          duration: const Duration(seconds: 2),
         ),
       );
+      Future.delayed(const Duration(milliseconds: 500), () {
+        if (_perfilSelecionado == 'Paciente') {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => TelaHomePaciente()));
+        } else {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const TelaHomeMedico()));
+        }
+      });
     } else {
       showDialog(
         context: context,
