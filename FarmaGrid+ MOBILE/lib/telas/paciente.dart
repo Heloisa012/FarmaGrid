@@ -1,4 +1,3 @@
-
 class Paciente {
   String _email;
   String _senha;

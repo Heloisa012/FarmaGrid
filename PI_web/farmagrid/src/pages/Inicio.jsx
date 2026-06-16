@@ -24,11 +24,11 @@ const PLANOS = [
     recursos: [['Teleconsultas ilimitadas', true], ['Prontuário digital', true], ['Receitas eletrônicas', true], ['Clube de descontos', false], ['Prioridade no atendimento', false]],
   },
   {
-    titulo: 'Clube Premium', preco: '29', destaque: true, cta: 'Assinar Agora',
+    titulo: 'Clube Premium', preco: '15', destaque: true, cta: 'Assinar Agora',
     recursos: [['Tudo do plano Básico', true], ['Até 60% de desconto', true], ['Prioridade no atendimento', true], ['Entrega grátis', true], ['Cashback em compras', true]],
   },
   {
-    titulo: 'Profissional/Farmácia', preco: '199', destaque: false, cta: 'Começar Teste',
+    titulo: 'Profissional/Farmácia', preco: '1000', destaque: false, cta: 'Começar Teste',
     recursos: [['Gestão completa', true], ['Estoque com IoT/RFID', true], ['Relatórios gerenciais', true], ['Suporte prioritário', true], ['API de integração', true]],
   },
 ];

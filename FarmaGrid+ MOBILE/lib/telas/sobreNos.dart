@@ -206,7 +206,7 @@ class TelaSobreNos extends StatelessWidget {
           const Text(
             "O FarmaGrid+ é uma plataforma mobile que conecta pacientes, "
             "médicos e farmácias em um único ecossistema digital. Desenvolvido "
-            "como Projeto Integrador do curso de ADS, o app oferece teleconsultas, "
+            "como Projeto Integrador do curso de DS, o app oferece teleconsultas, "
             "prescrições digitais, localização de farmácias parceiras e muito mais.",
             style: TextStyle(color: Color(0xFF444444), fontSize: 13, height: 1.6),
           ),

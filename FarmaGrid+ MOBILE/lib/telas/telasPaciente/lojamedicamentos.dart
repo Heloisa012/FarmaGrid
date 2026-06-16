@@ -1,7 +1,6 @@
 import 'package:farmagridd/telas/telasPaciente/descontos.dart';
 import 'package:flutter/material.dart';
 
-// ─── Modelo simples de item no carrinho ───────────────────────────────────────
 class ItemCarrinho {
   final Map<String, dynamic> medicamento;
   int quantidade;
@@ -9,7 +8,6 @@ class ItemCarrinho {
   ItemCarrinho({required this.medicamento, this.quantidade = 1});
 }
 
-// ─── Tela do Carrinho ─────────────────────────────────────────────────────────
 class TelaCarrinho extends StatefulWidget {
   final List<ItemCarrinho> itens;
   final VoidCallback onAtualizar;
@@ -247,7 +245,6 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
   }
 }
 
-// ─── Tela principal de Medicamentos ──────────────────────────────────────────
 class TelaMedicamentos extends StatefulWidget {
   const TelaMedicamentos({super.key});
 
@@ -264,7 +261,6 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
   final TextEditingController _buscaCtrl = TextEditingController();
   String _termoBusca = '';
 
-  // ── Carrinho ────────────────────────────────────────────────────────────────
   final List<ItemCarrinho> _carrinho = [];
 
   int get _totalItens =>
@@ -306,7 +302,6 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
     );
   }
 
-  // ── Dados ───────────────────────────────────────────────────────────────────
   static const List<Map<String, dynamic>> _todosMedicamentos = [
     {
       'nome': 'Paracetamol 750mg',
@@ -398,7 +393,6 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
     super.dispose();
   }
 
-  // ── Build ────────────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
     final lista = _medicamentosFiltrados;
@@ -556,7 +550,7 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
   }
 
   Widget _cardMedicamento(Map<String, dynamic> med) {
-    // Verifica se já está no carrinho
+
     final noCarrinho = _carrinho
         .where((i) => i.medicamento['nome'] == med['nome'])
         .firstOrNull;
@@ -652,7 +646,7 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
                         fontWeight: FontWeight.bold,
                         fontSize: 15)),
                 const SizedBox(height: 8),
-                // ── Botão de carrinho funcional ──────────────────────────────
+
                 Align(
                   alignment: Alignment.centerRight,
                   child: qtdNoCarrinho == 0

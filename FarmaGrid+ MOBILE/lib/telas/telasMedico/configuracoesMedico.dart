@@ -23,7 +23,6 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
   int _abaSelecionada = 0;
   final _themeCtrl = AppThemeController();
 
-  // ── Perfil Pessoal ───────────────────────────────────────────────
   final _nomeCtrl          = TextEditingController();
   final _sobrenomeCtrl     = TextEditingController();
   final _emailCtrl         = TextEditingController();
@@ -31,7 +30,6 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
   final _nascimentoCtrl    = TextEditingController(text: 'dd/mm/aaaa');
   final _enderecoCtrl      = TextEditingController();
 
-  // ── Info Profissional ────────────────────────────────────────────
   final _crmCtrl           = TextEditingController();
   final _rqeCtrl           = TextEditingController();
   final _especialidadeCtrl = TextEditingController();
@@ -41,12 +39,10 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
   final _tempoCtrl         = TextEditingController();
   final _valorCtrl         = TextEditingController();
 
-  // ── Segurança ────────────────────────────────────────────────────
   final _senhaAtualCtrl    = TextEditingController();
   final _novaSenhaCtrl     = TextEditingController();
   final _confirmSenhaCtrl  = TextEditingController();
 
-  // ── Estado de edição por aba ─────────────────────────────────────
   bool _editandoPerfil       = false;
   bool _editandoProfissional = false;
 
@@ -75,12 +71,10 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
     _preencherDados();
   }
 
-  /// Preenche os campos com os dados do médico logado.
   void _preencherDados() {
     final m = medicoLogado;
     if (m == null) return;
 
-    // Divide nome completo em nome e sobrenome para exibição
     final partes = m.nome.trim().split(' ');
     _nomeCtrl.text      = partes.first;
     _sobrenomeCtrl.text = partes.length > 1 ? partes.sublist(1).join(' ') : '';
@@ -104,7 +98,6 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
     super.dispose();
   }
 
-  // ── Salva alterações do Perfil Pessoal de volta no objeto Medico ──
   void _salvarPerfil() {
     final m = medicoLogado;
     if (m != null) {
@@ -118,7 +111,6 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
     _snack('Perfil atualizado com sucesso!');
   }
 
-  // ── Salva alterações das Info Profissionais ────────────────────────
   void _salvarProfissional() {
     final m = medicoLogado;
     if (m != null) {
@@ -257,7 +249,6 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
     }
   }
 
-  // ── Layout base de cada aba ─────────────────────────────────────────
   Widget _scaffoldAba({
     required String titulo,
     required String subtitulo,
@@ -355,7 +346,6 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
     );
   }
 
-  // ── Aba Perfil Pessoal ──────────────────────────────────────────────
   Widget _abaPerfil() {
     return _scaffoldAba(
       titulo: 'Perfil Pessoal',
@@ -435,7 +425,6 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
     );
   }
 
-  // ── Aba Info Profissional ───────────────────────────────────────────
   Widget _abaInfoProfissional() {
     return _scaffoldAba(
       titulo: 'Informações Profissionais',

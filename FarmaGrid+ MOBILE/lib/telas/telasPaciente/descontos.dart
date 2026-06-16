@@ -54,7 +54,7 @@ class _TelaDescontosState extends State<TelaDescontos> {
         end: Alignment.bottomCenter,
         colors: [
           const Color(0xFF89C6B1).withValues(alpha: 1.0),
-          const Color(0xFF59AA53), 
+          const Color(0xFF59AA53),
         ],
       ),
       borderRadius: const BorderRadius.only(
@@ -192,7 +192,7 @@ class TelaClube extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-       
+
         width: double.infinity,
         height: double.infinity,
         decoration: BoxDecoration(
@@ -294,8 +294,6 @@ class TelaClube extends StatelessWidget {
       ),
     );
   }
-
-  
 
   Widget _buildRegra(IconData icon, String texto) {
     return Row(

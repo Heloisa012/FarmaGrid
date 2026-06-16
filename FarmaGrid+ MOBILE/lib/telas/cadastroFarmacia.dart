@@ -14,9 +14,9 @@ const TextStyle estiloTitulo = TextStyle(
 
 const TextStyle estiloSubtitulo = TextStyle(
   fontFamily: 'Inter',
-  color: Colors.white70, 
+  color: Colors.white70,
   fontSize: 16,
-  fontWeight: FontWeight.w400, 
+  fontWeight: FontWeight.w400,
 );
 
 class TelaCadastroFarmacia extends StatelessWidget {
@@ -123,4 +123,3 @@ class TelaCadastroFarmacia extends StatelessWidget {
     );
   }
 }
-

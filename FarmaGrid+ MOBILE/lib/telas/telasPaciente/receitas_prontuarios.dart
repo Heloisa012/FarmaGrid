@@ -9,7 +9,7 @@ class _TelaReceitasProntuariosState extends State<TelaReceitasProntuarios> {
 
  bool exibirReceitas = true;
 
-  final Color corVerdePrimario = const Color(0xFF59AA53); 
+  final Color corVerdePrimario = const Color(0xFF59AA53);
   final Color corCardBege = const Color.fromARGB(255, 245, 245, 245);
   final Color corVerdeBotao = const Color(0xFF59AA53);
 

@@ -15,7 +15,6 @@ class _TelaFarmaciasProximasState extends State<TelaFarmaciasProximas> {
   final TextEditingController _buscaCtrl = TextEditingController();
   String _termoBusca = '';
 
-  // Filtro de status: 'todos', 'aberto', 'fechado'
   String _filtroStatus = 'todos';
 
   static const List<Map<String, dynamic>> _todasFarmacias = [
@@ -65,7 +64,7 @@ class _TelaFarmaciasProximasState extends State<TelaFarmaciasProximas> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // ── Chips de filtro ──────────────────────────────────────
+
                   Row(
                     children: [
                       _chipFiltro('Todas', 'todos'),
@@ -77,7 +76,6 @@ class _TelaFarmaciasProximasState extends State<TelaFarmaciasProximas> {
                   ),
                   const SizedBox(height: 16),
 
-                  // ── Título com contagem ──────────────────────────────────
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -100,7 +98,6 @@ class _TelaFarmaciasProximasState extends State<TelaFarmaciasProximas> {
                   ),
                   const SizedBox(height: 16),
 
-                  // ── Grid ou mensagem vazia ───────────────────────────────
                   lista.isEmpty
                       ? _semResultados()
                       : GridView.builder(

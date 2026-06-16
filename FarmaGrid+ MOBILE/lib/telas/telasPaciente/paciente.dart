@@ -39,7 +39,7 @@ class Paciente {
   get getSenha => this.senha;
 
  set setSenha( senha) => this.senha = senha;
- 
-  Paciente(this.nome, this.dataNascimento, this.sexo, this.rua, 
+
+  Paciente(this.nome, this.dataNascimento, this.sexo, this.rua,
            this.numero, this.cidade, this.planoSaude, this.senha);
 }

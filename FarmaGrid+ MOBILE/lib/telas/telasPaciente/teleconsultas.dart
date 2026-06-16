@@ -428,12 +428,12 @@ class _TeleconsultasState extends State<Teleconsultas> {
   Widget _calendarioData() {
     final hoje     = DateTime.now();
     final mesAtual = DateTime(_dataSel?.year ?? hoje.year, _dataSel?.month ?? hoje.month);
-    
+
     return StatefulBuilder(
       builder: (context, setLocalState) {
         int ano = mesAtual.year;
         int mes = mesAtual.month;
-        
+
         return _CalendarioWidget(
           anoInicial:  ano,
           mesInicial:  mes,
