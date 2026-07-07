@@ -6,7 +6,6 @@ class Paciente {
   bool receberNotificacoes;
   bool possuiPlanoSaude;
   bool aceitaTermos;
-  String tipoSanguineo;
   String genero;
 
   String get email        => _email;
@@ -16,7 +15,6 @@ class Paciente {
   bool   get getNotif     => receberNotificacoes;
   bool   get getPlano     => possuiPlanoSaude;
   bool   get getTermos    => aceitaTermos;
-  String get getTipo      => tipoSanguineo;
   String get getGenero    => genero;
 
   set setEmail(String v)    => _email = v;
@@ -26,7 +24,6 @@ class Paciente {
   set setNotif(bool v)      => receberNotificacoes = v;
   set setPlano(bool v)      => possuiPlanoSaude = v;
   set setTermos(bool v)     => aceitaTermos = v;
-  set setTipo(String v)     => tipoSanguineo = v;
   set setGenero(String v)   => genero = v;
 
   Paciente(
@@ -37,12 +34,11 @@ class Paciente {
     this.receberNotificacoes,
     this.possuiPlanoSaude,
     this.aceitaTermos,
-    this.tipoSanguineo,
     this.genero,
   );
 
   @override
   String toString() =>
-      'Paciente[$_nome | $_email | tipo=$tipoSanguineo | genero=$genero | '
+      'Paciente[$_nome | $_email | genero=$genero | '
       'notif=$receberNotificacoes | plano=$possuiPlanoSaude]';
 }

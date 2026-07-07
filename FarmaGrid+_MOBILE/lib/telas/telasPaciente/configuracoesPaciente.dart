@@ -453,25 +453,6 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
             ),
           ),
           const SizedBox(height: 14),
-          _cardSecao(
-            titulo: 'Privacidade e Permissões',
-            subtitulo: 'Controle como seus dados são utilizados',
-            child: Column(
-              children: [
-                _switchItem(Icons.location_on_outlined, 'Localização',
-                    'Permitir acesso à sua localização', true,
-                    (v) => _snack('Localização ${v ? 'ativada' : 'desativada'}')),
-                const Divider(height: 24),
-                _switchItem(Icons.camera_alt_outlined, 'Câmera',
-                    'Permitir acesso à câmera do dispositivo', true,
-                    (v) => _snack('Câmera ${v ? 'ativada' : 'desativada'}')),
-                const Divider(height: 24),
-                _switchItem(Icons.share_outlined, 'Compartilhamento de dados',
-                    'Permitir análise de uso para melhorias', false,
-                    (v) => _snack('Compartilhamento ${v ? 'ativado' : 'desativado'}')),
-              ],
-            ),
-          ),
         ],
       ),
     );
@@ -483,25 +464,6 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
       subtitulo: 'Personalize sua experiência no aplicativo',
       child: Column(
         children: [
-          _cardSecao(
-            titulo: 'Notificações',
-            subtitulo: 'Gerencie quais alertas você deseja receber',
-            child: Column(
-              children: [
-                _switchItem(Icons.calendar_today_outlined, 'Consultas agendadas',
-                    'Lembretes das suas consultas', _notifConsultas,
-                    (v) => setState(() => _notifConsultas = v)),
-                const Divider(height: 24),
-                _switchItem(Icons.history_edu_outlined, 'Receitas e Exames',
-                    'Alertas de receitas prontas', _notifReceitas,
-                    (v) => setState(() => _notifReceitas = v)),
-                const Divider(height: 24),
-                _switchItem(Icons.sell_outlined, 'Descontos e Promoções',
-                    'Ofertas das farmácias parceiras', _notifDescontos,
-                    (v) => setState(() => _notifDescontos = v)),
-              ],
-            ),
-          ),
           const SizedBox(height: 14),
           _cardSecao(
             titulo: 'Aparência',
@@ -513,38 +475,6 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                   _themeCtrl.toggleTheme();
                   setState(() => _temaEscuro = v);
                 }),
-                const Divider(height: 24),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(9),
-                      decoration: BoxDecoration(
-                          color: _verde.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(10)),
-                      child: const Icon(Icons.language_outlined, color: _verde, size: 20),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Idioma', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: _corTexto)),
-                          Text('Idioma do aplicativo', style: TextStyle(color: _corSubtexto, fontSize: 12)),
-                        ],
-                      ),
-                    ),
-                    DropdownButton<String>(
-                      value: _idioma,
-                      underline: const SizedBox(),
-                      style: TextStyle(color: _isDark ? Colors.white : _oliva, fontSize: 13),
-                      dropdownColor: _corCard,
-                      items: ['Português (BR)', 'English', 'Español']
-                          .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-                          .toList(),
-                      onChanged: (v) => setState(() => _idioma = v!),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),
@@ -591,7 +521,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                 const SizedBox(height: 14),
                 Text('Trocar plano:', style: TextStyle(fontSize: 13, color: _isDark ? Colors.white70 : const Color(0xFF444444))),
                 const SizedBox(height: 8),
-                ...['Plano Básico', 'Plano Padrão', 'Plano Premium'].map((plano) {
+                ...['Plano Básico', 'Clube FarmaGrid+'].map((plano) {
                   final sel = _planoAssinatura == plano;
                   return GestureDetector(
                     onTap: () => setState(() => _planoAssinatura = plano),

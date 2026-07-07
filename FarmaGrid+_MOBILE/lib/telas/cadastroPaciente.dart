@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:farmagridd/telas/paciente.dart';
 import 'login.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:flutter/services.dart';
 
 List<Paciente> listaPacientes = [];
 
@@ -26,16 +31,37 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
   final TextEditingController _senhaCtrl     = TextEditingController();
   final TextEditingController _confirmCtrl   = TextEditingController();
   final TextEditingController _telefoneCtrl  = TextEditingController();
+  final TextEditingController _dataNascimentoCtrl = TextEditingController();
+  final TextEditingController _cepCtrl = TextEditingController();
+  final TextEditingController _ruaCtrl = TextEditingController();
+  final TextEditingController _bairroCtrl = TextEditingController();
+  final TextEditingController _cidadeCtrl = TextEditingController();
+  final TextEditingController _estadoCtrl = TextEditingController();
+  final TextEditingController _numeroCtrl = TextEditingController();
 
   bool _possuiPlano   = false;
   bool _aceitaTermos  = false;
 
   bool _receberNotif  = false;
 
-  String _tipoSanguineo = "";
   String _genero        = "";
 
   bool _senhaVisivel = false;
+
+  final _telefoneMask = MaskTextInputFormatter(
+  mask: '(##) #####-####',
+  filter: {"#": RegExp(r'[0-9]')},
+);
+
+final _dataMask = MaskTextInputFormatter(
+  mask: '##/##/####',
+  filter: {"#": RegExp(r'[0-9]')},
+);
+
+final _cepMask = MaskTextInputFormatter(
+  mask: '#####-###',
+  filter: {"#": RegExp(r'[0-9]')},
+);
 
   void _mostrar() {
     for (Paciente p in listaPacientes) {
@@ -44,10 +70,7 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
   }
 
   void _cadastrar() {
-    if (_tipoSanguineo.isEmpty) {
-      _alertaErro("Selecione o tipo sanguíneo.");
-      return;
-    }
+
     if (_genero.isEmpty) {
       _alertaErro("Selecione o gênero.");
       return;
@@ -66,8 +89,7 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
         _receberNotif,
         _possuiPlano,
         _aceitaTermos,
-        _tipoSanguineo,
-        _genero,
+        _genero
       );
 
       listaPacientes.add(p);
@@ -128,20 +150,69 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
     );
   }
 
+  Future<void> _selecionarData() async {
+  final DateTime? data = await showDatePicker(
+    context: context,
+    initialDate: DateTime(2000, 1, 1),
+    firstDate: DateTime(1900),
+    lastDate: DateTime.now(),
+  );
+
+  if (data != null) {
+    setState(() {
+      _dataNascimentoCtrl.text =
+          "${data.day.toString().padLeft(2, '0')}/"
+          "${data.month.toString().padLeft(2, '0')}/"
+          "${data.year}";
+    });
+  }
+}
+
   void _limpar() {
     _nomeCtrl.clear();
     _emailCtrl.clear();
     _senhaCtrl.clear();
     _confirmCtrl.clear();
     _telefoneCtrl.clear();
+    _dataNascimentoCtrl.clear();
     setState(() {
       _possuiPlano   = false;
       _aceitaTermos  = false;
       _receberNotif  = false;
-      _tipoSanguineo = "";
       _genero        = "";
     });
   }
+
+  Future<void> _buscarCep() async {
+  final cep = _cepCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
+
+  if (cep.length != 8) return;
+
+  try {
+    final url = Uri.parse('https://viacep.com.br/ws/$cep/json/');
+    final response = await http.get(url);
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      if (data['erro'] == true) {
+        _alertaErro('CEP não encontrado.');
+        return;
+      }
+
+      setState(() {
+        _ruaCtrl.text = data['logradouro'] ?? '';
+        _bairroCtrl.text = data['bairro'] ?? '';
+        _cidadeCtrl.text = data['localidade'] ?? '';
+        _estadoCtrl.text = data['uf'] ?? '';
+      });
+    } else {
+      _alertaErro('Erro ao consultar o CEP.');
+    }
+  } catch (e) {
+    _alertaErro('Não foi possível consultar o CEP.');
+  }
+}
 
   @override
   void dispose() {
@@ -150,6 +221,13 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
     _senhaCtrl.dispose();
     _confirmCtrl.dispose();
     _telefoneCtrl.dispose();
+    _dataNascimentoCtrl.dispose();
+    _cepCtrl.dispose();
+    _ruaCtrl.dispose();
+    _bairroCtrl.dispose();
+    _cidadeCtrl.dispose();
+    _estadoCtrl.dispose();
+    _numeroCtrl.dispose();
     super.dispose();
   }
 
@@ -202,13 +280,113 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
                       label: "Telefone / WhatsApp",
                       icone: Icons.phone_outlined,
                       teclado: TextInputType.phone,
+                      inputFormatters: [_telefoneMask],
                       validator: (v) {
                         if (v == null || v.trim().isEmpty) return "Campo obrigatório!";
-                        if (v.trim().length < 10) return "Telefone inválido.";
+                        if (_telefoneMask.getUnmaskedText().length < 10) return "Telefone inválido.";
                         return null;
                       },
                     ),
                     const SizedBox(height: 14),
+
+                    GestureDetector(
+                    onTap: _selecionarData,
+                    child: AbsorbPointer(
+                      child: _campo(
+                        controller: _dataNascimentoCtrl,
+                        label: "Data de nascimento",
+                        icone: Icons.cake_outlined,
+                        validator: (v) {
+                          if (v == null || v.isEmpty) return "Campo obrigatório!";
+                          return null;
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+
+                  _campo(
+                    controller: _cepCtrl,
+                    label: "CEP",
+                    icone: Icons.location_on_outlined,
+                    teclado: TextInputType.number,
+                    inputFormatters: [_cepMask],
+                    onChanged: (_) => _buscarCep(),
+                    validator: (v) {
+                      if (v == null || v.trim().isEmpty) return "Campo obrigatório!";
+                      if (_cepCtrl.text.replaceAll(RegExp(r'[^0-9]'), '').length != 8) {
+                        return "CEP inválido.";
+                      }
+                      return null;
+                    },
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: _campo(
+                          controller: _ruaCtrl,
+                          label: "Rua",
+                          icone: Icons.home_outlined,
+                          validator: (v) => null,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 1,
+                        child: _campo(
+                          controller: _numeroCtrl,
+                          label: "Nº",
+                          icone: Icons.numbers_outlined,
+                          teclado: TextInputType.number,
+                          validator: (v) {
+                            if (v == null || v.trim().isEmpty) return "Obrigatório!";
+                            return null;
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  _campo(
+                    controller: _bairroCtrl,
+                    label: "Bairro",
+                    icone: Icons.location_city_outlined,
+                    validator: (v) => null,
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: _campo(
+                          controller: _cidadeCtrl,
+                          label: "Cidade",
+                          icone: Icons.location_city_outlined,
+                          validator: (v) => null,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        flex: 1,
+                        child: _campo(
+                          controller: _estadoCtrl,
+                          label: "UF",
+                          icone: Icons.map_outlined,
+                          validator: (v) => null,
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 14),
 
                     _campoSenha(
                       controller: _senhaCtrl,
@@ -256,25 +434,9 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
 
                     const SizedBox(height: 20),
 
-                    _secao("Tipo Sanguíneo", Icons.bloodtype_outlined),
+                    
                     const SizedBox(height: 8),
-                    _cardOpcoes(
-                      child: Wrap(
-                        children: ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"].map((op) =>
-                          SizedBox(
-                            width: MediaQuery.of(context).size.width / 2 - 45,
-                            child: RadioListTile<String>(
-                              title: Text(op, style: const TextStyle(fontSize: 13)),
-                              value: op,
-                              groupValue: _tipoSanguineo,
-                              activeColor: _verde,
-                              dense: true,
-                              onChanged: (v) => setState(() => _tipoSanguineo = v!),
-                            ),
-                          ),
-                        ).toList(),
-                      ),
-                    ),
+                    
 
                     const SizedBox(height: 20),
 
@@ -283,15 +445,6 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
                     _cardOpcoes(
                       child: Column(
                         children: [
-                          CheckboxListTile(
-                            title: const Text("Possuo plano de saúde", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                            subtitle: const Text("Convênio médico ativo"),
-                            secondary: const Icon(Icons.medical_services_outlined, color: _verde),
-                            tileColor: _verdeFraco,
-                            activeColor: _verde,
-                            value: _possuiPlano,
-                            onChanged: (v) => setState(() => _possuiPlano = v!),
-                          ),
 
                           const SizedBox(height: 8),
 
@@ -306,19 +459,6 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
                           ),
 
                           const SizedBox(height: 8),
-
-                          SwitchListTile(
-                            title: const Text("Receber notificações", style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                            subtitle: const Text("Lembretes de consultas e medicamentos"),
-                            secondary: const Icon(Icons.notifications_outlined, color: _verde),
-                            tileColor: _verdeFraco,
-                            activeColor: _verde,
-                            value: _receberNotif,
-                            onChanged: (v) {
-                              _receberNotif = v;
-                              setState(() {});
-                            },
-                          ),
                         ],
                       ),
                     ),
@@ -429,13 +569,17 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
     required TextEditingController controller,
     required String label,
     required IconData icone,
+    ValueChanged<String>? onChanged,
     TextInputType teclado = TextInputType.text,
+    List<TextInputFormatter>? inputFormatters,
     required String? Function(String?) validator,
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: teclado,
+      inputFormatters: inputFormatters,
       validator: validator,
+      onChanged: onChanged,
       decoration: InputDecoration(
         labelText: label,
         labelStyle: const TextStyle(color: Colors.grey),

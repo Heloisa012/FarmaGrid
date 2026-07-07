@@ -1,5 +1,5 @@
 import 'package:farmagridd/app_theme.dart';
-import 'package:farmagridd/telas/cadastroFarmacia.dart';
+import 'package:farmagridd/telas/login.dart';
 import 'package:flutter/material.dart';
 import 'agenda_medico.dart';
 import 'ia_insights.dart';

@@ -1,4 +1,5 @@
-import 'package:farmagridd/telas/cadastroFarmacia.dart';
+
+import 'package:farmagridd/telas/login.dart';
 import 'package:flutter/material.dart';
 
 class TelaDescontos extends StatefulWidget {
