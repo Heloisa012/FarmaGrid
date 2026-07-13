@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -29,7 +30,20 @@ public class Medico {
     @Column(length = 255)
     private String clinica;
 
+    @Column(length = 20)
+    private String telefone;
+
+    @Column(name = "data_nascimento")
+    private LocalDate dataNascimento;
+
+    @Column(name = "tipo_atendimento", length = 50)
+    private String tipoAtendimento;
+
     @OneToMany(mappedBy = "medico", cascade = CascadeType.ALL)
     @JsonIgnore
     private List<Teleconsulta> teleconsultas;
+
+    @OneToMany(mappedBy = "medico", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<DisponibilidadeMedico> disponibilidades;
 }
