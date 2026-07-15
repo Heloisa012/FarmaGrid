@@ -1,0 +1,617 @@
+import 'package:farmagridd/app_theme.dart';
+import 'package:farmagridd/telas/login.dart';
+import 'package:flutter/material.dart';
+import 'agenda_medico.dart';
+import 'ia_insights.dart';
+import 'prescrever_receita.dart';
+import 'prontuarios.dart';
+import 'relatorios.dart';
+import 'parcerias.dart';
+import 'configuracoesMedico.dart';
+import 'package:farmagridd/telas/sobreNos.dart';
+
+class TelaHomeMedico extends StatefulWidget {
+  const TelaHomeMedico({super.key});
+
+  @override
+  _TelaHomeMedicoState createState() => _TelaHomeMedicoState();
+}
+
+class _TelaHomeMedicoState extends State<TelaHomeMedico> {
+  final Color corVerdePrimario = const Color(0xFF59AA53);
+  final Color corVerdeOliva   = const Color(0xFF136A48);
+  final Color corTealBotao    = const Color(0xFF7FC6BB);
+
+  final _themeCtrl = AppThemeController();
+
+  @override
+  void initState() {
+    super.initState();
+    _themeCtrl.addListener(() => setState(() {}));
+  }
+
+  Color get corFundo => _themeCtrl.darkMode ? const Color(0xFF121212) : const Color.fromARGB(255, 245, 245, 245);
+  Color get corCard  => _themeCtrl.darkMode ? const Color(0xFF1E1E1E) : Colors.white;
+  Color get corTexto => _themeCtrl.darkMode ? Colors.white : const Color(0xFF2E2E2E);
+
+  void _abrirPerfil() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _DrawerMedico(
+        themeCtrl: _themeCtrl,
+        corVerde: corVerdePrimario,
+        corOliva: corVerdeOliva,
+        corTeal: corTealBotao,
+        corCard: corCard,
+        corTexto: corTexto,
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: corFundo,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            _construirCabecalho(),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 25),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 50),
+                  Text("Agenda de Hoje", style: TextStyle(color: corTexto, fontSize: 22, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 20),
+                  _construirCardAgenda("Heloisa Pola Argentin", "15:00", "Teleconsulta", true),
+                  _construirCardAgenda("João Alves", "16:00", "Retorno", false),
+                  _construirCardAgenda("Ana Costa", "17:00", "Teleconsulta", false),
+                  const SizedBox(height: 30),
+                  Text("Ferramentas", style: TextStyle(color: corTexto, fontSize: 22, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 20),
+                  _construirGridFerramentas(),
+                  const SizedBox(height: 30),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _construirCabecalho() {
+    return Stack(
+      clipBehavior: Clip.none,
+      alignment: Alignment.center,
+      children: [
+        Container(
+          width: double.infinity,
+          height: 260,
+          padding: const EdgeInsets.only(top: 60, left: 25, right: 25),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                const Color(0xFF59AA53),
+                const Color(0xFF89C6B1).withValues(alpha: 1.0),
+              ],
+            ),
+            borderRadius: const BorderRadius.only(
+              bottomLeft: Radius.circular(40),
+              bottomRight: Radius.circular(40),
+            ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: _abrirPerfil,
+                child: const CircleAvatar(
+                  radius: 28,
+                  backgroundColor: Colors.white,
+                  child: Icon(Icons.person, size: 35, color: Color(0xFF59AA53)),
+                ),
+              ),
+              const SizedBox(width: 15),
+              const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("Bem-vinda,", style: TextStyle(color: Colors.white70, fontSize: 16)),
+                  Text("Dra. Ana Carolina", style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                ],
+              ),
+              const Spacer(),
+              const Icon(Icons.notifications_none_outlined, color: Colors.white, size: 30),
+            ],
+          ),
+        ),
+        Positioned(
+          bottom: 30,
+          left: 25,
+          right: 25,
+          child: Container(
+            padding: const EdgeInsets.all(18),
+            decoration: BoxDecoration(
+              color: corCard,
+              borderRadius: BorderRadius.circular(22),
+              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.08), blurRadius: 15, offset: const Offset(0, 8))],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(color: corVerdePrimario.withValues(alpha: 0.1), shape: BoxShape.circle),
+                        child: Icon(Icons.calendar_today_outlined, color: corVerdeOliva, size: 24),
+                      ),
+                      const SizedBox(width: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text("Consultas hoje", style: TextStyle(color: Colors.grey, fontSize: 11)),
+                          Text("8 agendadas", style: TextStyle(color: corVerdeOliva, fontWeight: FontWeight.bold, fontSize: 15)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                Container(width: 1, height: 36, color: Colors.grey.withValues(alpha: 0.2), margin: const EdgeInsets.symmetric(horizontal: 10)),
+                Expanded(
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(color: corTealBotao.withValues(alpha: 0.15), shape: BoxShape.circle),
+                        child: Icon(Icons.people_outline, color: corVerdeOliva, size: 24),
+                      ),
+                      const SizedBox(width: 12),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Text("Pacientes", style: TextStyle(color: Colors.grey, fontSize: 11)),
+                          Text("150 ativos", style: TextStyle(color: corVerdeOliva, fontWeight: FontWeight.bold, fontSize: 15)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _construirCardAgenda(String nome, String hora, String tipo, bool iniciar) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: corCard,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))],
+      ),
+      child: Row(
+        children: [
+          Container(width: 5, height: 44, decoration: BoxDecoration(color: corTealBotao, borderRadius: BorderRadius.circular(10))),
+          const SizedBox(width: 15),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(nome, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: corTexto)),
+                const SizedBox(height: 3),
+                Text(tipo, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+              ],
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(color: corTealBotao.withValues(alpha: 0.2), borderRadius: BorderRadius.circular(8)),
+                child: Text(hora, style: TextStyle(color: corVerdeOliva, fontWeight: FontWeight.bold, fontSize: 12)),
+              ),
+              if (iniciar) ...[
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                  decoration: BoxDecoration(color: corVerdePrimario, borderRadius: BorderRadius.circular(8)),
+                  child: const Text("Iniciar", style: TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _construirGridFerramentas() {
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      crossAxisSpacing: 20,
+      mainAxisSpacing: 20,
+      childAspectRatio: 0.95,
+      children: [
+        _itemFerramenta("Agenda",      Icons.calendar_today_outlined, corVerdePrimario),
+        _itemFerramenta("IA Insights", Icons.psychology_outlined,     corVerdeOliva),
+        _itemFerramenta("Prescrever",  Icons.history_edu_outlined,    corTealBotao),
+        _itemFerramenta("Prontuários", Icons.assignment_outlined,     corVerdePrimario),
+        _itemFerramenta("Relatórios",  Icons.bar_chart_outlined,      corVerdeOliva),
+        _itemFerramenta("Parcerias",   Icons.handshake_outlined,      corTealBotao),
+      ],
+    );
+  }
+
+  Widget _itemFerramenta(String titulo, IconData icone, Color cor) {
+    return GestureDetector(
+      onTap: () {
+        if (titulo == "Agenda")      Navigator.push(context, MaterialPageRoute(builder: (_) => const TelaAgendaMedico()));
+        else if (titulo == "IA Insights") Navigator.push(context, MaterialPageRoute(builder: (_) => const TelaIAInsights()));
+        else if (titulo == "Prescrever")  Navigator.push(context, MaterialPageRoute(builder: (_) => const TelaPrescreverReceita()));
+        else if (titulo == "Prontuários") Navigator.push(context, MaterialPageRoute(builder: (_) => const TelaProntuarios()));
+        else if (titulo == "Relatórios")  Navigator.push(context, MaterialPageRoute(builder: (_) => const TelaRelatorios()));
+        else if (titulo == "Parcerias")   Navigator.push(context, MaterialPageRoute(builder: (_) => const TelaParcerias()));
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: corCard,
+          borderRadius: BorderRadius.circular(25),
+          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(color: cor, borderRadius: BorderRadius.circular(15)),
+              child: Icon(icone, size: 30, color: Colors.white),
+            ),
+            const SizedBox(height: 15),
+            Text(titulo, textAlign: TextAlign.center, style: TextStyle(color: corTexto, fontWeight: FontWeight.bold, fontSize: 14)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DrawerMedico extends StatefulWidget {
+  final AppThemeController themeCtrl;
+  final Color corVerde, corOliva, corTeal, corCard, corTexto;
+
+  const _DrawerMedico({
+    required this.themeCtrl,
+    required this.corVerde,
+    required this.corOliva,
+    required this.corTeal,
+    required this.corCard,
+    required this.corTexto,
+  });
+
+  @override
+  State<_DrawerMedico> createState() => _DrawerMedicoState();
+}
+
+class _DrawerMedicoState extends State<_DrawerMedico> {
+  void _irParaAba(int aba) {
+    Navigator.of(context).pop();
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => TelaConfiguracoesMedico(abaInicial: aba),
+    ));
+  }
+
+  void _irParaTela(Widget tela) {
+    Navigator.of(context).pop();
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => tela));
+  }
+
+  void _dialogo(String titulo, String corpo) {
+    Navigator.of(context).pop();
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(titulo),
+        content: Text(corpo),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("OK")),
+        ],
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark  = widget.themeCtrl.darkMode;
+    final bgColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
+    final subColor = isDark ? Colors.white60 : Colors.grey;
+
+    return DraggableScrollableSheet(
+      initialChildSize: 0.92,
+      minChildSize: 0.5,
+      maxChildSize: 0.97,
+      builder: (_, ctrl) => Container(
+        decoration: BoxDecoration(
+          color: bgColor,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(30),
+            topRight: Radius.circular(30),
+          ),
+        ),
+        child: ListView(
+          controller: ctrl,
+          padding: const EdgeInsets.symmetric(horizontal: 25),
+          children: [
+            Center(
+              child: Container(
+                margin: const EdgeInsets.only(top: 12, bottom: 20),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(color: Colors.grey.shade400, borderRadius: BorderRadius.circular(4)),
+              ),
+            ),
+            Center(
+              child: Column(
+                children: [
+                  CircleAvatar(
+                    radius: 42,
+                    backgroundColor: widget.corVerde.withValues(alpha: 0.15),
+                    child: Icon(Icons.person, size: 50, color: widget.corVerde),
+                  ),
+                  const SizedBox(height: 12),
+                  Text("Dra. Ana Carolina Lanzoni",
+                      style: TextStyle(color: widget.corTexto, fontSize: 20, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 4),
+                  Text("ana.lanzoni@farmagrid.com", style: TextStyle(color: subColor, fontSize: 13)),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _badge("CRM/SP 123456", widget.corVerde, widget.corOliva),
+                      const SizedBox(width: 8),
+                      _badge("CRM Ativo", Colors.green.shade100, Colors.green.shade700),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: widget.corVerde.withValues(alpha: isDark ? 0.15 : 0.06),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: widget.corVerde.withValues(alpha: 0.2)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("Dados Profissionais", style: TextStyle(color: widget.corOliva, fontWeight: FontWeight.bold, fontSize: 13)),
+                  const SizedBox(height: 12),
+                  _dadoProfissional(Icons.badge_outlined,          "CRM",           "CRM/SP 123456",       isDark),
+                  const SizedBox(height: 10),
+                  _dadoProfissional(Icons.local_hospital_outlined, "Especialidade", "Clínica Geral",       isDark),
+                  const SizedBox(height: 10),
+                  _dadoProfissional(Icons.school_outlined,         "Formação",      "USP – Medicina 2012", isDark),
+                  const SizedBox(height: 10),
+                  _dadoProfissional(Icons.work_outline,            "Experiência",   "12 anos",             isDark),
+                  const SizedBox(height: 10),
+                  _dadoProfissional(Icons.location_on_outlined,    "Consultório",   "Av. Paulista, 1000 - SP", isDark),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(child: _infoCard("150", "Pacientes", Icons.people_outline,         widget.corVerde, isDark)),
+                const SizedBox(width: 10),
+                Expanded(child: _infoCard("8",   "Hoje",     Icons.calendar_today_outlined, widget.corTeal,  isDark)),
+                const SizedBox(width: 10),
+                Expanded(child: _infoCard("4.9", "Nota",     Icons.star_outline,            widget.corOliva, isDark)),
+              ],
+            ),
+            const SizedBox(height: 28),
+            _secao("Conta", subColor),
+            _item(Icons.person_outline,   "Meu Perfil",               "Editar dados pessoais",             widget.corVerde, isDark, () => _irParaAba(0)),
+            _item(Icons.work_outline,     "Informações Profissionais", "Registro, especialidades e clínica", widget.corVerde, isDark, () => _irParaAba(1)),
+            _item(Icons.shield_outlined,  "Segurança",                 "Alterar senha de acesso",           widget.corVerde, isDark, () => _irParaAba(2)),
+            _item(Icons.settings_outlined,"Preferências",              "Notificações e aparência do app",   widget.corVerde, isDark, () => _irParaAba(3)),
+            const SizedBox(height: 20),
+            _secao("Preferências", subColor),
+            _itemSwitch(
+              Icons.dark_mode_outlined,
+              "Tema Escuro",
+              "Alternar aparência do app",
+              widget.corVerde, isDark,
+              widget.themeCtrl.darkMode,
+              () {
+                widget.themeCtrl.toggleTheme();
+                setState(() {});
+              },
+            ),
+            _item(Icons.notifications_outlined, "Notificações", "Alertas de consultas",   widget.corVerde, isDark, () => _irParaAba(3)),
+            _item(Icons.language_outlined,       "Idioma",       "Português (Brasil)",     widget.corVerde, isDark, () => _irParaAba(3)),
+            _item(Icons.privacy_tip_outlined,    "Privacidade",  "Dados e permissões",     widget.corVerde, isDark, () => _irParaAba(2)),
+            const SizedBox(height: 20),
+            _secao("Suporte", subColor),
+            _item(Icons.help_outline,        "Central de Ajuda", "Dúvidas frequentes", widget.corVerde, isDark,
+                () => _dialogo("Central de Ajuda", "Para dúvidas, acesse farmagrid.com.br/ajuda\nou envie um e-mail para suporte@farmagrid.com.br")),
+            _item(Icons.chat_bubble_outline, "Fale Conosco",    "Suporte via chat",    widget.corVerde, isDark,
+                () => _dialogo("Fale Conosco", "Nossa equipe está disponível de segunda a sexta, das 8h às 18h.\n\nWhatsApp: (11) 99999-0000\nE-mail: contato@farmagrid.com.br")),
+            _item(Icons.info_outline,        "Sobre Nós",       "Conheça a equipe",    widget.corVerde, isDark,
+                () => _irParaTela(const TelaSobreNos())),
+            const SizedBox(height: 24),
+            GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.popUntil(context, (r) => r.isFirst);
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.logout, color: Colors.red, size: 20),
+                    SizedBox(width: 8),
+                    Text("Sair da conta", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 15)),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 30),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _badge(String texto, Color bg, Color fg) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+    decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+    child: Text(texto, style: TextStyle(color: fg, fontWeight: FontWeight.bold, fontSize: 12)),
+  );
+
+  Widget _dadoProfissional(IconData icone, String label, String valor, bool isDark) => Row(
+    children: [
+      Icon(icone, size: 18, color: corVerdePrimario),
+      const SizedBox(width: 10),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: TextStyle(color: isDark ? Colors.white38 : Colors.grey, fontSize: 11)),
+          Text(valor, style: TextStyle(color: isDark ? Colors.white : const Color(0xFF2E2E2E), fontWeight: FontWeight.w600, fontSize: 13)),
+        ],
+      ),
+    ],
+  );
+
+  Widget _secao(String titulo, Color cor) => Padding(
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Text(titulo, style: TextStyle(color: cor, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+  );
+
+  Widget _infoCard(String valor, String label, IconData icone, Color cor, bool isDark) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      decoration: BoxDecoration(
+        color: cor.withValues(alpha: isDark ? 0.15 : 0.08),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        children: [
+          Icon(icone, color: cor, size: 20),
+          const SizedBox(height: 6),
+          Text(valor, style: TextStyle(color: cor, fontWeight: FontWeight.bold, fontSize: 18)),
+          Text(label, style: TextStyle(color: cor.withValues(alpha: 0.7), fontSize: 10)),
+        ],
+      ),
+    );
+  }
+
+  Widget _item(IconData icone, String titulo, String sub, Color cor, bool isDark, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF7F7F7),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(9),
+              decoration: BoxDecoration(color: cor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
+              child: Icon(icone, color: cor, size: 20),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(titulo, style: TextStyle(color: isDark ? Colors.white : const Color(0xFF2E2E2E), fontWeight: FontWeight.bold, fontSize: 14)),
+                  Text(sub, style: TextStyle(color: isDark ? Colors.white38 : Colors.grey, fontSize: 12)),
+                ],
+              ),
+            ),
+            Icon(Icons.chevron_right, color: isDark ? Colors.white30 : Colors.grey.shade300, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _itemSwitch(IconData icone, String titulo, String sub, Color cor, bool isDark, bool valor, VoidCallback onTap) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF7F7F7),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(9),
+            decoration: BoxDecoration(color: cor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
+            child: Icon(icone, color: cor, size: 20),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(titulo, style: TextStyle(color: isDark ? Colors.white : const Color(0xFF2E2E2E), fontWeight: FontWeight.bold, fontSize: 14)),
+                Text(sub, style: TextStyle(color: isDark ? Colors.white38 : Colors.grey, fontSize: 12)),
+              ],
+            ),
+          ),
+          GestureDetector(
+            onTap: onTap,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              width: 46,
+              height: 26,
+              decoration: BoxDecoration(
+                color: valor ? cor : Colors.grey.shade400,
+                borderRadius: BorderRadius.circular(13),
+              ),
+              child: AnimatedAlign(
+                duration: const Duration(milliseconds: 200),
+                alignment: valor ? Alignment.centerRight : Alignment.centerLeft,
+                child: Container(
+                  margin: const EdgeInsets.all(3),
+                  width: 20,
+                  height: 20,
+                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
