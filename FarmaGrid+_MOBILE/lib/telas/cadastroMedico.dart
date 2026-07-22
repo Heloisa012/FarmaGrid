@@ -312,22 +312,7 @@ class _TelaCadastroMedicoState extends State<TelaCadastroMedico> {
 
                     const SizedBox(height: 20),
 
-                    _secao("Tipo de Atendimento", Icons.videocam_outlined),
-                    const SizedBox(height: 8),
-                    _cardOpcoes(
-                      child: Column(
-                        children: ["Presencial", "Online", "Híbrido"].map((op) =>
-                          RadioListTile<String>(
-                            title: Text(op, style: const TextStyle(fontSize: 14)),
-                            value: op,
-                            groupValue: _tipoAtendimento,
-                            activeColor: _verde,
-                            dense: true,
-                            onChanged: (v) => setState(() => _tipoAtendimento = v!),
-                          ),
-                        ).toList(),
-                      ),
-                    ),
+                   
 
                     const SizedBox(height: 20),
 
@@ -336,17 +321,6 @@ class _TelaCadastroMedicoState extends State<TelaCadastroMedico> {
                     _cardOpcoes(
                       child: Column(
                         children: [
-
-                          CheckboxListTile(
-                            title: const Text("Atendo por teleconsulta",
-                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                            subtitle: const Text("Consultas via videochamada"),
-                            secondary: const Icon(Icons.videocam_outlined, color: _verde),
-                            tileColor: _verdeFraco,
-                            activeColor: _verde,
-                            value: _atendeTeleconsulta,
-                            onChanged: (v) => setState(() => _atendeTeleconsulta = v!),
-                          ),
 
                           const SizedBox(height: 8),
 
@@ -362,20 +336,6 @@ class _TelaCadastroMedicoState extends State<TelaCadastroMedico> {
                           ),
 
                           const SizedBox(height: 8),
-
-                          SwitchListTile(
-                            title: const Text("Receber notificações",
-                                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                            subtitle: const Text("Alertas de consultas e agenda"),
-                            secondary: const Icon(Icons.notifications_outlined, color: _verde),
-                            tileColor: _verdeFraco,
-                            activeColor: _verde,
-                            value: _receberNotif,
-                            onChanged: (v) {
-                              _receberNotif = v;
-                              setState(() {});
-                            },
-                          ),
                         ],
                       ),
                     ),

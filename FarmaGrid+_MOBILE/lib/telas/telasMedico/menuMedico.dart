@@ -147,38 +147,11 @@ class DrawerMedico extends StatelessWidget {
               themeCtrl.darkMode,
               () => themeCtrl.toggleTheme(),
             ),
-            _item(Icons.notifications_outlined, "Notificações", "Alertas de consultas",
-                corVerde, isDark, () => _navegarParaAba(context, 3)),
-            _item(Icons.language_outlined, "Idioma", "Português (Brasil)",
-                corVerde, isDark, () => _navegarParaAba(context, 3)),
             _item(Icons.privacy_tip_outlined, "Privacidade", "Dados e permissões",
                 corVerde, isDark, () => _navegarParaAba(context, 2)),
             const SizedBox(height: 20),
+
             _secao("Suporte", subColor),
-            _item(Icons.help_outline, "Central de Ajuda", "Dúvidas frequentes",
-                corVerde, isDark, () {
-                  Navigator.of(context, rootNavigator: true).pop();
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title: const Text("Central de Ajuda"),
-                      content: const Text("Para dúvidas, acesse farmagrid.com.br/ajuda ou envie um e-mail para suporte@farmagrid.com.br"),
-                      actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text("OK"))],
-                    ),
-                  );
-                }),
-            _item(Icons.chat_bubble_outline, "Fale Conosco", "Suporte via chat",
-                corVerde, isDark, () {
-                  Navigator.of(context, rootNavigator: true).pop();
-                  showDialog(
-                    context: context,
-                    builder: (_) => AlertDialog(
-                      title: const Text("Fale Conosco"),
-                      content: const Text("Nossa equipe está disponível de segunda a sexta, das 8h às 18h.\n\nWhatsApp: (11) 99999-0000\nE-mail: contato@farmagrid.com.br"),
-                      actions: [TextButton(onPressed: () => Navigator.pop(context), child: const Text("OK"))],
-                    ),
-                  );
-                }),
             _item(Icons.info_outline, "Sobre Nós", "Conheça a equipe",
                 corVerde, isDark, () => _navegarPara(context, const TelaSobreNos())),
             const SizedBox(height: 24),

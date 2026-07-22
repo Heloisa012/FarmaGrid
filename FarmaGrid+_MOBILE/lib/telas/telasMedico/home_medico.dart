@@ -444,15 +444,10 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
                 setState(() {});
               },
             ),
-            _item(Icons.notifications_outlined, "Notificações", "Alertas de consultas",   widget.corVerde, isDark, () => _irParaAba(3)),
-            _item(Icons.language_outlined,       "Idioma",       "Português (Brasil)",     widget.corVerde, isDark, () => _irParaAba(3)),
+           
             _item(Icons.privacy_tip_outlined,    "Privacidade",  "Dados e permissões",     widget.corVerde, isDark, () => _irParaAba(2)),
             const SizedBox(height: 20),
             _secao("Suporte", subColor),
-            _item(Icons.help_outline,        "Central de Ajuda", "Dúvidas frequentes", widget.corVerde, isDark,
-                () => _dialogo("Central de Ajuda", "Para dúvidas, acesse farmagrid.com.br/ajuda\nou envie um e-mail para suporte@farmagrid.com.br")),
-            _item(Icons.chat_bubble_outline, "Fale Conosco",    "Suporte via chat",    widget.corVerde, isDark,
-                () => _dialogo("Fale Conosco", "Nossa equipe está disponível de segunda a sexta, das 8h às 18h.\n\nWhatsApp: (11) 99999-0000\nE-mail: contato@farmagrid.com.br")),
             _item(Icons.info_outline,        "Sobre Nós",       "Conheça a equipe",    widget.corVerde, isDark,
                 () => _irParaTela(const TelaSobreNos())),
             const SizedBox(height: 24),
