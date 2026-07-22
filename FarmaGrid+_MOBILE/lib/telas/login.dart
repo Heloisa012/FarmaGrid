@@ -4,6 +4,7 @@ import 'sobreNos.dart';
 import 'telasPaciente/homePaciente.dart';
 import 'telasMedico/home_medico.dart';
 import 'cadastroPaciente.dart';
+import '../services/auth_service.dart';
 
 const Color corFundoClaro    = Color.fromARGB(255, 245, 245, 245);
 const Color corVerdePrimario = Color(0xFF59AA53);
@@ -16,11 +17,6 @@ const TextStyle estiloTitulo = TextStyle(
   fontWeight: FontWeight.w500,
   color: Colors.white,
 );
-
-final List<Map<String, String>> _usuariosFixos = [
-  {'email': 'paciente@teste.com',  'senha': '123456', 'perfil': 'Paciente'},
-  {'email': 'medico@teste.com',    'senha': '123456', 'perfil': 'Médico/Clínica'},
-];
 
 class TelaLogin extends StatefulWidget {
   @override
@@ -36,31 +32,28 @@ class _TelaLoginState extends State<TelaLogin> {
 
   String _perfilSelecionado = 'Paciente';
   bool _senhaVisivel = false;
+  bool _carregando = false;
 
-  void _entrar() {
+  Future<void> _entrar() async {
     if (!_formKey.currentState!.validate()) return;
 
     final email = _emailCtrl.text.trim();
     final senha = _senhaCtrl.text;
 
-    bool encontrado = _usuariosFixos.any(
-      (u) => u['email'] == email && u['senha'] == senha && u['perfil'] == _perfilSelecionado,
-    );
+    setState(() => _carregando = true);
 
-    if (!encontrado && _perfilSelecionado == 'Paciente') {
-      encontrado = listaPacientes.any(
-        (p) => p.email == email && p.senha == senha,
-      );
-    }
+    try {
+      final usuario = await AuthService.login(email, senha);
 
-    if (encontrado) {
+      if (!mounted) return;
+
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Row(
             children: [
               const Icon(Icons.check_circle, color: Colors.white, size: 20),
               const SizedBox(width: 10),
-              Text("Bem-vindo! Entrando como $_perfilSelecionado..."),
+              Text("Bem-vindo, ${usuario.nome}!"),
             ],
           ),
           backgroundColor: corVerdePrimario,
@@ -69,42 +62,48 @@ class _TelaLoginState extends State<TelaLogin> {
           duration: const Duration(seconds: 2),
         ),
       );
+
       Future.delayed(const Duration(milliseconds: 500), () {
-        if (_perfilSelecionado == 'Paciente') {
+        if (!mounted) return;
+        if (usuario.tipo == 'PACIENTE') {
           Navigator.push(context, MaterialPageRoute(builder: (_) => TelaHomePaciente()));
-        } else {
+        } else if (usuario.tipo == 'MEDICO') {
           Navigator.push(context, MaterialPageRoute(builder: (_) => const TelaHomeMedico()));
+        } else {
+          _mostrarErro('Tipo de usuário "${usuario.tipo}" ainda não possui tela própria.');
         }
       });
-    } else {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (_) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Row(
-            children: [
-              Icon(Icons.error_outline, color: Colors.red),
-              SizedBox(width: 8),
-              Text("Erro no login"),
-            ],
-          ),
-          content: const Text(
-            "E-mail ou senha incorretos.\nVerifique os dados e tente novamente.",
-          ),
-          actions: [
-            TextButton(
-              child: const Text("Cancelar", style: TextStyle(color: Colors.grey)),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-            TextButton(
-              child: const Text("OK", style: TextStyle(color: corVerdePrimario, fontWeight: FontWeight.bold)),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
+    } on ApiException catch (e) {
+      _mostrarErro(e.mensagem);
+    } catch (_) {
+      _mostrarErro('Não foi possível conectar ao servidor.\nVerifique sua conexão e tente novamente.');
+    } finally {
+      if (mounted) setState(() => _carregando = false);
+    }
+  }
+
+  void _mostrarErro(String mensagem) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.error_outline, color: Colors.red),
+            SizedBox(width: 8),
+            Text("Erro no login"),
           ],
         ),
-      );
-    }
+        content: Text(mensagem),
+        actions: [
+          TextButton(
+            child: const Text("OK", style: TextStyle(color: corVerdePrimario, fontWeight: FontWeight.bold)),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -253,13 +252,19 @@ class _TelaLoginState extends State<TelaLogin> {
                           width: double.infinity,
                           height: 50,
                           child: ElevatedButton(
-                            onPressed: _entrar,
+                            onPressed: _carregando ? null : _entrar,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: corVerdePrimario,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                             ),
-                            child: const Text("Entrar",
-                                style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold)),
+                            child: _carregando
+                                ? const SizedBox(
+                                    width: 24,
+                                    height: 24,
+                                    child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                                  )
+                                : const Text("Entrar",
+                                    style: TextStyle(fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold)),
                           ),
                         ),
                       ],
