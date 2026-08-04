@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FarmaGrid+</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background-color: #F8F9F4;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .navbar {
+      background-color: #ffffff;
+      border-bottom: solid 1px;
+    }
+
+    .logo {
+      display: flex;
+      font-size: 30px;
+      font-weight: 700;
+      color: #355e3b;
+      margin-top: 10px;
+      margin-bottom: 2px;
+      letter-spacing: 0.6px;
+      text-align: center;
+    }
+
+    .logo span { color: #4BA94B; }
+
+    .plus-icon {
+      width: 30px;
+      height: 30px;
+      position: relative;
+      top: -10px;
+    }
+
+    .titulo {
+      font-size: 15px;
+      font-weight: 700;
+      color: #2e462e;
+      text-align: center;
+      margin-right: 35px;
+    }
+
+    .prontuarioIcon {
+      width: 60px;
+      height: 60px;
+      margin-right: 12px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      text-decoration: none;
+    }
+
+    .menu-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .menu-title {
+      font-size: 25px;
+      font-weight: 600;
+      color: #234e2d;
+    }
+
+    .menu-date {
+      font-size: 14px;
+      font-weight: 500;
+      color: #2e462e;
+      margin-top: 3px;
+    }
+
+    #sinoNot {
+      width: 40px;
+      height: 40px;
+    }
+
+    .colunaEsquerda {
+      width: 240px;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background-color: #ffffff;
+      border-right: solid 1px;
+      padding-top: 15px;
+    }
+
+    .principal {
+      margin-right: 6px;
+      margin-left: 10px;
+      margin-bottom: 20px;
+    }
+
+    .icone {
+      width: 30px;
+      height: 30px;
+    }
+
+    button {
+      color: #234e2d;
+      border: none;
+      background-color: transparent;
+      margin-bottom: 20px;
+      text-align: left;
+      margin-left: 15px;
+      font-weight: 550;
+    }
+
+    .info {
+      display: flex;
+      flex-direction: column;
+      background-color: #ffffff;
+      height: 25vh;
+      margin-top: auto;
+      border-top: solid 1px;
+      padding-top: 10px;
+      padding-left: 5px;
+    }
+
+    .perfil {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 5px;
+    }
+
+    .foto {
+      background-color: #dff4df;
+      color: #234e2d;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .dados {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .nome {
+      color: #234e2d;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .acoes {
+      display: flex;
+      flex-direction: column;
+      margin-top: 10px;
+    }
+
+    .botao {
+      gap: 6px;
+      background: none;
+      border: none;
+      color: #234e2d;
+      font-weight: 500;
+      font-size: 14px;
+      border-radius: 5px;
+      margin-left: 0;
+      padding: 2px;
+      width: 60px;
+    }
+
+    .botao:hover {
+      background-color: #234e2d;
+      color: #dff4df;
+      font-weight: 500;
+    }
+
+    .btn-img:hover {
+      background-color: #234e2d;
+      color: #dff4df;
+      font-weight: 550;
+      border: none;
+      border-radius: 5px;
+      width: 170px;
+      text-align: center;
+    }
+
+    .btn-img:hover #iconeD { content: url("dashboard.png"); }
+    .btn-img:hover #iconeE { content: url("estoque.png"); }
+    .btn-img:hover #iconeA { content: url("alerta.png"); }
+    .btn-img:hover #iconeDe { content: url("desconto.png"); }
+    .btn-img:hover #iconeR { content: url("relatorioBranco.png"); }
+    .btn-img:hover #iconeSe { content: url("sensor.png"); }
+
+    #bde {
+      background-color: #234e2d;
+      color: #dff4df;
+      font-weight: 550;
+      border: none;
+      border-radius: 5px;
+      width: 170px;
+      text-align: center;
+    }
+
+    .containerPrincipal {
+      display: flex;
+      height: 100vh;
+    }
+
+    .corpo {
+      display: flex;
+      flex: 1;
+      width: 100vh;
+      flex-direction: column;
+    }
+
+    .icone2 {
+      width: 18px;
+      height: 18px;
+    }
+
+    .botao:hover .icone2 {
+      content: url("sairHover.png");
+    }
+
+    /* --- Área principal --- */
+    .corpo-alertas {
+    height: 100%;
+    background-color: #F8F9F4;
+    overflow: hidden;
+    }
+
+    /* --- Cards de resumo --- */
+    .card-resumo {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    border: 1px solid #e0e0e0;
+    }
+
+    .card-resumo h2 {
+    margin: 0;
+    font-size: 24px;
+    color: #2e462e;
+    font-weight: 700;
+    }
+
+    .card-resumo p {
+    margin: 0;
+    font-size: 14px;
+    color: #6b6b6b;
+    }
+
+    .icone-alerta {
+    font-size: 22px;
+    }
+
+    .critico { border-left: 5px solid #D9534F; }
+    .atencao { border-left: 5px solid #F0AD4E; }
+    .total { border-left: 5px solid #4BA94B; background-color: #E7F6E7; }
+
+    /* --- Campo de busca --- */
+    .busca {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    background-color: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    /* --- Painel esquerdo: lista de alertas --- */
+    .painel-alertas {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    height: 70vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .painel-alertas h6 {
+    font-weight: 700;
+    color: #2e462e;
+    margin-bottom: 2px;
+    }
+
+    .subtitulo {
+    font-size: 13px;
+    color: #7a7a7a;
+    margin-bottom: 10px;
+    }
+
+    .lista-alertas {
+        overflow-y: auto;
+        flex: 1;
+        padding-right: 4px;
+        max-height: 45vh; 
+        scrollbar-width: none;
+        -ms-overflow-style: none; 
+    }
+
+    .lista-alertas::-webkit-scrollbar {
+        display: none; 
+    }
+
+    /* --- Cada alerta --- */
+    .alerta-item {
+    display: flex;
+    justify-content: space-between;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    border: 2px solid transparent;
+    transition: transform 0.1s ease, border-color 0.2s ease;
+    }
+
+    .alerta-item:hover {
+    transform: scale(1.01);
+    }
+
+    .info-produto {
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+    color: #333;
+    }
+
+    .info-produto strong {
+    font-size: 14px;
+    color: #2e462e;
+    }
+
+    .info-extra {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-size: 12px;
+    }
+
+    .dias {
+    background-color: #f6f6f6;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #fff;
+    }
+
+    .local {
+    color: #777;
+    margin-top: 3px;
+    font-size: 12px;
+    }
+
+    /* --- Cores dos alertas --- */
+    .alerta-critico {
+    border: 2px solid #D9534F;
+    background-color: #FDECEA;
+    }
+
+    .alerta-atencao {
+    border: 2px solid #F0AD4E;
+    background-color: #FEF5E7;
+    }
+
+    .alerta-ok {
+    border: 2px solid #4BA94B;
+    background-color: #E7F6E7;
+    }
+
+    .alerta-critico .dias { background-color: #D9534F; }
+    .alerta-atencao .dias { background-color: #F0AD4E; }
+    .alerta-ok .dias { background-color: #4BA94B; }
+
+    /* --- Painel direito --- */
+    .painel-detalhes {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    height: 70vh;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    }
+
+    .painel-detalhes h6 {
+    font-weight: 700;
+    color: #2e462e;
+    }
+
+    .texto-detalhe {
+    font-size: 13px;
+    color: #6b6b6b;
+    margin-bottom: 30px;
+    }
+
+    .conteudo-detalhe {
+    text-align: center;
+    margin-top: 80px;
+    color: #999;
+    font-size: 15px;
+    }
+
+    .buscar input{
+        background-image: url("buscar.png");
+        background-repeat: no-repeat;
+        background-position: 10px center; 
+        background-size: 18px; 
+        padding-left: 35px; 
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        height: 35px;
+        width: 1000px;
+        outline-color: #234e2d;
+        font-size: 14px;
+    }
+
+    .buscar{
+        margin: 0px;
+        justify-content: center;
+    }
+
+    .iconA {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #ffffff;
+        border: none;
+        width: 45px;
+        height: 45px;
+    }
+
+    .iconA img {
+        width: 30px;
+        height: 30px;
+    }
+
+    .iconC {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #E7F6E7;
+        border: none;
+        width: 45px;
+        height: 45px;
+    }
+
+    .iconC img {
+        width: 30px;
+        height: 30px;
+    }
+
+    /*Parte de descontos*/
+    .corpo-descontos {
+    background-color: #F8F9F4;
+    height: 100vh;
+    overflow: hidden;
+    width: 95%;
+    margin-top: -10px;
+    margin-left: -10px;
+    }
+
+    /* Painel esquerdo */
+    .painel-lista {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: 1px solid #e0e0e0;
+    height: 68vh;
+    display: flex;
+    flex-direction: column;
+    }
+
+    /* Lista de cupons */
+    .lista-cupons {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 4px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    }
+    .lista-cupons::-webkit-scrollbar {
+    display: none;
+    }
+
+    /* Cada cupom */
+    .cupom-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    background-color: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    transition: transform 0.1s ease, box-shadow 0.2s ease;
+    }
+    .cupom-item:hover {
+    transform: scale(1.01);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .codigo {
+    color: #2e462e;
+    font-weight: 600;
+    font-size: 14px;
+    }
+    .descricao {
+    color: #6b6b6b;
+    font-size: 13px;
+    }
+    .valor {
+    color: #4BA94B;
+    font-weight: 600;
+    font-size: 13px;
+    margin-top: 3px;
+    }
+    .barra {
+    background-color: #e6e6e6;
+    height: 6px;
+    border-radius: 4px;
+    margin-top: 6px;
+    overflow: hidden;
+    }
+    .preenchido {
+    background-color: #4BA94B;
+    height: 100%;
+    }
+    .status {
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 5px;
+    padding: 2px 8px;
+    align-self: center;
+    }
+    .status.ativo {
+    background-color: #4BA94B;
+    color: white;
+    }
+    .status.expirado {
+    background-color: #ccc;
+    color: #555;
+    }
+
+    /* Botão Novo Cupom */
+    .btn-novo {
+    background-color: #4BA94B;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+    }
+    .btn-novo:hover {
+    background-color: #3e8e3e;
+    }
+
+    /* Painel direito */
+    .painel-detalhes {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border: 1px solid #e0e0e0;
+    height: 68vh;
+    }
+
+    /* Modal */
+    .modal-novo {
+    border-radius: 12px;
+    overflow: hidden;
+    }
+    .modal-novo .form-control,
+    .modal-novo .form-select {
+    background-color: #f8f9f4;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    }
+    .modal-novo .form-control:focus,
+    .modal-novo .form-select:focus {
+    border-color: #4BA94B;
+    box-shadow: 0 0 0 0.15rem rgba(75,169,75,0.25);
+    }
+    .btn-salvar {
+    background-color: #4BA94B;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    padding: 6px 14px;
+    }
+    .btn-salvar:hover {
+    background-color: #3e8e3e;
+    }
+    .btn-cancelar {
+    background-color: #e9ecef;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-weight: 600;
+    color: #333;
+    }
+    .btn-cancelar:hover {
+    background-color: #d6d8d9;
+    }
+
+    /* --- Detalhes do Cupom --- */
+    #conteudoDetalhe {
+    margin-top: 12px;
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 10px;
+    scrollbar-width: none;       /* Firefox */
+    -ms-overflow-style: none;    /* IE e Edge antigos */
+    }
+
+    #conteudoDetalhe::-webkit-scrollbar {
+    display: none;               /* Chrome, Safari, Edge */
+    }
+
+    /* Caixa superior com código + valor */
+    .cupom-destaque {
+    border: 2px dashed #4BA94B;
+    border-radius: 10px;
+    background: transparent;
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    }
+
+    /* row interna para centralizar texto grande */
+    .cupom-destaque .linha-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    }
+
+    .cupom-destaque .tag {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    color: #234e2e;
+    font-weight: 700;
+    font-size: 15px;
+    }
+
+    /* Valor grande (20% OFF) */
+    .cupom-destaque .valor-grande {
+    font-size: 28px;
+    font-weight: 700;
+    color: #4BA94B;
+    margin-top: 4px;
+    }
+
+    /* detalhes (linhas de label + valor) */
+    .detalhes-lista {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    }
+
+    .detalhe-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    }
+
+    .detalhe-item .label {
+    color: #6b6b6b;
+    font-size: 13px;
+    }
+
+    .detalhe-item .valor {
+    color: #234e2e;
+    font-weight: 600;
+    font-size: 14px;
+    text-align: right;
+    }
+
+    /* Limite de uso / Já utilizados lado-a-lado */
+    .dois-colunas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 6px;
+    }
+
+    .box-pequeno {
+    background: #f7fdf7;
+    border-radius: 8px;
+    padding: 10px;
+    border: 1px solid #e6efe6;
+    }
+
+    .box-pequeno .label { color:#6b6b6b; font-size:13px; }
+    .box-pequeno .valor { color:#234e2e; font-weight:700; font-size:14px; }
+
+    /* Status */
+    .status-ativo {
+    color: #237b33;
+    background: #e8f6ea;
+    padding: 8px 12px;
+    border-radius: 6px;
+    display: inline-block;
+    font-weight: 600;
+    }
+
+    /* Botão Editar */
+    .btn-editar {
+    background-color: #4BA94B;
+    color: #fff;
+    font-weight: 700;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 18px;
+    width: 520px;
+    text-align: center;
+    margin-top: 18px;
+    box-shadow: 0 2px 6px rgba(75,169,75,0.25);
+    }
+
+    /* Aparência do cupom selecionado na lista esquerda (igual protótipo) */
+    .cupom-item.selected {
+    border: 2px dashed #4BA94B;
+    background: #F2FBF3;
+    transform: none;
+    box-shadow: none;
+    }
+    .cupom-item .codigo { color: #234e2e; font-weight:700; }
+
+    /* Ícones pequenos (usamos SVG inline para aparência mais fiel) */
+    .icon-small {
+    width:16px;
+    height:16px;
+    display:inline-block;
+    vertical-align:middle;
+    margin-right:6px;
+    }
+
+    .validade{
+      width: 25px;
+    }
+
+    .sensor{
+        width: 25px;
+    }
+
+    .descontos{
+      width: 25px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="containerPrincipal">
+    <div class="colunaEsquerda">
+
+      <div class="principal">
+        <div class="logo">
+          FARMA<span>GRID</span>
+          <img src="LogoFarmaGrid.png" alt="Símbolo de mais" class="plus-icon" />
+        </div>
+        <div class="titulo">Sistema para Farmácia</div>
+      </div>
+
+      <button type="button" class="btn-img" id="bd">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"/>
+                        <rect x="14" y="3" width="7" height="7"/>
+                        <rect x="14" y="14" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/>
+                    </svg>
+        Visão Geral
+      </button>
+
+      <button type="button" class="btn-img" id="be">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        </svg>
+        Estoque
+      </button>
+
+      <button type="button" class="btn-img" id="ba">
+        <img src="alertaVerde.png" alt="Ícone" class="icone, validade" id="iconeA">
+        Validade
+      </button>
+
+      <button type="button" class="btn-img" id="se">
+        <img src="sensor.png" alt="Ícone" class="icone, sensor" id="iconeSe">
+        Sensor
+      </button>
+
+      <button type="button" class="btn-img" id="bde">
+        <img src="descontoVerde.png" alt="Ícone" class="icone, descontos" id="iconeDe">
+        Descontos
+      </button>
+
+      <button type="button" class="btn-img" id="br">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10"/>
+                        <line x1="12" y1="20" x2="12" y2="4"/>
+                        <line x1="6" y1="20" x2="6" y2="14"/>
+                    </svg>
+        Relatórios
+      </button>
+
+      <div class="info">
+        <div class="perfil">
+          <div class="foto">ADM</div>
+          <div class="dados">
+            <span class="nome">Administrador FarmaGrid</span>
+          </div>
+        </div>
+
+        <div class="acoes">
+          <button class="botao" id="Sair">
+            <img src="sair.png" alt="sair" class="icone2">
+            Sair
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="corpo dashboard p-4">
+      <!-- CONTEÚDO DA PÁGINA DE DESCONTOS -->
+        <div class="p-4 corpo-descontos">
+
+        <!-- Cabeçalho -->
+        <div class="mb-3">
+            <h3 class="fw-bold" style="color:#234e2d;">Descontos</h3>
+            <p style="color:#6b6b6b; margin-top:-4px;">Gerencie cupons e promoções</p>
+        </div>
+
+        <!-- Campo de busca -->
+        <div class="buscar mb-4 d-flex justify-content-center">
+            <input type="text" placeholder="Buscar cupom..." />
+        </div>
+
+        <!-- Grid principal -->
+        <div class="row g-3">
+            
+            <!-- Painel esquerdo: Lista de cupons -->
+            <div class="col-5">
+            <div class="painel-lista p-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                <div>
+                    <h6 class="fw-bold" style="color:#2e462e;">Lista de Cupons</h6>
+                    <span class="subtitulo">4 Cupons</span>
+                </div>
+                <button class="btn-novo" data-bs-toggle="modal" data-bs-target="#modalNovoCupom">
+                    <span class="me-1">+</span> Novo Cupom
+                </button>
+                </div>
+
+                <div class="lista-cupons">
+                <div class="cupom-item">
+                    <div>
+                    <div class="codigo">BEMVINDO20</div>
+                    <div class="descricao">Desconto de boas-vindas</div>
+                    <div class="valor">20% OFF</div>
+                    <div class="barra">
+                        <div class="preenchido" style="width:45%;"></div>
+                    </div>
+                    <small>45/100 usos</small>
+                    </div>
+                    <span class="status ativo">Ativo</span>
+                </div>
+
+                <div class="cupom-item">
+                    <div>
+                    <div class="codigo">MEDICAMENTOS15</div>
+                    <div class="descricao">Desconto em medicamentos</div>
+                    <div class="valor">15% OFF</div>
+                    <div class="barra">
+                        <div class="preenchido" style="width:60%;"></div>
+                    </div>
+                    <small>120/200 usos</small>
+                    </div>
+                    <span class="status ativo">Ativo</span>
+                </div>
+
+                <div class="cupom-item">
+                    <div>
+                    <div class="codigo">CONSULTA50</div>
+                    <div class="descricao">R$ 50 de desconto em consultas</div>
+                    <div class="valor">R$ 50,00 OFF</div>
+                    <div class="barra">
+                        <div class="preenchido" style="width:25%;"></div>
+                    </div>
+                    <small>12/50 usos</small>
+                    </div>
+                    <span class="status ativo">Ativo</span>
+                </div>
+
+                <div class="cupom-item">
+                    <div>
+                    <div class="codigo">FAMILIA30</div>
+                    <div class="descricao">Desconto para plano família</div>
+                    <div class="valor">30% OFF</div>
+                    <div class="barra">
+                        <div class="preenchido" style="width:100%;"></div>
+                    </div>
+                    <small>30/30 usos</small>
+                    </div>
+                    <span class="status expirado">Expirado</span>
+                </div>
+                </div>
+            </div>
+            </div>
+
+            <!-- div da direita: Detalhes -->
+            <div class="col-7">
+            <div class="painel-detalhes p-3" id="painelDetalhes">
+                <h6 class="fw-bold" style="color:#2e462e;">Detalhes do Cupom</h6>
+                <p class="texto-detalhe">Escolha um cupom da lista</p>
+
+                <div id="conteudoDetalhe" class="p-0">
+                <!-- estado inicial -->
+                <div class="conteudo-vazio text-muted" style="margin-top:40px; text-align:center;">
+                    <div style="font-size:15px; color:#999;">Selecione um cupom para visualizar os dados</div>
+                </div>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- Modal Novo Cupom -->
+        <div class="modal fade" id="modalNovoCupom" tabindex="-1" aria-labelledby="modalNovoCupomLabel" aria-hidden="true">
+            <div class="modal-dialog">
+            <div class="modal-content modal-novo">
+                <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="modalNovoCupomLabel" style="color:#234e2d;">Novo Cupom</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                </div>
+                <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                    <label class="form-label">Código do Cupom</label>
+                    <input type="text" class="form-control" placeholder="EX: BEMVINDO20">
+                    </div>
+                    <div class="mb-3">
+                    <label class="form-label">Descrição</label>
+                    <input type="text" class="form-control" placeholder="Ex: Desconto de boas-vindas">
+                    </div>
+                    <div class="mb-3">
+                    <label class="form-label">Tipo de Desconto</label>
+                    <select class="form-select">
+                        <option selected>Selecione o tipo</option>
+                        <option>Porcentagem (%)</option>
+                        <option>Valor Fixo (R$)</option>
+                    </select>
+                    </div>
+                    <div class="row">
+                    <div class="col-6 mb-3">
+                        <label class="form-label">Valor</label>
+                        <input type="number" class="form-control" value="0">
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label class="form-label">Limite de Uso</label>
+                        <input type="number" class="form-control" value="0">
+                    </div>
+                    </div>
+                    <div class="mb-3">
+                    <label class="form-label">Categoria</label>
+                    <input type="text" class="form-control" placeholder="Ex: Todos os planos">
+                    </div>
+                    <div class="mb-3">
+                    <label class="form-label">Válido até</label>
+                    <input type="text" class="form-control" placeholder="dd/mm/aaaa">
+                    </div>
+                </form>
+                </div>
+                <div class="modal-footer d-flex justify-content-between">
+                <button type="button" class="btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn-salvar" data-bs-dismiss="modal">Salvar Cupom</button>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- Modal Editar Cupom -->
+        <div class="modal fade" id="modalEditarCupom" tabindex="-1" aria-labelledby="modalEditarCupomLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content modal-novo">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold" id="modalEditarCupomLabel" style="color:#234e2d;">Editar Cupom</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+
+            <div class="modal-body">
+                <form id="formEditarCupom">
+                <div class="mb-3">
+                    <label class="form-label">Código do Cupom</label>
+                    <input type="text" class="form-control" id="editCodigo" readonly>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Descrição</label>
+                    <input type="text" class="form-control" id="editDescricao">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Tipo de Desconto</label>
+                    <select class="form-select" id="editTipo">
+                    <option>Percentual (%)</option>
+                    <option>Valor Fixo (R$)</option>
+                    </select>
+                </div>
+
+                <div class="row">
+                    <div class="col-6 mb-3">
+                    <label class="form-label">Valor</label>
+                    <input type="number" class="form-control" id="editValor">
+                    </div>
+                    <div class="col-6 mb-3">
+                    <label class="form-label">Limite de Uso</label>
+                    <input type="number" class="form-control" id="editLimite">
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Categoria</label>
+                    <input type="text" class="form-control" id="editCategoria">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Válido até</label>
+                    <input type="text" class="form-control" id="editValidade">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" id="editStatus">
+                    <option>Ativo</option>
+                    <option>Expirado</option>
+                    </select>
+                </div>
+                </form>
+            </div>
+
+            <div class="modal-footer d-flex justify-content-between">
+                <button type="button" class="btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn-salvar" id="btnSalvarAlteracoes">Salvar Alterações</button>
+            </div>
+            </div>
+        </div>
+        </div>
+
+
+        </div>
+        
+
+    </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('bd').addEventListener('click', () => window.electronAPI.abrirJanelaD());
+      document.getElementById('be').addEventListener('click', () => window.electronAPI.abrirJanelaE());
+      document.getElementById('ba').addEventListener('click', () => window.electronAPI.abrirJanelaV());
+      document.getElementById('se').addEventListener('click', () => window.electronAPI.abrirJanelaSE());
+      document.getElementById('bde').addEventListener('click', () => window.electronAPI.abrirJanelaDE());
+      document.getElementById('br').addEventListener('click', () => window.electronAPI.abrirJanelaR());
+      document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
+    });
+  </script>
+
+</body>
+</html>

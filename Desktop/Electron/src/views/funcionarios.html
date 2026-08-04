@@ -1,0 +1,790 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FarmaGrid+</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+ 
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+ 
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+ 
+    body {
+      background-color: #FFFBED;
+    }
+ 
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+ 
+    .navbar {
+      background-color: #ffffff;
+      border-bottom: solid 1px;
+    }
+ 
+    .logo {
+      display: flex;
+      font-size: 30px;
+      font-weight: 700;
+      color: #355e3b;
+      margin-top: 10px;
+      margin-bottom: 2px;
+      letter-spacing: 0.6px;
+      text-align: center;
+    }
+ 
+    .logo span { color: #4BA94B; }
+ 
+    .plus-icon {
+      width: 30px;
+      height: 30px;
+      position: relative;
+      top: -10px;
+    }
+ 
+    .titulo {
+      font-size: 15px;
+      font-weight: 700;
+      color: #2e462e;
+      text-align: center;
+      margin-right: 35px;
+    }
+ 
+    .prontuarioIcon {
+      width: 60px;
+      height: 60px;
+      margin-right: 12px;
+    }
+ 
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      text-decoration: none;
+    }
+ 
+    .menu-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+ 
+    .menu-title {
+      font-size: 25px;
+      font-weight: 600;
+      color: #234e2d;
+    }
+ 
+    .menu-date {
+      font-size: 14px;
+      font-weight: 500;
+      color: #2e462e;
+      margin-top: 3px;
+    }
+ 
+    #sinoNot {
+      width: 40px;
+      height: 40px;
+    }
+ 
+    .colunaEsquerda {
+      width: 240px;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background-color: #ffffff;
+      border-right: solid 1px;
+      padding-top: 15px;
+    }
+ 
+    .principal {
+      margin-right: 6px;
+      margin-left: 10px;
+      margin-bottom: 20px;
+    }
+ 
+    .icone {
+      width: 30px;
+      height: 30px;
+    }
+ 
+    button {
+      color: #234e2d;
+      border: none;
+      background-color: transparent;
+      margin-bottom: 20px;
+      text-align: left;
+      margin-left: 15px;
+      font-weight: 550;
+    }
+ 
+    .info {
+      display: flex;
+      flex-direction: column;
+      background-color: #ffffff;
+      height: 25vh;
+      margin-top: auto;
+      border-top: solid 1px;
+      padding-top: 10px;
+      padding-left: 5px;
+    }
+ 
+    .perfil {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 5px;
+    }
+ 
+    .foto {
+      background-color: #dff4df;
+      color: #234e2d;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 16px;
+    }
+ 
+    .dados {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+ 
+    .nome {
+      color: #234e2d;
+      font-weight: 600;
+      font-size: 14px;
+    }
+ 
+    .acoes {
+      display: flex;
+      flex-direction: column;
+      margin-top: 10px;
+    }
+ 
+    .botao {
+      gap: 6px;
+      background: none;
+      border: none;
+      color: #234e2d;
+      font-weight: 500;
+      font-size: 14px;
+      border-radius: 5px;
+      margin-left: 0;
+      padding: 2px;
+      width: 60px;
+    }
+ 
+    .botao:hover {
+      background-color: #234e2d;
+      color: #dff4df;
+      font-weight: 500;
+    }
+ 
+    .btn-img:hover {
+      background-color: #234e2d;
+      color: #dff4df;
+      font-weight: 550;
+      border: none;
+      border-radius: 5px;
+      width: 170px;
+      text-align: center;
+    }
+ 
+    .btn-img:hover #iconeD { content: url("dashboard.png"); }
+    .btn-img:hover #iconeE { content: url("estoque.png"); }
+    .btn-img:hover #iconeA { content: url("alerta.png"); }
+    .btn-img:hover #iconeDe { content: url("desconto.png"); }
+    .btn-img:hover #iconeR { content: url("relatorioBranco.png"); }
+    .btn-img:hover #iconeSe { content: url("sensor.png"); }
+ 
+    #fn {
+      background-color: #234e2d;
+      color: #dff4df;
+      font-weight: 550;
+      border: none;
+      border-radius: 5px;
+      width: 170px;
+      text-align: center;
+    }
+ 
+    .containerPrincipal {
+      display: flex;
+      height: 100vh;
+    }
+ 
+    .corpo {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+    }
+ 
+    .icone2 {
+      width: 18px;
+      height: 18px;
+    }
+ 
+    .botao:hover .icone2 {
+      content: url("sairHover.png");
+    }
+ 
+    .dashboard {
+      background-color: #F8F9F4;
+      height: 100%;
+      overflow-y: auto;
+      border-radius: 10px;
+    }
+ 
+    .card {
+      border-radius: 12px !important;
+    }
+ 
+    .card-header {
+      background-color: #fff !important;
+      font-size: 15px;
+    }
+ 
+    .alert {
+      border-radius: 10px;
+    }
+ 
+    .progress {
+      border-radius: 10px;
+      background-color: #ffe5e5;
+    }
+ 
+    .iconA{
+        width: 20px;
+        height: 20px;
+        margin-right: 5px;
+    }
+ 
+    .validade{
+      width: 25px;
+    }
+ 
+    .descontos{
+      width: 25px;
+    }
+ 
+    .sensor{
+        width: 25px;
+    }
+ 
+    .icone3 {
+        width: 20px;
+        height: 20px;
+    }
+ 
+    /* TABELA */
+ 
+    .table-container {
+    background: #fff;
+    border-radius: 12px;
+    padding: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    margin-top: 30px;
+    max-height: 370px;
+    min-height: 370px;
+    overflow-y: auto; 
+    }
+ 
+    /* Cabeçalho fixo */
+    .table thead th {
+    position: sticky;
+    top: 0;
+    background: #fff;
+    z-index: 1;
+    }
+ 
+    th {
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 14px;
+    }
+ 
+    td {
+    vertical-align: middle;
+    font-size: 14px;
+    }
+ 
+    .badge-caixa {
+    background-color: #e0ebff;
+    color: #3b82f6;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    }
+ 
+    .badge-balconista {
+    background-color: #f0e6ff;
+    color: #a855f7;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    }
+ 
+    .status-ativo {
+    background-color: #d1f7e3;
+    color: #16a34a;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    cursor: pointer;
+    }
+ 
+    .status-inativo {
+    background-color: #e5e7eb;
+    color: #6b7280;
+    padding: 5px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    cursor: pointer;
+    }
+ 
+    .btn-icon {
+    border: 1px solid #ddd;
+    background: #fff;
+    border-radius: 6px;
+    padding: 5px 8px;
+    cursor: pointer;
+    transition: 0.2s;
+    }
+ 
+    .btn-icon:hover {
+    background: #f1f1f1;
+    }
+ 
+    /* Scroll invisível (como você já queria) */
+    ::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
+    }
+ 
+    ::-webkit-scrollbar-thumb {
+    background: transparent;
+    }
+ 
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgb(0, 0, 0);
+      background-color: rgba(0, 0, 0, 0.4);
+      padding-top: 60px;
+    }
+ 
+    .modal-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      max-width: 500px;
+    }
+ 
+    .busca{
+      height: 40px;
+      margin-top: -15px;
+      background-color: rgb(238, 238, 238);
+    }
+ 
+  </style>
+</head>
+ 
+<body>
+ 
+  <div class="containerPrincipal">
+    <div class="colunaEsquerda">
+ 
+      <div class="principal">
+        <div class="logo">
+          FARMA<span>GRID</span>
+          <img src="LogoFarmaGrid.png" alt="Símbolo de mais" class="plus-icon" />
+        </div>
+        <div class="titulo">Sistema para Farmácia</div>
+      </div>
+ 
+ 
+      <button type="button" class="btn-img" id="bd">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"/>
+                        <rect x="14" y="3" width="7" height="7"/>
+                        <rect x="14" y="14" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/>
+                    </svg>
+        Visão Geral
+      </button>
+ 
+      <button type="button" class="btn-img" id="be">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                    </svg>
+        Estoque
+      </button>
+ 
+      <button type="button" class="btn-img" id="ba">
+        <img src="alertaVerde.png" alt="Ícone" class="icone, validade" id="iconeA">
+        Validade
+      </button>
+ 
+      <!--
+      <button type="button" class="btn-img" id="se">
+        <img src="sensorVerde.png" alt="Ícone" class="icone, sensor" id="iconeSe">
+        Sensor
+      </button>
+      -->
+ 
+      <button type="button" class="btn-img" id="bde">
+        <img src="descontoVerde.png" alt="Ícone" class="icone, descontos" id="iconeDe">
+        Descontos
+      </button>
+ 
+      <button type="button" class="btn-img" id="br">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10"/>
+                        <line x1="12" y1="20" x2="12" y2="4"/>
+                        <line x1="6" y1="20" x2="6" y2="14"/>
+                    </svg>
+        Relatórios
+      </button>
+ 
+      <button type="button" class="btn-img" id="fn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10"/>
+                        <line x1="12" y1="20" x2="12" y2="4"/>
+                        <line x1="6" y1="20" x2="6" y2="14"/>
+                    </svg>
+        Funcionários
+      </button>
+ 
+      <div class="info">
+        <div class="perfil">
+          <div class="foto">ADM</div>
+          <div class="dados">
+            <span class="nome">Administrador FarmaGrid</span>
+          </div>
+        </div>
+ 
+        <div class="acoes">
+          <button class="botao" id="Sair">
+            <img src="sair.png" alt="sair" class="icone2">
+            Sair
+          </button>
+        </div>
+      </div>
+    </div>
+ 
+    <div class="corpo dashboard p-4">
+ 
+        <div style="display: flex; flex-direction: row; justify-content: space-between;">
+            <div>
+                <h4 class="fw-bold text-success mb-1">Gerenciamento de Funcionários</h4>
+                <p class="text-secondary mb-4">Cadastre e gerencie funcionários</p>
+            </div>
+            
+            <div>
+                <button style="background-color: #355e3b; color: white; border-radius: 10px; padding: 7px;" id="openModalBtn">+ Novo Funcionário</button>
+            </div>
+        </div>
+ 
+        <div style="display: flex; flex-direction: row; justify-content: space-evenly;">
+            <div class="card p-4">
+                <p class="text-muted" style="font-size: 14px; min-width: 180px; margin-right: 10px;"><img src="func.png" alt="dinheiro" class="icone3"> Total de Funcionário</p>
+                <p id="totalFunc" style="margin-bottom: -8px; font-size: 25px; color: #234e2d;">0</p>
+            </div>
+ 
+            <div class="card p-4">
+                <p class="text-muted" style="font-size: 14px; min-width: 180px; margin-right: 10px;"><img src="func2.png" alt="dinheiro" class="icone3"> Ativos</p>
+                <p id="funcAtivos" style="margin-bottom: -8px; font-size: 25px; color: #234e2d;">0</p>
+            </div>
+ 
+            <div class="card p-4">
+                <p class="text-muted" style="font-size: 14px; min-width: 180px; margin-right: 10px;"><img src="caixa.png" alt="dinheiro" class="icone3"> Caixas</p>
+                <p id="totalCaixa" style="margin-bottom: -8px; font-size: 25px; color: #234e2d;">0</p>
+            </div>
+ 
+            <div class="card p-4">
+                <p class="text-muted" style="font-size: 14px; min-width: 180px;"><img src="balconista2.png" alt="dinheiro" class="icone3"> Balconistas</p>
+                <p id="totalBalconista" style="margin-bottom: -8px; font-size: 25px; color: #234e2d;">0</p>
+            </div>
+        </div>
+ 
+        <div class="card p-4" style="display: flex; flex-direction: row; margin-top: 30px; justify-content: space-evenly">
+            <div>
+                <p style="font-size: 14px; margin-bottom: 0px;"><b>Buscar</b></p>
+                <input type="text" id="busca" name="busca" placeholder="Nome, CPF ou e-mail..." style="border-radius: 7px; height: 35px; background-color: #f1f1f1; padding: 5px; border:1px solid #c7c7c7; width: 350px;">
+            </div>
+ 
+            <div>
+            <p style="font-size: 14px; margin-bottom: 0px;"><b>Função</b></p>
+            <select id="filtrFuncao" name="funcao" style="border-radius: 7px; height: 35px; background-color: #f1f1f1; padding: 5px; width: 250px;">
+              <option value="todas">Todas</option>
+              <option value="caixa">Caixa</option>
+              <option value="balconista">Balconista</option>
+            </select>
+          </div>
+ 
+          <div>
+            <p style="font-size: 14px; margin-bottom: 0px;"><b>Status</b></p>
+            <select id="filtrStatus" name="status" style="border-radius: 7px; height: 35px; background-color: #f1f1f1; padding: 5px; width: 250px;">
+              <option value="todos">Todos</option>
+              <option value="ativo">Ativo</option>
+              <option value="inativo">Inativo</option>
+            </select>
+          </div>
+        </div>
+ 
+        <!--TABELA-->
+        <div class="table-container">
+            <table class="table align-middle">
+                <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>E-mail</th>
+                    <th>Telefone</th>
+                    <th>Função</th>
+                    <th>Status</th>
+                    <th>Ações</th>
+                </tr>
+                </thead>
+ 
+                <tbody id="tabelaFuncionarios">
+                  <!-- preenchido via JS ao carregar a página -->
+                </tbody>
+            </table>
+        </div>
+ 
+        <!--MODAL DE NOVO FUNCIONÁRIO-->
+        <div id="myModal" class="modal">
+            <div class="modal-content">
+                <span id="closeModalBtn" class="close">&times;</span>
+                <h3>Novo Funcionário</h3>
+ 
+                <p style="margin-top: 6px; font-size: 14px;"><b>Nome Completo</b></p>
+                <input type="text" class="form-control mb-3 busca"
+                placeholder="Digite o nome completo" id="nome">
+ 
+                <p style="margin-top: 6px; font-size: 14px;"><b>CPF</b></p>
+                <input type="text" class="form-control mb-3 busca"
+                placeholder="000.000.000-00" id="cpf" maxlength="14" oninput="formatarCPF(this)">
+ 
+                <p style="margin-top: 6px; font-size: 14px;"><b>E-mail</b></p>
+                <input type="email" class="form-control mb-3 busca"
+                placeholder="funcionario@farmagrid.com" id="email">
+ 
+                <p style="margin-top: 6px; font-size: 14px;"><b>Telefone</b></p>
+                <input type="text" class="form-control mb-3 busca"
+                placeholder="(19) 99390-1111" id="telefone">
+ 
+                <p style="margin-top: 6px; font-size: 14px; margin-bottom: 0px;"><b>Função</b></p>
+                <select id="modalFuncao" name="funcao" style="border-radius: 7px; height: 35px; background-color: #f1f1f1; padding: 5px; width: 460px;">
+                    <option value="caixa">Caixa</option>
+                    <option value="balconista">Balconista</option>
+                </select>
+ 
+                <p style="margin-top: 16px; font-size: 14px; margin-bottom: 0px;"><b>Status</b></p>
+                <select id="modalStatus" name="status" style="border-radius: 7px; height: 35px; background-color: #f1f1f1; padding: 5px; width: 460px;">
+                    <option value="ativo">Ativo</option>
+                    <option value="inativo">Inativo</option>
+                </select>
+ 
+                <div style="display: flex; flex-direction: row; justify-content: end; margin-top: 30px;">
+                    <button style="color: black; border: 1px solid black; padding: 10px; border-radius: 10px;" id="btnCancelar">Cancelar</button>
+                    <button style="color: white; padding: 10px; border-radius: 10px; background-color: #355e3b;" id="btnCadastrar">+ Cadastrar</button>
+                </div>
+                
+            </div>
+        </div>
+ 
+    </div>
+ 
+ 
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('bd').addEventListener('click', () => window.electronAPI.abrirJanelaD());
+      document.getElementById('be').addEventListener('click', () => window.electronAPI.abrirJanelaE());
+      document.getElementById('ba').addEventListener('click', () => window.electronAPI.abrirJanelaV());
+      document.getElementById('bde').addEventListener('click', () => window.electronAPI.abrirJanelaDE());
+      document.getElementById('br').addEventListener('click', () => window.electronAPI.abrirJanelaR());
+      document.getElementById('fn').addEventListener('click', () => window.electronAPI.abrirJanelaFunc());
+      document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
+ 
+      carregarFuncionarios();
+      document.getElementById('filtrFuncao').addEventListener('change', filtrarTabela);
+      document.getElementById('filtrStatus').addEventListener('change', filtrarTabela);
+      document.getElementById('busca').addEventListener('input', filtrarTabela);
+    });
+ 
+    // Carrega funcionários do banco ao abrir a página
+    async function carregarFuncionarios() {
+    const funcionarios = await window.electronAPI.buscarFuncionarios();
+    const tbody = document.getElementById('tabelaFuncionarios');
+    tbody.innerHTML = '';
+
+    // CONTADORES
+    let totalFunc = 0;
+    let funcAtivos = 0;
+    let totalCaixa = 0;
+    let totalBalconista = 0;
+
+    funcionarios.forEach(f => {
+      totalFunc++;
+      if (f.status === 'ativo') funcAtivos++;
+      if (f.funcao === 'caixa') totalCaixa++;
+      if (f.funcao === 'balconista') totalBalconista++;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${f.nome}</td>
+        <td>${f.CPF}</td>
+        <td>${f.email}</td>
+        <td>${f.telefone}</td>
+        <td><span class="badge-${f.funcao === 'caixa' ? 'caixa' : 'balconista'}">${f.funcao === 'caixa' ? 'Caixa' : 'Balconista'}</span></td>
+        <td><span class="status-${f.status === 'ativo' ? 'ativo' : 'inativo'} status-toggle" data-cpf="${f.CPF}">${f.status === 'ativo' ? 'Ativo' : 'Inativo'}</span></td>
+        <td><button class="btn-icon"><img src="editar.png" alt="editar" class="icone3"></button></td>
+      `;
+
+      tr.querySelector('.status-toggle').addEventListener('dblclick', async function () {
+        const cpf = this.getAttribute('data-cpf');
+        const novoStatus = this.classList.contains('status-ativo') ? 'inativo' : 'ativo';
+
+        const resultado = await window.electronAPI.atualizarStatusFuncionario({ cpf, status: novoStatus });
+
+        if (resultado.sucesso) {
+          if (novoStatus === 'inativo') {
+            this.classList.replace('status-ativo', 'status-inativo');
+            this.textContent = 'Inativo';
+          } else {
+            this.classList.replace('status-inativo', 'status-ativo');
+            this.textContent = 'Ativo';
+          }
+          // Recarrega para atualizar os contadores também
+          carregarFuncionarios();
+        } else {
+          alert('Erro ao atualizar status: ' + resultado.erro);
+        }
+      });
+
+      tbody.appendChild(tr);
+    });
+
+    // Atualiza os cards
+    document.getElementById('totalFunc').textContent = totalFunc;
+    document.getElementById('funcAtivos').textContent = funcAtivos;
+    document.getElementById('totalCaixa').textContent = totalCaixa;
+    document.getElementById('totalBalconista').textContent = totalBalconista;
+  }
+ 
+    // Modal
+    var modal = document.getElementById("myModal");
+    document.getElementById("openModalBtn").onclick = () => modal.style.display = "block";
+    document.getElementById("closeModalBtn").onclick = () => modal.style.display = "none";
+    document.getElementById("btnCancelar").onclick = () => modal.style.display = "none";
+    window.onclick = (e) => { if (e.target === modal) modal.style.display = "none"; };
+ 
+    // CADASTRAR FUNCIONÁRIO
+    document.getElementById('btnCadastrar').addEventListener('click', async () => {
+ 
+      const nome     = document.getElementById('nome').value.trim();
+      const cpf      = document.getElementById('cpf').value.trim();
+      const email    = document.getElementById('email').value.trim();
+      const telefone = document.getElementById('telefone').value.trim();
+      const funcao   = document.getElementById('modalFuncao').value;
+      const status   = document.getElementById('modalStatus').value;
+ 
+      // Validação básica
+      if (!nome || !cpf || !email || !telefone) {
+        alert('Por favor, preencha todos os campos.');
+        return;
+      }
+ 
+      const cpfLimpo = cpf.replace(/\D/g, '');
+      if (cpfLimpo.length !== 11) {
+        alert('CPF inválido. Digite 11 dígitos.');
+        return;
+      }
+ 
+      const resultado = await window.electronAPI.cadastrarFuncionario({
+        nome, cpf, email, telefone, funcao, status
+      });
+ 
+      if (resultado.sucesso) {
+        alert('Funcionário cadastrado com sucesso!');
+        modal.style.display = 'none';
+ 
+        // Recarrega a tabela do banco
+        carregarFuncionarios();
+ 
+        // Limpa os campos
+        document.getElementById('nome').value = '';
+        document.getElementById('cpf').value = '';
+        document.getElementById('email').value = '';
+        document.getElementById('telefone').value = '';
+ 
+      } else {
+        alert('Erro: ' + resultado.erro);
+      }
+    });
+
+    function formatarCPF(campo) {
+      // Remove tudo que não é número
+      let v = campo.value.replace(/\D/g, '');
+      
+      // Coloca ponto entre o terceiro e o quarto dígitos
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      
+      // Coloca ponto entre o sexto e o sétimo dígitos
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      
+      // Coloca traço entre o nono e o décimo dígitos
+      v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      
+      campo.value = v;
+    }
+
+    function filtrarTabela() {
+    const textoBusca = document.getElementById('busca').value.toLowerCase();
+    const funcaoFiltro = document.getElementById('filtrFuncao').value;
+    const statusFiltro = document.getElementById('filtrStatus').value;
+
+    const linhas = document.querySelectorAll('#tabelaFuncionarios tr');
+
+    linhas.forEach(tr => {
+      const nome     = tr.cells[0].textContent.toLowerCase();
+      const cpf      = tr.cells[1].textContent.toLowerCase();
+      const email    = tr.cells[2].textContent.toLowerCase();
+      const funcao   = tr.cells[4].textContent.toLowerCase().trim();
+      const status   = tr.cells[5].textContent.toLowerCase().trim();
+
+      const buscaOk  = nome.includes(textoBusca) || cpf.includes(textoBusca) || email.includes(textoBusca);
+      const funcaoOk = funcaoFiltro === 'todas' || funcao === funcaoFiltro;
+      const statusOk = statusFiltro === 'todos'  || status === statusFiltro;
+
+      tr.style.display = (buscaOk && funcaoOk && statusOk) ? '' : 'none';
+    });
+  }
+  </script>
+ 
+</body>
+</html>

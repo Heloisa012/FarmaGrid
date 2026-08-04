@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FarmaGrid+</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background-color: #FFFBED;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .navbar {
+      background-color: #ffffff;
+      border-bottom: solid 1px;
+    }
+
+    .logo {
+      display: flex;
+      font-size: 30px;
+      font-weight: 700;
+      color: #355e3b;
+      margin-top: 10px;
+      margin-bottom: 2px;
+      letter-spacing: 0.6px;
+      text-align: center;
+    }
+
+    .logo span { color: #4BA94B; }
+
+    .plus-icon {
+      width: 30px;
+      height: 30px;
+      position: relative;
+      top: -10px;
+    }
+
+    .titulo {
+      font-size: 15px;
+      font-weight: 700;
+      color: #2e462e;
+      text-align: center;
+      margin-right: 35px;
+    }
+
+    .prontuarioIcon {
+      width: 60px;
+      height: 60px;
+      margin-right: 12px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      text-decoration: none;
+    }
+
+    .menu-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .menu-title {
+      font-size: 25px;
+      font-weight: 600;
+      color: #234e2d;
+    }
+
+    .menu-date {
+      font-size: 14px;
+      font-weight: 500;
+      color: #2e462e;
+      margin-top: 3px;
+    }
+
+    #sinoNot {
+      width: 40px;
+      height: 40px;
+    }
+
+    .colunaEsquerda {
+      width: 240px;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background-color: #ffffff;
+      border-right: solid 1px;
+      padding-top: 15px;
+    }
+
+    .principal {
+      margin-right: 6px;
+      margin-left: 10px;
+      margin-bottom: 20px;
+    }
+
+    .icone {
+      width: 30px;
+      height: 30px;
+    }
+
+    button {
+      color: #234e2d;
+      border: none;
+      background-color: transparent;
+      margin-bottom: 20px;
+      text-align: left;
+      margin-left: 15px;
+      font-weight: 550;
+    }
+
+    .info {
+      display: flex;
+      flex-direction: column;
+      background-color: #ffffff;
+      height: 25vh;
+      margin-top: auto;
+      border-top: solid 1px;
+      padding-top: 10px;
+      padding-left: 5px;
+    }
+
+    .perfil {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 5px;
+    }
+
+    .foto {
+      background-color: #dff4df;
+      color: #234e2d;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .dados {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .nome {
+      color: #234e2d;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .acoes {
+      display: flex;
+      flex-direction: column;
+      margin-top: 10px;
+    }
+
+    .botao {
+      gap: 6px;
+      background: none;
+      border: none;
+      color: #234e2d;
+      font-weight: 500;
+      font-size: 14px;
+      border-radius: 5px;
+      margin-left: 0;
+      padding: 2px;
+      width: 60px;
+    }
+
+    .botao:hover {
+      background-color: #234e2d;
+      color: #dff4df;
+      font-weight: 500;
+    }
+
+    .btn-img:hover {
+      background-color: #234e2d;
+      color: #dff4df;
+      font-weight: 550;
+      border: none;
+      border-radius: 5px;
+      width: 170px;
+      text-align: center;
+    }
+
+    .btn-img:hover #iconeD { content: url("dashboard.png"); }
+    .btn-img:hover #iconeE { content: url("estoque.png"); }
+    .btn-img:hover #iconeA { content: url("alerta.png"); }
+    .btn-img:hover #iconeDe { content: url("desconto.png"); }
+    .btn-img:hover #iconeR { content: url("relatorioBranco.png"); }
+    .btn-img:hover #iconeSe { content: url("sensor.png"); }
+
+    #bd {
+      background-color: #234e2d;
+      color: #dff4df;
+      font-weight: 550;
+      border: none;
+      border-radius: 5px;
+      width: 170px;
+      text-align: center;
+    }
+
+    .containerPrincipal {
+      display: flex;
+      height: 100vh;
+    }
+
+    .corpo {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+    }
+
+    .icone2 {
+      width: 18px;
+      height: 18px;
+    }
+
+    .botao:hover .icone2 {
+      content: url("sairHover.png");
+    }
+
+    .dashboard {
+      background-color: #F8F9F4;
+      height: 100%;
+      overflow-y: auto;
+      border-radius: 10px;
+    }
+
+    .card {
+      border-radius: 12px !important;
+    }
+
+    .card-header {
+      background-color: #fff !important;
+      font-size: 15px;
+    }
+
+    .alert {
+      border-radius: 10px;
+    }
+
+    .progress {
+      border-radius: 10px;
+      background-color: #ffe5e5;
+    }
+
+    .iconA{
+        width: 20px;
+        height: 20px;
+        margin-right: 5px;
+    }
+
+    .validade{
+      width: 25px;
+    }
+
+    .descontos{
+      width: 25px;
+    }
+
+    .sensor{
+        width: 25px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="containerPrincipal">
+    <div class="colunaEsquerda">
+
+      <div class="principal">
+        <div class="logo">
+          FARMA<span>GRID</span>
+          <img src="LogoFarmaGrid.png" alt="Símbolo de mais" class="plus-icon" />
+        </div>
+        <div class="titulo">Sistema para Farmácia</div>
+      </div>
+
+
+      <button type="button" class="btn-img" id="bd">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"/>
+                        <rect x="14" y="3" width="7" height="7"/>
+                        <rect x="14" y="14" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/>
+                    </svg>
+        Visão Geral
+      </button>
+
+      <button type="button" class="btn-img" id="be">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                    </svg>
+        Estoque
+      </button>
+
+      <button type="button" class="btn-img" id="ba">
+        <img src="alertaVerde.png" alt="Ícone" class="icone, validade" id="iconeA">
+        Validade
+      </button>
+
+      <!--
+      <button type="button" class="btn-img" id="se">
+        <img src="sensorVerde.png" alt="Ícone" class="icone, sensor" id="iconeSe">
+        Sensor
+      </button>
+      -->
+
+      <button type="button" class="btn-img" id="bde">
+        <img src="descontoVerde.png" alt="Ícone" class="icone, descontos" id="iconeDe">
+        Descontos
+      </button>
+
+      <button type="button" class="btn-img" id="br">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10"/>
+                        <line x1="12" y1="20" x2="12" y2="4"/>
+                        <line x1="6" y1="20" x2="6" y2="14"/>
+                    </svg>
+        Relatórios
+      </button>
+
+      <button type="button" class="btn-img" id="fn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10"/>
+                        <line x1="12" y1="20" x2="12" y2="4"/>
+                        <line x1="6" y1="20" x2="6" y2="14"/>
+                    </svg>
+        Funcionários
+      </button>
+
+      <div class="info">
+        <div class="perfil">
+          <div class="foto">ADM</div>
+          <div class="dados">
+            <span class="nome">Administrador FarmaGrid</span>
+          </div>
+        </div>
+
+        <div class="acoes">
+          <button class="botao" id="Sair">
+            <img src="sair.png" alt="sair" class="icone2">
+            Sair
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="corpo dashboard p-4">
+      <h4 class="fw-bold text-success mb-1">Dashboard</h4>
+      <p class="text-secondary mb-4">Visão geral do sistema FarmaGrid</p>
+
+      <!-- Cards superiores -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-4">
+          <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="fs-4 fw-semibold text-dark" id="totalEstoque"></div>
+                  <div class="text-muted small">Produtos em Estoque</div>
+                </div>
+              </div>
+              <div class="mt-2 text-success">
+                <i class="bi bi-box-seam fs-3"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="fs-4 fw-semibold text-dark" id="totalAlertas"></div>
+                  <div class="text-muted small">Alertas de Validade</div>
+                </div>
+                <span class="badge bg-warning-subtle text-warning border border-warning small">Próximos 30 dias</span>
+              </div>
+              <div class="mt-2 text-warning">
+                <i class="bi bi-exclamation-triangle fs-3"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-start">
+                <div>
+                  <div class="fs-4 fw-semibold text-dark" id="vendasMes"></div>
+                  <div class="text-muted small">Vendas do Mês</div>
+                </div>
+              </div>
+              <div class="mt-2 text-success">
+                <i class="bi bi-graph-up-arrow fs-3"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Linhas inferiores -->
+      <div class="row g-3">
+        <!-- Produtos próximos ao vencimento -->
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 fw-semibold text-warning d-flex align-items-center">
+              <img src="alertaAmarelo.png" class="iconA">Produtos Próximos ao Vencimento
+            </div>
+            <div class="card-body" id="proximosVencimentoBody">
+              <div class="alert alert-warning bg-opacity-25 border-0 mb-3">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <strong>Dipirona 500mg</strong><br>
+                    <small class="text-muted">50 unidades</small>
+                  </div>
+                  <div class="text-end">
+                    <strong class="text-danger">15 dias</strong><br>
+                    <small class="text-muted">para vencer</small>
+                  </div>
+                </div>
+              </div>
+              <div class="alert alert-warning bg-opacity-25 border-0 mb-3">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <strong>Amoxicilina 500mg</strong><br>
+                    <small class="text-muted">25 unidades</small>
+                  </div>
+                  <div class="text-end">
+                    <strong class="text-danger">8 dias</strong><br>
+                    <small class="text-muted">para vencer</small>
+                  </div>
+                </div>
+              </div>
+              <div class="alert alert-warning bg-opacity-25 border-0">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <strong>Paracetamol 750mg</strong><br>
+                    <small class="text-muted">80 unidades</small>
+                  </div>
+                  <div class="text-end">
+                    <strong class="text-danger">22 dias</strong><br>
+                    <small class="text-muted">para vencer</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estoque baixo -->
+        <div class="col-md-6">
+          <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white border-0 fw-semibold text-danger d-flex align-items-center">
+              <img src="estoqueVermelho.png" class="iconA"> Estoque Baixo
+            </div>
+            <div class="card-body" id="estoqueBaixoBody">
+              <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center">
+                  <strong>Losartana 50mg</strong>
+                  <span class="badge bg-danger">Crítico</span>
+                </div>
+                <div class="small text-muted mb-1">Atual: 15 — Mínimo: 30</div>
+                <div class="progress" style="height: 8px;">
+                  <div class="progress-bar bg-danger" style="width: 50%;"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <strong>Amoxicilina 500mg</strong>
+                  <span class="badge bg-danger">Crítico</span>
+                </div>
+                <div class="small text-muted mb-1">Atual: 25 — Mínimo: 40</div>
+                <div class="progress" style="height: 8px;">
+                  <div class="progress-bar bg-danger" style="width: 60%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+  <script>
+    window.addEventListener('DOMContentLoaded', async () => {
+      await carregarDashboard();
+      document.getElementById('bd').addEventListener('click', () => window.electronAPI.abrirJanelaD());
+      document.getElementById('be').addEventListener('click', () => window.electronAPI.abrirJanelaE());
+      document.getElementById('ba').addEventListener('click', () => window.electronAPI.abrirJanelaV());
+      //document.getElementById('se').addEventListener('click', () => window.electronAPI.abrirJanelaSE());
+      document.getElementById('bde').addEventListener('click', () => window.electronAPI.abrirJanelaDE());
+      document.getElementById('br').addEventListener('click', () => window.electronAPI.abrirJanelaR());
+      document.getElementById('fn').addEventListener('click', () => window.electronAPI.abrirJanelaFunc());
+      document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
+      
+    });
+
+    function mostrarDataAtual() {
+      const hoje = new Date();
+      const dia = hoje.getDate();
+      const diaSemanaNum = hoje.getDay();
+      const mes = hoje.getMonth();
+      const ano = hoje.getFullYear();
+
+      const semana = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
+      const mesesAno = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+      document.getElementById("dataAtual").textContent =
+        `${semana[diaSemanaNum]}, ${dia} de ${mesesAno[mes]} de ${ano}`;
+    }
+
+    async function carregarDashboard() {
+      const dados = await window.electronAPI.buscarDashboard();
+
+      document.getElementById('totalEstoque').textContent = dados.totalEstoque.toLocaleString('pt-BR');
+      document.getElementById('totalAlertas').textContent = dados.totalAlertasValidade;
+      document.getElementById('vendasMes').textContent = formatarMoeda(dados.vendasDoMes);
+
+      renderizarProximosVencimento(dados.proximosVencimento);
+      renderizarEstoqueBaixo(dados.estoqueBaixo);
+    }
+
+    function formatarMoeda(valor) {
+      if (valor >= 1000) return `R$ ${(valor / 1000).toFixed(1)}K`;
+      return `R$ ${valor.toFixed(2).replace('.', ',')}`;
+    }
+
+    function renderizarProximosVencimento(lotes) {
+      const container = document.getElementById('proximosVencimentoBody');
+
+      if (lotes.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center mb-0">Nenhum produto próximo do vencimento</p>';
+        return;
+      }
+
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+
+      container.innerHTML = lotes.map(l => {
+        const validade = new Date(l.data_validade);
+        validade.setHours(0, 0, 0, 0);
+        const dias = Math.round((validade - hoje) / (1000 * 60 * 60 * 24));
+
+        return `
+          <div class="alert alert-warning bg-opacity-25 border-0 mb-3">
+            <div class="d-flex justify-content-between">
+              <div>
+                <strong>${l.nome_produto}</strong><br>
+                <small class="text-muted">${l.quantidade} unidades</small>
+              </div>
+              <div class="text-end">
+                <strong class="text-danger">${dias} dias</strong><br>
+                <small class="text-muted">para vencer</small>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderizarEstoqueBaixo(produtos) {
+      const container = document.getElementById('estoqueBaixoBody');
+
+      if (produtos.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center mb-0">Nenhum produto com estoque baixo</p>';
+        return;
+      }
+
+      container.innerHTML = produtos.map(p => {
+        const pct = p.estoque_min > 0 ? Math.min(100, Math.round((p.quantidade / p.estoque_min) * 100)) : 100;
+
+        return `
+          <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+              <strong>${p.nome}</strong>
+              <span class="badge bg-danger">Crítico</span>
+            </div>
+            <div class="small text-muted mb-1">Atual: ${p.quantidade} — Mínimo: ${p.estoque_min}</div>
+            <div class="progress" style="height: 8px;">
+              <div class="progress-bar bg-danger" style="width: ${pct}%;"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+  </script>
+
+</body>
+</html>

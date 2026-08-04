@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FarmaGrid+</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background-color: #F8F9F4;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .navbar {
+      background-color: #ffffff;
+      border-bottom: solid 1px;
+    }
+
+    .logo {
+      display: flex;
+      font-size: 30px;
+      font-weight: 700;
+      color: #355e3b;
+      margin-top: 10px;
+      margin-bottom: 2px;
+      letter-spacing: 0.6px;
+      text-align: center;
+    }
+
+    .logo span { color: #4BA94B; }
+
+    .plus-icon {
+      width: 30px;
+      height: 30px;
+      position: relative;
+      top: -10px;
+    }
+
+    .titulo {
+      font-size: 15px;
+      font-weight: 700;
+      color: #2e462e;
+      text-align: center;
+      margin-right: 35px;
+    }
+
+    .prontuarioIcon {
+      width: 60px;
+      height: 60px;
+      margin-right: 12px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      text-decoration: none;
+    }
+
+    .menu-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .menu-title {
+      font-size: 25px;
+      font-weight: 600;
+      color: #234e2d;
+    }
+
+    .menu-date {
+      font-size: 14px;
+      font-weight: 500;
+      color: #2e462e;
+      margin-top: 3px;
+    }
+
+    #sinoNot {
+      width: 40px;
+      height: 40px;
+    }
+
+    .colunaEsquerda {
+      width: 240px;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background-color: #ffffff;
+      border-right: solid 1px;
+      padding-top: 15px;
+    }
+
+    .principal {
+      margin-right: 6px;
+      margin-left: 10px;
+      margin-bottom: 20px;
+    }
+
+    .icone {
+      width: 30px;
+      height: 30px;
+    }
+
+    button {
+      color: #234e2d;
+      border: none;
+      background-color: transparent;
+      margin-bottom: 20px;
+      text-align: left;
+      margin-left: 15px;
+      font-weight: 550;
+    }
+
+    .info {
+      display: flex;
+      flex-direction: column;
+      background-color: #ffffff;
+      height: 25vh;
+      margin-top: auto;
+      border-top: solid 1px;
+      padding-top: 10px;
+      padding-left: 5px;
+    }
+
+    .perfil {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 5px;
+    }
+
+    .foto {
+      background-color: #dff4df;
+      color: #234e2d;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .dados {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
+
+    .nome {
+      color: #234e2d;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .acoes {
+      display: flex;
+      flex-direction: column;
+      margin-top: 10px;
+    }
+
+    .botao {
+      gap: 6px;
+      background: none;
+      border: none;
+      color: #234e2d;
+      font-weight: 500;
+      font-size: 14px;
+      border-radius: 5px;
+      margin-left: 0;
+      padding: 2px;
+      width: 60px;
+    }
+
+    .botao:hover {
+      background-color: #234e2d;
+      color: #dff4df;
+      font-weight: 500;
+    }
+
+    .btn-img:hover {
+      background-color: #234e2d;
+      color: #dff4df;
+      font-weight: 550;
+      border: none;
+      border-radius: 5px;
+      width: 170px;
+      text-align: center;
+    }
+
+    .btn-img:hover #iconeD { content: url("dashboard.png"); }
+    .btn-img:hover #iconeE { content: url("estoque.png"); }
+    .btn-img:hover #iconeA { content: url("alerta.png"); }
+    .btn-img:hover #iconeDe { content: url("desconto.png"); }
+    .btn-img:hover #iconeR { content: url("relatorioBranco.png"); }
+    .btn-img:hover #iconeSe { content: url("sensor.png"); }
+
+    #br {
+      background-color: #234e2d;
+      color: #dff4df;
+      font-weight: 550;
+      border: none;
+      border-radius: 5px;
+      width: 170px;
+      text-align: center;
+    }
+
+    .containerPrincipal {
+      display: flex;
+      height: 100vh;
+    }
+
+    .corpo {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+    }
+
+    .icone2 {
+      width: 18px;
+      height: 18px;
+    }
+
+    .botao:hover .icone2 {
+      content: url("sairHover.png");
+    }
+
+    /* --- Área principal --- */
+    .corpo-alertas {
+    height: 100%;
+    background-color: #F8F9F4;
+    overflow: hidden;
+    }
+
+    /* --- Cards de resumo --- */
+    .card-resumo {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    border: 1px solid #e0e0e0;
+    }
+
+    .card-resumo h2 {
+    margin: 0;
+    font-size: 24px;
+    color: #2e462e;
+    font-weight: 700;
+    }
+
+    .card-resumo p {
+    margin: 0;
+    font-size: 14px;
+    color: #6b6b6b;
+    }
+
+    .icone-alerta {
+    font-size: 22px;
+    }
+
+    .critico { border-left: 5px solid #D9534F; }
+    .atencao { border-left: 5px solid #F0AD4E; }
+    .total { border-left: 5px solid #4BA94B; background-color: #E7F6E7; }
+
+    /* --- Campo de busca --- */
+    .busca {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    background-color: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    /* --- Painel esquerdo: lista de alertas --- */
+    .painel-alertas {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    height: 70vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    .painel-alertas h6 {
+    font-weight: 700;
+    color: #2e462e;
+    margin-bottom: 2px;
+    }
+
+    .subtitulo {
+    font-size: 13px;
+    color: #7a7a7a;
+    margin-bottom: 10px;
+    }
+
+    .lista-alertas {
+        overflow-y: auto;
+        flex: 1;
+        padding-right: 4px;
+        max-height: 45vh; 
+        scrollbar-width: none;
+        -ms-overflow-style: none; 
+    }
+
+    .lista-alertas::-webkit-scrollbar {
+        display: none; 
+    }
+
+    /* --- Cada alerta --- */
+    .alerta-item {
+    display: flex;
+    justify-content: space-between;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    border: 2px solid transparent;
+    transition: transform 0.1s ease, border-color 0.2s ease;
+    }
+
+    .alerta-item:hover {
+    transform: scale(1.01);
+    }
+
+    .info-produto {
+    display: flex;
+    flex-direction: column;
+    font-size: 13px;
+    color: #333;
+    }
+
+    .info-produto strong {
+    font-size: 14px;
+    color: #2e462e;
+    }
+
+    .info-extra {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    font-size: 12px;
+    }
+
+    .dias {
+    background-color: #f6f6f6;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-weight: 600;
+    color: #fff;
+    }
+
+    .local {
+    color: #777;
+    margin-top: 3px;
+    font-size: 12px;
+    }
+
+    /* --- Cores dos alertas --- */
+    .alerta-critico {
+    border: 2px solid #D9534F;
+    background-color: #FDECEA;
+    }
+
+    .alerta-atencao {
+    border: 2px solid #F0AD4E;
+    background-color: #FEF5E7;
+    }
+
+    .alerta-ok {
+    border: 2px solid #4BA94B;
+    background-color: #E7F6E7;
+    }
+
+    .alerta-critico .dias { background-color: #D9534F; }
+    .alerta-atencao .dias { background-color: #F0AD4E; }
+    .alerta-ok .dias { background-color: #4BA94B; }
+
+    /* --- Painel direito --- */
+    .painel-detalhes {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    height: 70vh;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    }
+
+    .painel-detalhes h6 {
+    font-weight: 700;
+    color: #2e462e;
+    }
+
+    .texto-detalhe {
+    font-size: 13px;
+    color: #6b6b6b;
+    margin-bottom: 30px;
+    }
+
+    .conteudo-detalhe {
+    text-align: center;
+    margin-top: 80px;
+    color: #999;
+    font-size: 15px;
+    }
+
+    .buscar input{
+        background-image: url("buscar.png");
+        background-repeat: no-repeat;
+        background-position: 10px center; 
+        background-size: 18px; 
+        padding-left: 35px; 
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        height: 35px;
+        width: 1000px;
+        outline-color: #234e2d;
+        font-size: 14px;
+    }
+
+    .buscar{
+        margin: 10px;
+        justify-content: center;
+    }
+
+    .iconA {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #ffffff;
+        border: none;
+        width: 45px;
+        height: 45px;
+    }
+
+    .iconA img {
+        width: 30px;
+        height: 30px;
+    }
+
+    .iconC {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #E7F6E7;
+        border: none;
+        width: 45px;
+        height: 45px;
+    }
+
+    .iconC img {
+        width: 30px;
+        height: 30px;
+    }
+
+
+    /* RELATÓRIOS */
+    .corpo-relatorios {
+    background-color: #F8F9F4;
+    overflow-y: auto;
+    height: 100%;
+    }
+
+    .titulo-relatorio {
+    color: #234e2d;
+    font-weight: 700;
+    }
+
+    .subtitulo-relatorio {
+    color: #6b6b6b;
+    font-size: 15px;
+    margin-bottom: 8px;
+    }
+
+    .caixa-gerar, .caixa-recentes {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .titulo-caixa {
+    color: #234e2d;
+    font-weight: 700;
+    }
+
+    .card-relatorio {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 16px;
+    transition: all 0.2s ease;
+    }
+    .card-relatorio:hover {
+    border-color: #4BA94B;
+    box-shadow: 0 2px 8px rgba(75,169,75,0.15);
+    }
+    .card-relatorio h6 {
+    margin: 0;
+    color: #234e2d;
+    font-weight: 700;
+    }
+    .card-relatorio p {
+    margin: 0;
+    color: #6b6b6b;
+    font-size: 13px;
+    }
+    .icon-relatorio {
+    background: #f7faf7;
+    border-radius: 10px;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    }
+    .icon-relatorio img { width: 28px; }
+
+    .select-relatorio {
+    background-color: #f8f8f8;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+    padding: 8px 12px;
+    color: #444;
+    }
+
+    .btn-gerar {
+    background-color: #4BA94B;
+    border: none;
+    color: #fff;
+    font-weight: 700;
+    border-radius: 8px;
+    padding: 10px;
+    transition: 0.2s;
+    text-align: center;
+    font-size: 13px;
+    margin-top: 50px;
+    }
+    .btn-gerar:hover {
+    background-color: #3c8c3c;
+    }
+
+    /* Relatórios recentes */
+    .relatorio-item {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    }
+    .relatorio-item h6 {
+    margin: 0;
+    color: #234e2d;
+    font-weight: 700;
+    }
+    .relatorio-item p {
+    margin: 0;
+    color: #6b6b6b;
+    font-size: 13px;
+    }
+    .btn-baixar {
+    border: 1px solid #ccc;
+    background: #fff;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-weight: 600;
+    color: #234e2d;
+    transition: all 0.2s;
+    }
+    .btn-baixar:hover {
+    background-color: #4BA94B;
+    color: #fff;
+    border-color: #4BA94B;
+    }
+
+    .btn-baixar:hover .iconB {
+        content: url("baixarBranco.png");
+    }
+
+    /* Cards de resumo */
+    .card-resumo {
+    background: #fff;
+    border-radius: 10px;
+    border: 1px solid #e0e0e0;
+    padding: 16px 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .card-resumo h6 {
+    color: #234e2d;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 3px;
+    }
+    .card-resumo h3 {
+    color: #234e2d;
+    margin: 0;
+    font-size: 20px;
+    font-weight: 700;
+    }
+    .card-resumo p {
+    font-size: 13px;
+    margin: 0;
+    color: #6b6b6b;
+    }
+    .card-resumo .texto-vermelho {
+    color: #D9534F;
+    font-weight: 600;
+    }
+
+
+    .iconB{
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Rolagem */
+    .corpo-relatorios,
+    .lista-alertas,
+    .painel-alertas {
+    scrollbar-width: none !important; 
+    -ms-overflow-style: none !important; 
+    }
+
+    .corpo-relatorios::-webkit-scrollbar,
+    .lista-alertas::-webkit-scrollbar,
+    .painel-alertas::-webkit-scrollbar {
+    display: none !important; 
+    }
+
+    .corpo-relatorios {
+    overflow-y: scroll;
+    height: 100%;
+    }
+
+    .cardResumo{
+        margin-bottom: 20px;
+    }
+
+    .validade{
+      width: 25px;
+    }
+
+     .descontos{
+      width: 25px;
+    }
+
+    .sensor{
+        width: 25px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="containerPrincipal">
+    <div class="colunaEsquerda">
+
+      <div class="principal">
+        <div class="logo">
+          FARMA<span>GRID</span>
+          <img src="LogoFarmaGrid.png" alt="Símbolo de mais" class="plus-icon" />
+        </div>
+        <div class="titulo">Sistema para Farmácia</div>
+      </div>
+
+      <button type="button" class="btn-img" id="bd">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7"/>
+                        <rect x="14" y="3" width="7" height="7"/>
+                        <rect x="14" y="14" width="7" height="7"/>
+                        <rect x="3" y="14" width="7" height="7"/>
+                    </svg>
+        Visão Geral
+      </button>
+
+      <button type="button" class="btn-img" id="be">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                    </svg>
+        Estoque
+      </button>
+
+      <button type="button" class="btn-img" id="ba">
+        <img src="alertaVerde.png" alt="Ícone" class="icone, validade" id="iconeA">
+        Validade
+      </button>
+
+      <!--
+      <button type="button" class="btn-img" id="se">
+        <img src="sensorVerde.png" alt="Ícone" class="icone, sensor" id="iconeSe">
+        Sensor
+      </button>
+      -->
+
+      <button type="button" class="btn-img" id="bde">
+        <img src="descontoVerde.png" alt="Ícone" class="icone, descontos" id="iconeDe">
+        Descontos
+      </button>
+
+      <button type="button" class="btn-img" id="br">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10"/>
+                        <line x1="12" y1="20" x2="12" y2="4"/>
+                        <line x1="6" y1="20" x2="6" y2="14"/>
+                    </svg>
+        Relatórios
+      </button>
+
+      <button type="button" class="btn-img" id="fn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="20" x2="18" y2="10"/>
+                        <line x1="12" y1="20" x2="12" y2="4"/>
+                        <line x1="6" y1="20" x2="6" y2="14"/>
+                    </svg>
+        Funcionários
+      </button>
+
+      <div class="info">
+        <div class="perfil">
+          <div class="foto">ADM</div>
+          <div class="dados">
+            <span class="nome">Administrador FarmaGrid</span>
+          </div>
+        </div>
+
+        <div class="acoes">
+          <button class="botao" id="Sair">
+            <img src="sair.png" alt="sair" class="icone2">
+            Sair
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="corpo dashboard p-4">
+      
+        <div class="corpo-relatorios px-4 py-3">
+  <h3 class="titulo-relatorio">Relatórios</h3>
+  <p class="subtitulo-relatorio">Gere e visualize relatórios do sistema</p>
+
+  <!-- GERAR NOVO RELATÓRIO -->
+  <div class="caixa-gerar mt-3 p-4">
+    <h5 class="titulo-caixa mb-3">Gerar Novo Relatório</h5>
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="card-relatorio" data-tipo="estoque">
+          <div class="icon-relatorio estoque">
+            <img src="estoqueVerde.png" alt="">
+          </div>
+          <div>
+            <h6>Relatório de Estoque</h6>
+            <p>Visão completa do inventário atual</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card-relatorio" data-tipo="validade">
+          <div class="icon-relatorio validade">
+            <img src="alertaVerde.png" alt="">
+          </div>
+          <div>
+            <h6>Relatório de Validade</h6>
+            <p>Produtos próximos ao vencimento</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card-relatorio" data-tipo="vendas">
+          <div class="icon-relatorio vendas">
+            <img src="seta.png" alt="">
+          </div>
+          <div>
+            <h6>Relatório de Vendas</h6>
+            <p>Performance de vendas e receita</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row align-items-center mt-4 g-3">
+      <div class="col-md-5">
+        <label class="form-label pequeno">Período</label>
+        <select class="form-select select-relatorio" id="selectPeriodo">
+          <option selected>Selecione o período</option>
+          <option>Última Semana</option>
+          <option>Último Mês</option>
+          <option>Últimos 3 Meses</option>
+        </select>
+      </div>
+      <div class="col-md-5">
+        <label class="form-label pequeno">Formato</label>
+        <select class="form-select select-relatorio" id="selectFormato">
+          <option selected>Selecione o formato</option>
+          <option>PDF</option>
+          <option>XLSX</option>
+          <option>CSV</option>
+        </select>
+      </div>
+      <div class="col-md-2 d-flex align-items-end">
+        <button class="btn-gerar" id="btnGerarRelatorio">Gerar Relatório</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RELATÓRIOS RECENTES -->
+  <div class="caixa-recentes mt-4 p-4">
+    <h5 class="titulo-caixa mb-3">Relatórios Recentes</h5>
+
+    <div id="listaRelatoriosRecentes">
+        <div class="relatorio-item">
+          <div>
+            <h6>Estoque Mensal - Novembro 2025</h6>
+            <p>Inventário • 12/11/2025 • 2.4 MB</p>
+          </div>
+          <button class="btn-baixar"><img src="baixar.png" class="iconB"> Baixar</button>
+        </div>
+
+        <div class="relatorio-item">
+          <div>
+            <h6>Validade - Alerta Semanal</h6>
+            <p>Validade • 10/11/2025 • 1.2 MB</p>
+          </div>
+          <button class="btn-baixar"><img src="baixar.png" class="iconB"> Baixar</button>
+        </div>
+
+        <div class="relatorio-item">
+          <div>
+            <h6>Vendas Outubro 2025</h6>
+            <p>Vendas • 01/11/2025 • 3.1 MB</p>
+          </div>
+          <button class="btn-baixar"><img src="baixar.png" class="iconB"> Baixar</button>
+        </div>
+    </div>
+  </div>
+
+  <!-- CARDS DE RESUMO -->
+  <div class="row mt-4 g-3 cardResumo">
+    <div class="col-md-4">
+      <div class="card-resumo total">
+        <div class="iconC">
+          <img src="estoqueVerde.png" alt="">
+        </div>
+        <div>
+          <h6>Produtos em Estoque</h6>
+          <h3 id="resumoEstoque"></h3>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card-resumo vendas">
+        <div class="iconC">
+          <img src="seta.png" alt="">
+        </div>
+        <div>
+          <h6>Vendas do Mês</h6>
+          <h3 id="resumoVendas"></h3>
+          <p id="resumoVendasDelta"></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="card-resumo alerta">
+        <div class="iconC">
+          <img src="alertaVerde.png" alt="">
+        </div>
+        <div>
+          <h6>Alertas Ativos</h6>
+          <h3 id="resumoAlertas"></h3>
+          <p class="texto-vermelho">Requer atenção</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    </div>
+
+  <script>
+    let tipoSelecionado = 'estoque';
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      document.getElementById('bd').addEventListener('click', () => window.electronAPI.abrirJanelaD());
+      document.getElementById('be').addEventListener('click', () => window.electronAPI.abrirJanelaE());
+      document.getElementById('ba').addEventListener('click', () => window.electronAPI.abrirJanelaV());
+      document.getElementById('bde').addEventListener('click', () => window.electronAPI.abrirJanelaDE());
+      document.getElementById('br').addEventListener('click', () => window.electronAPI.abrirJanelaR());
+      document.getElementById('fn').addEventListener('click', () => window.electronAPI.abrirJanelaFunc());
+      document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
+
+      configurarSelecaoTipo();
+      await carregarResumo();
+      await carregarRelatoriosRecentes();
+
+      document.getElementById('btnGerarRelatorio').addEventListener('click', gerarRelatorio);
+    });
+
+    function configurarSelecaoTipo() {
+      const cards = document.querySelectorAll('.card-relatorio');
+      cards.forEach(card => {
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', () => {
+          cards.forEach(c => { c.style.borderColor = '#e0e0e0'; c.style.boxShadow = 'none'; });
+          card.style.borderColor = '#4BA94B';
+          card.style.boxShadow = '0 2px 8px rgba(75,169,75,0.25)';
+          tipoSelecionado = card.dataset.tipo;
+        });
+      });
+      cards[0].click();
+    }
+
+    async function carregarResumo() {
+      const dados = await window.electronAPI.buscarResumoRelatorios();
+
+      document.getElementById('resumoEstoque').textContent = `${dados.totalEstoque.toLocaleString('pt-BR')} itens`;
+      document.getElementById('resumoVendas').textContent = `R$ ${dados.vendasMesAtual.toFixed(2).replace('.', ',')}`;
+      document.getElementById('resumoAlertas').textContent = `${dados.totalAlertas} alertas`;
+
+      const deltaVendas = document.getElementById('resumoVendasDelta');
+      if (dados.variacaoVendas === null) {
+        deltaVendas.textContent = 'Sem dados do mês anterior';
+      } else {
+        const sinal = dados.variacaoVendas >= 0 ? '+' : '';
+        deltaVendas.textContent = `${sinal}${dados.variacaoVendas}% vs mês anterior`;
+      }
+    }
+
+    async function carregarRelatoriosRecentes() {
+      const relatorios = await window.electronAPI.buscarRelatoriosFarmacia();
+      const lista = document.getElementById('listaRelatoriosRecentes');
+
+      if (relatorios.length === 0) {
+        lista.innerHTML = '<p class="text-muted text-center mb-0">Nenhum relatório gerado ainda</p>';
+        return;
+      }
+
+      const nomes = { estoque: 'Estoque', validade: 'Validade', vendas: 'Vendas' };
+
+      lista.innerHTML = relatorios.map(r => {
+        const data = new Date(r.gerado_em).toLocaleDateString('pt-BR');
+        return `
+          <div class="relatorio-item">
+            <div>
+              <h6>${nomes[r.tipo] || r.tipo} - ${r.periodo || 'Completo'}</h6>
+              <p>${r.formato} • ${data} • ${r.tamanho_kb} KB</p>
+            </div>
+            <button class="btn-baixar" data-id="${r.id}"><img src="baixar.png" class="iconB"> Baixar</button>
+          </div>
+        `;
+      }).join('');
+
+      lista.querySelectorAll('.btn-baixar').forEach(btn => {
+        btn.addEventListener('click', () => window.electronAPI.baixarRelatorioFarmacia(btn.dataset.id));
+      });
+    }
+
+    async function gerarRelatorio() {
+      const periodo = document.getElementById('selectPeriodo').value;
+      const formato = document.getElementById('selectFormato').value;
+
+      if (periodo === 'Selecione o período' || formato === 'Selecione o formato') {
+        alert('Selecione o período e o formato antes de gerar.');
+        return;
+      }
+
+      const btn = document.getElementById('btnGerarRelatorio');
+      btn.disabled = true;
+      btn.textContent = 'Gerando...';
+
+      const resultado = await window.electronAPI.gerarRelatorioFarmacia({ tipo: tipoSelecionado, periodo, formato });
+
+      btn.disabled = false;
+      btn.textContent = 'Gerar Relatório';
+
+      if (resultado.sucesso) {
+        await carregarRelatoriosRecentes();
+      } else {
+        alert('Erro ao gerar relatório: ' + resultado.erro);
+      }
+    }
+  </script>
+
+</body>
+</html>
