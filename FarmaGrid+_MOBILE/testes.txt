@@ -1,0 +1,2 @@
+paciente@teste.com / 123456 → Paciente
+medico@teste.com / 123456 → Médico/Clínica
