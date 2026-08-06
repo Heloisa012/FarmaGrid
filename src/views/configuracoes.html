@@ -554,7 +554,23 @@
     <div id="notificacao">✓ Alterações salvas com sucesso!</div>
 
     <script>
+        let dadosMedico;
+
         window.addEventListener('DOMContentLoaded', async () => {
+            const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
+            dadosMedico = await window.electronAPI.buscarDadosMedico(
+                usuarioLogado.id_medico
+            );
+
+            if (dadosMedico.foto_perfil) {
+                localStorage.setItem('fotoPerfilBase64', dadosMedico.foto_perfil);
+                const fotoBarra = document.querySelector('.foto');
+                fotoBarra.style.backgroundImage = `url(data:image/jpeg;base64,${dadosMedico.foto_perfil})`;
+                fotoBarra.style.backgroundSize = 'cover';
+                fotoBarra.style.backgroundPosition = 'center';
+                fotoBarra.textContent = '';
+            }
+
             const botBp  = document.getElementById('bp');
             const botBt  = document.getElementById('bt');
             const botBi  = document.getElementById('bi');
@@ -569,7 +585,14 @@
             document.getElementById('conf').addEventListener('click', () => window.electronAPI.abrirJanelaConfig());
 
             document.querySelectorAll('#opcoes button').forEach(btn => {
-                btn.addEventListener('click', () => {
+                btn.addEventListener('click', async () => {
+
+                    const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
+
+                    dadosMedico = await window.electronAPI.buscarDadosMedico(
+                        usuarioLogado.id_medico
+                    );
+
                     document.querySelector('#opcoes button.selecionado')?.classList.remove('selecionado');
                     btn.classList.add('selecionado');
 
@@ -633,6 +656,26 @@
                                     </div>
                                 </div>
                             `;
+
+                            document.getElementById('primeiroNome').value = dadosMedico.nome || '';
+                            document.getElementById('sobrenome').value = dadosMedico.sobrenome || '';
+                            document.getElementById('email').value = dadosMedico.email || '';
+                            document.getElementById('telefone').value = dadosMedico.telefone || '';
+                            document.getElementById('endereco').value = dadosMedico.endereco || '';
+
+                            if (dadosMedico.data_nascimento) {
+                                const nascimento = new Date(dadosMedico.data_nascimento);
+                                document.getElementById('nascimento').value = nascimento.toISOString().split('T')[0];
+                            }
+
+                            if (dadosMedico.foto_perfil) {
+                                const circulo = document.getElementById('circulo-avatar');
+                                circulo.style.backgroundImage = `url(data:image/jpeg;base64,${dadosMedico.foto_perfil})`;
+                                circulo.style.backgroundSize = 'cover';
+                                circulo.style.backgroundPosition = 'center';
+                                circulo.textContent = '';
+                            }
+
                             break;
 
                         case 'Informações Profissionais':
@@ -643,7 +686,7 @@
                                         <p class="subtitulo">Atualize suas informações e preferências do sistema</p>
                                     </div>
                                     <div id="botaoEditar">
-                                        <button id="editar" onclick="editar()">Editar</button>
+                                        <button id="editar" onclick="editarProfissional()">Editar</button>
                                     </div>
                                 </div>
                                 
@@ -681,7 +724,7 @@
                                         <input type="text" name="clinicaHospital" id="clinicaHospital" class="inputs2" readonly>
 
                                         <p class="tituloInputs" style="margin-top: 10px;">Endereço da Clínica/Hospital:</p>
-                                        <input type="tel" name="subespecialidades" id="subespecialidades" class="inputs2" readonly>
+                                        <input type="tel" name="enderecoClinica" id="enderecoClinica" class="inputs2" readonly>
                                     </div>
 
                                     <div id="infoConsulta">
@@ -697,6 +740,24 @@
                                     </div>
                                 </div>
                             `;
+
+                            document.getElementById('crm').value = dadosMedico.crm || '';
+                            document.getElementById('rqe').value = dadosMedico.rqe || '';
+                            document.getElementById('especialidade').value = dadosMedico.especialidade || '';
+                            document.getElementById('subespecialidades').value = dadosMedico.subespecialidades || '';
+
+                            document.getElementById('clinicaHospital').value =
+                                dadosMedico.nome_clinica || '';
+
+                            document.getElementById('enderecoClinica').value =
+                                dadosMedico.endereco_clinica || '';
+
+                            document.getElementById('tempoConsulta').value =
+                                dadosMedico.tempo_consulta || '';
+
+                            document.getElementById('valorConsulta').value =
+                                dadosMedico.valor_consulta || '';
+
                             break;
 
                             case 'Segurança':
@@ -742,7 +803,7 @@
                                         <p class="subtitulo">Atualize suas informações e preferências do sistema</p>
                                     </div>
                                     <div id="botaoEditar">
-                                        <button id="editar" onclick="editar()">Editar</button>
+                                        <button id="editar" onclick="editarPreferencias()">Editar</button>
                                     </div>
                                 </div>
 
@@ -759,6 +820,13 @@
                                     </div>
                                 </div>                              
                             `;
+
+                            document.getElementById('hInicio').value =
+                                dadosMedico.horario_inicio || '';
+
+                            document.getElementById('hTermino').value =
+                                dadosMedico.horario_termino || '';
+
                             break;
                     }
                 });
@@ -772,19 +840,43 @@
                 }
             });
 
-            document.getElementById('conteudo').addEventListener('change', (e) => {
-                if (e.target.id === 'input-selecionar-foto') {
-                    const arquivo = e.target.files[0];
-                    if (arquivo) {
-                        const urlTemporaria = URL.createObjectURL(arquivo);
-                        const circulo = document.getElementById('circulo-avatar');
-                        circulo.style.backgroundImage = `url(${urlTemporaria})`;
-                        circulo.style.backgroundSize = 'cover';
-                        circulo.style.backgroundPosition = 'center';
-                        circulo.textContent = '';
-                    }
+            document.getElementById('conteudo').addEventListener('change', async (e) => {
+            if (e.target.id === 'input-selecionar-foto') {
+                const arquivo = e.target.files[0];
+
+                if (arquivo) {
+                    const urlTemporaria = URL.createObjectURL(arquivo);
+                    const circulo = document.getElementById('circulo-avatar');
+
+                    circulo.style.backgroundImage = `url(${urlTemporaria})`;
+                    circulo.style.backgroundSize = 'cover';
+                    circulo.style.backgroundPosition = 'center';
+                    circulo.textContent = '';
+
+                    const fotoBarra = document.querySelector('.foto');
+                    fotoBarra.style.backgroundImage = `url(${urlTemporaria})`;
+                    fotoBarra.style.backgroundSize = 'cover';
+                    fotoBarra.style.backgroundPosition = 'center';
+                    fotoBarra.textContent = '';
+
+                    const buffer = await arquivo.arrayBuffer();
+
+                    const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
+
+                    await window.electronAPI.salvarFotoPerfil({
+                        id: usuarioLogado.id_medico,
+                        foto: Array.from(new Uint8Array(buffer))
+                    });
+
+                    const novaFotoBase64 = buffer instanceof ArrayBuffer
+                        ? btoa(String.fromCharCode(...new Uint8Array(buffer)))
+                        : '';
+                    localStorage.setItem('fotoPerfilBase64', novaFotoBase64);
+
+                    mostrarNotificacao('✓ Foto atualizada com sucesso!');
                 }
-            });
+            }
+        });
 
             document.getElementById('conteudo').addEventListener('input', (e) => {
                 if (e.target.id === 'crm') {
@@ -848,7 +940,7 @@
             })
         }
 
-        function salvarEdicao(){
+        async function salvarEdicao(){
 
             const crm = document.getElementById('crm');
                 if (crm) {
@@ -868,6 +960,18 @@
             todosInputs.forEach(input => {
                 input.readOnly = true;
             })
+
+             const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
+
+            await window.electronAPI.atualizarDadosMedico({
+                id: usuarioLogado.id_medico,
+                nome: document.getElementById('primeiroNome')?.value,
+                sobrenome: document.getElementById('sobrenome')?.value,
+                email: document.getElementById('email')?.value,
+                telefone: document.getElementById('telefone')?.value,
+                data_nascimento: document.getElementById('nascimento')?.value,
+                endereco: document.getElementById('endereco')?.value
+            });
 
             mostrarNotificacao('✓ Alterações salvas com sucesso!');
         }
@@ -889,6 +993,156 @@
                 input.type = 'password';
                 olho.innerHTML = '<img src="olhoFechado.png" width="18" height="18">';
             }
+        }
+
+        function editarProfissional(){
+            const inputs = document.querySelectorAll(
+                '#crm, #rqe, #especialidade, #subespecialidades, #clinicaHospital, #enderecoClinica, #tempoConsulta, #valorConsulta'
+            );
+
+            const botoes = document.getElementById('botaoEditar');
+
+            botoes.innerHTML = `
+                <div style="display:flex; gap:1px;">
+                    <button id="cancelar" onclick="cancelarEdicaoProfissional()">Cancelar</button>
+                    <button id="salvarEdicao" onclick="salvarEdicaoProfissional()">Salvar Edição</button>
+                </div>
+            `;
+
+            inputs.forEach(input => {
+                input.readOnly = false;
+            });
+        }
+
+        function cancelarEdicaoProfissional(){
+
+            const inputs = document.querySelectorAll(
+                '#crm, #rqe, #especialidade, #subespecialidades, #clinicaHospital, #enderecoClinica, #tempoConsulta, #valorConsulta'
+            );
+
+            const botoes = document.getElementById('botaoEditar');
+
+            botoes.innerHTML = `
+                <button id="editar" onclick="editarProfissional()">Editar</button>
+            `;
+
+            inputs.forEach(input => {
+                input.readOnly = true;
+            });
+        }
+
+        async function salvarEdicaoProfissional(){
+
+            const crm = document.getElementById('crm');
+
+            if (crm) {
+                const regexValidaCrm = /^\d{4,6}-[A-Z]{2}$/;
+
+                if (crm.value !== "" && !regexValidaCrm.test(crm.value)) {
+                    mostrarNotificacao('❌ CRM inválido!');
+                    return;
+                }
+            }
+
+            const usuarioLogado = JSON.parse(
+                localStorage.getItem('usuarioLogado')
+            );
+
+            await window.electronAPI.atualizarDadosProfissionais({
+                id: usuarioLogado.id_medico,
+
+                crm: document.getElementById('crm')?.value,
+                rqe: document.getElementById('rqe')?.value,
+                especialidade: document.getElementById('especialidade')?.value,
+                subespecialidades: document.getElementById('subespecialidades')?.value,
+
+                nome_clinica: document.getElementById('clinicaHospital')?.value,
+                endereco_clinica: document.getElementById('enderecoClinica')?.value,
+                tempo_consulta: document.getElementById('tempoConsulta')?.value,
+                valor_consulta: document.getElementById('valorConsulta')?.value
+            });
+
+            const inputs = document.querySelectorAll(
+            '#crm, #rqe, #especialidade, #subespecialidades, #clinicaHospital, #enderecoClinica, #tempoConsulta, #valorConsulta'
+            );
+
+            const botoes = document.getElementById('botaoEditar');
+
+            botoes.innerHTML = `
+                <button id="editar" onclick="editarProfissional()">Editar</button>
+            `;
+
+            inputs.forEach(input => {
+                input.readOnly = true;
+            });
+
+            mostrarNotificacao('✓ Alterações salvas com sucesso!');
+        }
+
+        function editarPreferencias(){
+
+            const inputs = document.querySelectorAll(
+                '#hInicio, #hTermino'
+            );
+
+            const botoes = document.getElementById('botaoEditar');
+
+            botoes.innerHTML = `
+                <div style="display:flex; gap:1px;">
+                    <button id="cancelar" onclick="cancelarPreferencias()">Cancelar</button>
+                    <button id="salvarEdicao" onclick="salvarPreferencias()">Salvar Edição</button>
+                </div>
+            `;
+
+            inputs.forEach(input => {
+                input.readOnly = false;
+            });
+        }
+
+        function cancelarPreferencias(){
+
+            const inputs = document.querySelectorAll(
+                '#hInicio, #hTermino'
+            );
+
+            const botoes = document.getElementById('botaoEditar');
+
+            botoes.innerHTML = `
+                <button id="editar" onclick="editarPreferencias()">Editar</button>
+            `;
+
+            inputs.forEach(input => {
+                input.readOnly = true;
+            });
+        }
+
+        async function salvarPreferencias(){
+
+            const usuarioLogado = JSON.parse(
+                localStorage.getItem('usuarioLogado')
+            );
+
+            await window.electronAPI.atualizarPreferencias({
+                id: usuarioLogado.id_medico,
+                horario_inicio: document.getElementById('hInicio').value,
+                horario_termino: document.getElementById('hTermino').value
+            });
+
+            const inputs = document.querySelectorAll(
+                '#hInicio, #hTermino'
+            );
+
+            const botoes = document.getElementById('botaoEditar');
+
+            botoes.innerHTML = `
+                <button id="editar" onclick="editarPreferencias()">Editar</button>
+            `;
+
+            inputs.forEach(input => {
+                input.readOnly = true;
+            });
+
+            mostrarNotificacao('✓ Alterações salvas com sucesso!');
         }
 
     </script>

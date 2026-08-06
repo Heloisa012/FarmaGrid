@@ -773,7 +773,7 @@
     <h5 class="titulo-caixa mb-3">Gerar Novo Relatório</h5>
     <div class="row g-3">
       <div class="col-md-4">
-        <div class="card-relatorio">
+        <div class="card-relatorio" data-tipo="estoque">
           <div class="icon-relatorio estoque">
             <img src="estoqueVerde.png" alt="">
           </div>
@@ -784,7 +784,7 @@
         </div>
       </div>
       <div class="col-md-4">
-        <div class="card-relatorio">
+        <div class="card-relatorio" data-tipo="validade">
           <div class="icon-relatorio validade">
             <img src="alertaVerde.png" alt="">
           </div>
@@ -795,7 +795,7 @@
         </div>
       </div>
       <div class="col-md-4">
-        <div class="card-relatorio">
+        <div class="card-relatorio" data-tipo="vendas">
           <div class="icon-relatorio vendas">
             <img src="seta.png" alt="">
           </div>
@@ -810,7 +810,7 @@
     <div class="row align-items-center mt-4 g-3">
       <div class="col-md-5">
         <label class="form-label pequeno">Período</label>
-        <select class="form-select select-relatorio">
+        <select class="form-select select-relatorio" id="selectPeriodo">
           <option selected>Selecione o período</option>
           <option>Última Semana</option>
           <option>Último Mês</option>
@@ -819,7 +819,7 @@
       </div>
       <div class="col-md-5">
         <label class="form-label pequeno">Formato</label>
-        <select class="form-select select-relatorio">
+        <select class="form-select select-relatorio" id="selectFormato">
           <option selected>Selecione o formato</option>
           <option>PDF</option>
           <option>XLSX</option>
@@ -827,7 +827,7 @@
         </select>
       </div>
       <div class="col-md-2 d-flex align-items-end">
-        <button class="btn-gerar">Gerar Relatório</button>
+        <button class="btn-gerar" id="btnGerarRelatorio">Gerar Relatório</button>
       </div>
     </div>
   </div>
@@ -836,28 +836,30 @@
   <div class="caixa-recentes mt-4 p-4">
     <h5 class="titulo-caixa mb-3">Relatórios Recentes</h5>
 
-    <div class="relatorio-item">
-      <div>
-        <h6>Estoque Mensal - Novembro 2025</h6>
-        <p>Inventário • 12/11/2025 • 2.4 MB</p>
-      </div>
-      <button class="btn-baixar"><img src="baixar.png" class="iconB"> Baixar</button>
-    </div>
+    <div id="listaRelatoriosRecentes">
+        <div class="relatorio-item">
+          <div>
+            <h6>Estoque Mensal - Novembro 2025</h6>
+            <p>Inventário • 12/11/2025 • 2.4 MB</p>
+          </div>
+          <button class="btn-baixar"><img src="baixar.png" class="iconB"> Baixar</button>
+        </div>
 
-    <div class="relatorio-item">
-      <div>
-        <h6>Validade - Alerta Semanal</h6>
-        <p>Validade • 10/11/2025 • 1.2 MB</p>
-      </div>
-      <button class="btn-baixar"><img src="baixar.png" class="iconB"> Baixar</button>
-    </div>
+        <div class="relatorio-item">
+          <div>
+            <h6>Validade - Alerta Semanal</h6>
+            <p>Validade • 10/11/2025 • 1.2 MB</p>
+          </div>
+          <button class="btn-baixar"><img src="baixar.png" class="iconB"> Baixar</button>
+        </div>
 
-    <div class="relatorio-item">
-      <div>
-        <h6>Vendas Outubro 2025</h6>
-        <p>Vendas • 01/11/2025 • 3.1 MB</p>
-      </div>
-      <button class="btn-baixar"><img src="baixar.png" class="iconB"> Baixar</button>
+        <div class="relatorio-item">
+          <div>
+            <h6>Vendas Outubro 2025</h6>
+            <p>Vendas • 01/11/2025 • 3.1 MB</p>
+          </div>
+          <button class="btn-baixar"><img src="baixar.png" class="iconB"> Baixar</button>
+        </div>
     </div>
   </div>
 
@@ -870,8 +872,7 @@
         </div>
         <div>
           <h6>Produtos em Estoque</h6>
-          <h3>1.234 itens</h3>
-          <p>+12% vs mês anterior</p>
+          <h3 id="resumoEstoque"></h3>
         </div>
       </div>
     </div>
@@ -883,8 +884,8 @@
         </div>
         <div>
           <h6>Vendas do Mês</h6>
-          <h3>R$ 85.400</h3>
-          <p>+18% vs mês anterior</p>
+          <h3 id="resumoVendas"></h3>
+          <p id="resumoVendasDelta"></p>
         </div>
       </div>
     </div>
@@ -896,7 +897,7 @@
         </div>
         <div>
           <h6>Alertas Ativos</h6>
-          <h3>23 alertas</h3>
+          <h3 id="resumoAlertas"></h3>
           <p class="texto-vermelho">Requer atenção</p>
         </div>
       </div>
@@ -907,29 +908,106 @@
     </div>
 
   <script>
-    window.addEventListener('DOMContentLoaded', () => {
+    let tipoSelecionado = 'estoque';
+
+    window.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('bd').addEventListener('click', () => window.electronAPI.abrirJanelaD());
       document.getElementById('be').addEventListener('click', () => window.electronAPI.abrirJanelaE());
       document.getElementById('ba').addEventListener('click', () => window.electronAPI.abrirJanelaV());
-      //document.getElementById('se').addEventListener('click', () => window.electronAPI.abrirJanelaSE());
       document.getElementById('bde').addEventListener('click', () => window.electronAPI.abrirJanelaDE());
       document.getElementById('br').addEventListener('click', () => window.electronAPI.abrirJanelaR());
       document.getElementById('fn').addEventListener('click', () => window.electronAPI.abrirJanelaFunc());
       document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
+
+      configurarSelecaoTipo();
+      await carregarResumo();
+      await carregarRelatoriosRecentes();
+
+      document.getElementById('btnGerarRelatorio').addEventListener('click', gerarRelatorio);
     });
 
-    function mostrarDataAtual() {
-      const hoje = new Date();
-      const dia = hoje.getDate();
-      const diaSemanaNum = hoje.getDay();
-      const mes = hoje.getMonth();
-      const ano = hoje.getFullYear();
+    function configurarSelecaoTipo() {
+      const cards = document.querySelectorAll('.card-relatorio');
+      cards.forEach(card => {
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', () => {
+          cards.forEach(c => { c.style.borderColor = '#e0e0e0'; c.style.boxShadow = 'none'; });
+          card.style.borderColor = '#4BA94B';
+          card.style.boxShadow = '0 2px 8px rgba(75,169,75,0.25)';
+          tipoSelecionado = card.dataset.tipo;
+        });
+      });
+      cards[0].click();
+    }
 
-      const semana = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
-      const mesesAno = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    async function carregarResumo() {
+      const dados = await window.electronAPI.buscarResumoRelatorios();
 
-      document.getElementById("dataAtual").textContent =
-        `${semana[diaSemanaNum]}, ${dia} de ${mesesAno[mes]} de ${ano}`;
+      document.getElementById('resumoEstoque').textContent = `${dados.totalEstoque.toLocaleString('pt-BR')} itens`;
+      document.getElementById('resumoVendas').textContent = `R$ ${dados.vendasMesAtual.toFixed(2).replace('.', ',')}`;
+      document.getElementById('resumoAlertas').textContent = `${dados.totalAlertas} alertas`;
+
+      const deltaVendas = document.getElementById('resumoVendasDelta');
+      if (dados.variacaoVendas === null) {
+        deltaVendas.textContent = 'Sem dados do mês anterior';
+      } else {
+        const sinal = dados.variacaoVendas >= 0 ? '+' : '';
+        deltaVendas.textContent = `${sinal}${dados.variacaoVendas}% vs mês anterior`;
+      }
+    }
+
+    async function carregarRelatoriosRecentes() {
+      const relatorios = await window.electronAPI.buscarRelatoriosFarmacia();
+      const lista = document.getElementById('listaRelatoriosRecentes');
+
+      if (relatorios.length === 0) {
+        lista.innerHTML = '<p class="text-muted text-center mb-0">Nenhum relatório gerado ainda</p>';
+        return;
+      }
+
+      const nomes = { estoque: 'Estoque', validade: 'Validade', vendas: 'Vendas' };
+
+      lista.innerHTML = relatorios.map(r => {
+        const data = new Date(r.gerado_em).toLocaleDateString('pt-BR');
+        return `
+          <div class="relatorio-item">
+            <div>
+              <h6>${nomes[r.tipo] || r.tipo} - ${r.periodo || 'Completo'}</h6>
+              <p>${r.formato} • ${data} • ${r.tamanho_kb} KB</p>
+            </div>
+            <button class="btn-baixar" data-id="${r.id}"><img src="baixar.png" class="iconB"> Baixar</button>
+          </div>
+        `;
+      }).join('');
+
+      lista.querySelectorAll('.btn-baixar').forEach(btn => {
+        btn.addEventListener('click', () => window.electronAPI.baixarRelatorioFarmacia(btn.dataset.id));
+      });
+    }
+
+    async function gerarRelatorio() {
+      const periodo = document.getElementById('selectPeriodo').value;
+      const formato = document.getElementById('selectFormato').value;
+
+      if (periodo === 'Selecione o período' || formato === 'Selecione o formato') {
+        alert('Selecione o período e o formato antes de gerar.');
+        return;
+      }
+
+      const btn = document.getElementById('btnGerarRelatorio');
+      btn.disabled = true;
+      btn.textContent = 'Gerando...';
+
+      const resultado = await window.electronAPI.gerarRelatorioFarmacia({ tipo: tipoSelecionado, periodo, formato });
+
+      btn.disabled = false;
+      btn.textContent = 'Gerar Relatório';
+
+      if (resultado.sucesso) {
+        await carregarRelatoriosRecentes();
+      } else {
+        alert('Erro ao gerar relatório: ' + resultado.erro);
+      }
     }
   </script>
 

@@ -1,6 +1,4 @@
 
-Copiar
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -409,6 +407,10 @@ Copiar
       margin-top: -15px;
       background-color: rgb(238, 238, 238);
     }
+
+    .close{
+      cursor: pointer;
+    }
  
   </style>
 </head>
@@ -597,7 +599,7 @@ Copiar
  
                 <p style="margin-top: 6px; font-size: 14px;"><b>Telefone</b></p>
                 <input type="text" class="form-control mb-3 busca"
-                placeholder="(19) 99390-1111" id="telefone">
+                placeholder="(19) 99390-1111" id="telefone" oninput="formatarTelefone(this)">
  
                 <p style="margin-top: 6px; font-size: 14px; margin-bottom: 0px;"><b>Função</b></p>
                 <select id="modalFuncao" name="funcao" style="border-radius: 7px; height: 35px; background-color: #f1f1f1; padding: 5px; width: 460px;">
@@ -616,6 +618,48 @@ Copiar
                     <button style="color: white; padding: 10px; border-radius: 10px; background-color: #355e3b;" id="btnCadastrar">+ Cadastrar</button>
                 </div>
                 
+            </div>
+        </div>
+
+        <!--MODAL DE EDITAR FUNCIONÁRIO-->
+        <div id="myModal2" class="modal">
+            <div class="modal-content">
+                <span id="closeModalBtn2" class="close">&times;</span>
+                <h3>Editar Funcionário</h3>
+
+                <p style="margin-top: 6px; font-size: 14px;"><b>Nome Completo</b></p>
+                <input type="text" class="form-control mb-3 busca"
+                placeholder="Digite o nome completo" id="nomeEditar">
+ 
+                <p style="margin-top: 6px; font-size: 14px;"><b>CPF</b></p>
+                <input type="text" class="form-control mb-3 busca"
+                placeholder="000.000.000-00" id="cpfEditar" maxlength="14" oninput="formatarCPF(this)" readonly>
+ 
+                <p style="margin-top: 6px; font-size: 14px;"><b>E-mail</b></p>
+                <input type="email" class="form-control mb-3 busca"
+                placeholder="funcionario@farmagrid.com" id="emailEditar">
+ 
+                <p style="margin-top: 6px; font-size: 14px;"><b>Telefone</b></p>
+                <input type="text" class="form-control mb-3 busca"
+                placeholder="(19) 99390-1111" id="telefoneEditar" oninput="formatarTelefone(this)">
+ 
+                <p style="margin-top: 6px; font-size: 14px; margin-bottom: 0px;"><b>Função</b></p>
+                <select id="modalFuncaoEditar" name="funcao" style="border-radius: 7px; height: 35px; background-color: #f1f1f1; padding: 5px; width: 460px;">
+                    <option value="caixa">Caixa</option>
+                    <option value="balconista">Balconista</option>
+                </select>
+ 
+                <p style="margin-top: 16px; font-size: 14px; margin-bottom: 0px;"><b>Status</b></p>
+                <select id="modalStatusEditar" name="status" style="border-radius: 7px; height: 35px; background-color: #f1f1f1; padding: 5px; width: 460px;">
+                    <option value="ativo">Ativo</option>
+                    <option value="inativo">Inativo</option>
+                </select>
+ 
+                <div style="display: flex; flex-direction: row; justify-content: end; margin-top: 30px;">
+                    <button style="color: black; border: 1px solid black; padding: 10px; border-radius: 10px;" id="btnCancelar2">Cancelar</button>
+                    <button style="color: white; padding: 10px; border-radius: 10px; background-color: #355e3b; margin-left: 10px;" id="btnSalvarEditar">Salvar</button>
+                </div>
+
             </div>
         </div>
  
@@ -664,7 +708,7 @@ Copiar
         <td>${f.telefone}</td>
         <td><span class="badge-${f.funcao === 'caixa' ? 'caixa' : 'balconista'}">${f.funcao === 'caixa' ? 'Caixa' : 'Balconista'}</span></td>
         <td><span class="status-${f.status === 'ativo' ? 'ativo' : 'inativo'} status-toggle" data-cpf="${f.CPF}">${f.status === 'ativo' ? 'Ativo' : 'Inativo'}</span></td>
-        <td><button class="btn-icon"><img src="editar.png" alt="editar" class="icone3"></button></td>
+        <td><button class="btn-icon btnEditar" data-cpf="${f.CPF}"><img src="editar.png" alt="editar" class="icone3"></button></td>
       `;
 
       tr.querySelector('.status-toggle').addEventListener('dblclick', async function () {
@@ -696,6 +740,19 @@ Copiar
     document.getElementById('funcAtivos').textContent = funcAtivos;
     document.getElementById('totalCaixa').textContent = totalCaixa;
     document.getElementById('totalBalconista').textContent = totalBalconista;
+
+    var modal2 = document.getElementById("myModal2");
+    document.querySelectorAll('.btnEditar').forEach(botao => {
+      botao.addEventListener('click', () => {
+        const cpfSelecionado = botao.getAttribute('data-cpf');
+        const funcionarioSelecionado = funcionarios.find(f => f.CPF === cpfSelecionado);
+
+        preencherModalEdicao(funcionarioSelecionado);
+        modal2.style.display = "block";
+      });
+    });
+    document.getElementById("closeModalBtn2").onclick = () => modal2.style.display = "none";
+    document.getElementById("btnCancelar2").onclick = () => modal2.style.display = "none";
   }
  
     // Modal
@@ -749,6 +806,34 @@ Copiar
       }
     });
 
+    //salvar alterações de editar
+    document.getElementById('btnSalvarEditar').addEventListener('click', async () => {
+
+      const cpf      = document.getElementById('cpfEditar').value.trim();
+      const nome     = document.getElementById('nomeEditar').value.trim();
+      const email    = document.getElementById('emailEditar').value.trim();
+      const telefone = document.getElementById('telefoneEditar').value.trim();
+      const funcao   = document.getElementById('modalFuncaoEditar').value;
+      const status   = document.getElementById('modalStatusEditar').value;
+
+      if (!nome || !email || !telefone) {
+        alert('Por favor, preencha todos os campos.');
+        return;
+      }
+
+      const resultado = await window.electronAPI.atualizarFuncionario({
+        cpf, nome, email, telefone, funcao, status
+      });
+
+      if (resultado.sucesso) {
+        alert('Funcionário atualizado com sucesso!');
+        document.getElementById('myModal2').style.display = 'none';
+        carregarFuncionarios();
+      } else {
+        alert('Erro ao atualizar: ' + resultado.erro);
+      }
+    });
+
     function formatarCPF(campo) {
       // Remove tudo que não é número
       let v = campo.value.replace(/\D/g, '');
@@ -762,6 +847,27 @@ Copiar
       // Coloca traço entre o nono e o décimo dígitos
       v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
       
+      campo.value = v;
+    }
+
+    function formatarTelefone(campo) {
+      // Remove tudo que não é número
+      let v = campo.value.replace(/\D/g, '');
+
+      // Limita a 11 dígitos (DDD + 9 dígitos)
+      v = v.slice(0, 11);
+
+      // Coloca parênteses no DDD
+      v = v.replace(/^(\d{2})(\d)/, '($1) $2');
+
+      if (v.length > 10) {
+        // Celular: (19) 99390-1111 → separa os últimos 4 dígitos com traço
+        v = v.replace(/(\d{5})(\d{1,4})$/, '$1-$2');
+      } else {
+        // Fixo: (19) 3390-1111
+        v = v.replace(/(\d{4})(\d{1,4})$/, '$1-$2');
+      }
+
       campo.value = v;
     }
 
@@ -785,6 +891,15 @@ Copiar
 
       tr.style.display = (buscaOk && funcaoOk && statusOk) ? '' : 'none';
     });
+  }
+
+    function preencherModalEdicao(funcionario) {
+    document.getElementById('nomeEditar').value = funcionario.nome;
+    document.getElementById('cpfEditar').value = funcionario.CPF;
+    document.getElementById('emailEditar').value = funcionario.email;
+    document.getElementById('telefoneEditar').value = funcionario.telefone;
+    document.getElementById('modalFuncaoEditar').value = funcionario.funcao;
+    document.getElementById('modalStatusEditar').value = funcionario.status;
   }
   </script>
  

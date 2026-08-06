@@ -606,38 +606,43 @@
                 </div>
 
                 <div class="modal-body">
-                    <form id="formNovoProduto">
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Nome do Produto</label>
-                        <input type="text" class="form-control" placeholder="Ex: Dipirona 500mg" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Categoria</label>
-                        <input type="text" class="form-control" placeholder="Ex: Analgésicos" required>
-                    </div>
-
-                    <div class="row">
-                        <div class="col mb-3">
-                        <label class="form-label fw-semibold">Estoque Inicial</label>
-                        <input type="number" class="form-control" min="0" value="0">
-                        </div>
-                        <div class="col mb-3">
-                        <label class="form-label fw-semibold">Estoque Mínimo</label>
-                        <input type="number" class="form-control" min="0" value="0">
-                        </div>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Preço Unitário</label>
-                        <input type="number" step="0.01" class="form-control" value="0.00">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-semibold">Fornecedor</label>
-                        <input type="text" class="form-control" placeholder="Nome do fornecedor">
-                    </div>
-                    </form>
+                  <form id="formNovoProduto">
+                      <div class="mb-3">
+                          <label class="form-label fw-semibold">Nome do Produto</label>
+                          <input type="text" id="novoNome" class="form-control" placeholder="Ex: Dipirona 500mg" required>
+                      </div>
+                      <div class="mb-3">
+                          <label class="form-label fw-semibold">Categoria</label>
+                          <input type="text" id="novoCategoria" class="form-control" placeholder="Ex: Analgésicos" required>
+                      </div>
+                      <div class="row">
+                          <div class="col mb-3">
+                              <label class="form-label fw-semibold">Estoque Inicial</label>
+                              <input type="number" id="novoQuantidade" class="form-control" min="0" value="0">
+                          </div>
+                          <div class="col mb-3">
+                              <label class="form-label fw-semibold">Estoque Mínimo</label>
+                              <input type="number" id="novoEstoqueMin" class="form-control" min="0" value="0">
+                          </div>
+                      </div>
+                      <div class="mb-3">
+                          <label class="form-label fw-semibold">Preço Unitário</label>
+                          <input type="number" step="0.01" id="novoPreco" class="form-control" value="0.00">
+                      </div>
+                      <div class="mb-3">
+                          <label class="form-label fw-semibold">Fornecedor</label>
+                          <input type="text" id="novoFornecedor" class="form-control" placeholder="Nome do fornecedor">
+                      </div>
+                      <div class="mb-3">
+                          <label class="form-label fw-semibold">Código de Barras</label>
+                          <input type="text" id="codigoBarras" class="form-control" placeholder="Digite o código de barras do produto">
+                      </div>
+                      <div class="mb-3">
+                          <label class="form-label fw-semibold">Remedio Controlado?</label><br>
+                          <input type="radio" name="remedioControlado" id="tarjaSim" value="sim"> Sim
+                          <input type="radio" name="remedioControlado" id="tarjaNao" value="nao" checked style="margin-left: 10px;"> Não
+                      </div>
+                  </form>
                 </div>
 
                 <div class="modal-footer">
@@ -744,6 +749,15 @@
                         <label class="form-label fw-semibold">Fornecedor</label>
                         <input type="text" id="editFornecedor" class="form-control" required>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Código de Barras</label>
+                        <input type="text" id="editCodigoBarras" class="form-control" placeholder="Digite o código de barras do produto">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Remedio Controlado?</label><br>
+                        <input type="radio" name="editRemedioControlado" id="editTarjaSim" value="sim"> Sim
+                        <input type="radio" name="editRemedioControlado" id="editTarjaNao" value="nao" checked style="margin-left: 10px;"> Não
+                    </div>
                     </form>
                 </div>
 
@@ -758,193 +772,206 @@
     </div>
 
   <script>
-  window.addEventListener('DOMContentLoaded', () => {
+    let produtoAtual = null;
+
+    window.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('bd').addEventListener('click', () => window.electronAPI.abrirJanelaD());
       document.getElementById('be').addEventListener('click', () => window.electronAPI.abrirJanelaE());
       document.getElementById('ba').addEventListener('click', () => window.electronAPI.abrirJanelaV());
-      //document.getElementById('se').addEventListener('click', () => window.electronAPI.abrirJanelaSE());
       document.getElementById('bde').addEventListener('click', () => window.electronAPI.abrirJanelaDE());
       document.getElementById('br').addEventListener('click', () => window.electronAPI.abrirJanelaR());
       document.getElementById('fn').addEventListener('click', () => window.electronAPI.abrirJanelaFunc());
       document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
+
+      await carregarProdutos();
     });
 
-  function mostrarDataAtual() {
-    const hoje = new Date();
-    const dia = hoje.getDate();
-    const diaSemanaNum = hoje.getDay();
-    const mes = hoje.getMonth();
-    const ano = hoje.getFullYear();
+    async function carregarProdutos() {
+      const produtos = await window.electronAPI.buscarProdutos();
+      renderizarLista(produtos);
+      renderizarAlerta(produtos);
+    }
 
-    const semana = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
-    const mesesAno = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    function renderizarAlerta(produtos) {
+      const baixos = produtos.filter(p => p.quantidade < p.estoque_min);
+      const alerta = document.querySelector('.alerta-estoque');
+      if (baixos.length === 0) {
+        alerta.style.display = 'none';
+      } else {
+        alerta.style.display = 'flex';
+        alerta.querySelector('strong').textContent = `${baixos.length} produto(s) com estoque baixo`;
+        alerta.querySelector('.alerta-perigo').textContent = baixos.map(p => p.nome).join(', ');
+      }
+    }
 
-    document.getElementById("dataAtual").textContent =
-      `${semana[diaSemanaNum]}, ${dia} de ${mesesAno[mes]} de ${ano}`;
-  }
+    function renderizarLista(produtos) {
+      const lista = document.querySelector('.list-group');
+      const contador = document.querySelector('.card-body small.text-muted');
+      contador.textContent = `${produtos.length} Produto(s)`;
 
-  // --- exibir detalhes do produto ---
-  const produtos = document.querySelectorAll('.list-group-item');
-  const infoProduto = document.getElementById('infoProduto');
+      lista.innerHTML = produtos.map(p => {
+        const estoqueBaixo = p.quantidade < p.estoque_min;
+        return `
+          <a href="#" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+            data-id="${p.id}">
+            <div>
+              <div class="fw-semibold text-dark">${p.nome}</div>
+              <small class="text-muted">${p.categoria || '—'}<br>Estoque: ${p.quantidade} un.</small>
+            </div>
+            <div class="text-end">
+              ${estoqueBaixo ? '<img src="alertaAmarelo.png" class="iconA"><br>' : ''}
+              <span class="text-success fw-semibold">R$ ${parseFloat(p.preco).toFixed(2).replace('.', ',')}</span>
+            </div>
+          </a>
+        `;
+      }).join('');
 
-  produtos.forEach(produto => {
-    produto.addEventListener('click', (e) => {
-      e.preventDefault();
+      lista.querySelectorAll('.list-group-item').forEach(item => {
+        item.addEventListener('click', async (e) => {
+          e.preventDefault();
+          lista.querySelectorAll('.list-group-item').forEach(i => i.classList.remove('active'));
+          item.classList.add('active');
 
-      // Remover seleção anterior
-      produtos.forEach(p => p.classList.remove('active'));
-      produto.classList.add('active');
+          const id = parseInt(item.dataset.id);
+          const produto = produtos.find(p => p.id === id);
+          produtoAtual = produto;
 
-      // Pegar informações do produto
-      const nome = produto.querySelector('.fw-semibold.text-dark').textContent.trim();
-      const smallHTML = produto.querySelector('small').innerHTML;
-      const [categoria, estoqueBruto] = smallHTML.split('<br>');
-      const categoriaTexto = categoria.trim();
-      const estoqueTexto = estoqueBruto.replace('Estoque:', '').trim();
-      const estoqueNumero = parseInt(estoqueTexto.replace(/\D/g, ''));
+          const lotes = await window.electronAPI.buscarLotes(id);
+          renderizarDetalhes(produto, lotes);
+        });
+      });
+    }
 
-      const preco = produto.querySelector('.fw-semibold.text-success')?.textContent.trim() || '';
-      const fornecedor = nome.includes("Dipirona") ? "FarmaLab" :
-                         nome.includes("Amoxicilina") ? "BioMed" :
-                         nome.includes("Omeprazol") ? "PharmaX" :
-                         nome.includes("Paracetamol") ? "MediCorp" :
-                         "Genéricos BR";
-      const estoqueMinimo = 50; // valor fixo por enquanto
+    function renderizarDetalhes(p, lotes) {
+      const corEstoque = p.quantidade < p.estoque_min ? 'text-warning fw-semibold' : 'text-success fw-semibold';
+      const lotesHTML = lotes.length > 0
+        ? lotes.map(l => `
+            <div class="mb-1 p-2 rounded" style="background:#f0f9f0; font-size:13px;">
+              <strong>${l.numero_lote || 'Sem lote'}</strong> —
+              ${l.quantidade} un. |
+              Val: ${l.data_validade ? new Date(l.data_validade).toLocaleDateString('pt-BR') : '—'} |
+              ${l.prateleira || '—'}
+            </div>`).join('')
+        : '<small class="text-muted">Nenhum lote cadastrado</small>';
 
-      //cor do estoque
-      const corEstoque = estoqueNumero < estoqueMinimo ? 'text-warning fw-semibold' : 'text-dark fw-semibold';
-
-      // Exibir no painel direito
-      infoProduto.innerHTML = `
-        <div class="p-4 text-start d-flex flex-column justify-content-between" style="height: 100%;">
+      document.getElementById('infoProduto').innerHTML = `
+        <div class="p-3 text-start d-flex flex-column justify-content-between" style="height:100%;">
           <div>
-            <h5 class="fw-semibold text-success mb-4 border-bottom pb-2">Detalhes do Produto</h5>
+            <h5 class="fw-semibold text-success mb-3 border-bottom pb-2">Detalhes do Produto</h5>
 
-            <div class="mb-4">
-              <p class="mb-1 fw-semibold text-dark">Nome do Produto</p>
-              <p class="text-muted fs-6">${nome}</p>
+            <div class="mb-3">
+              <p class="mb-0 fw-semibold text-dark">Nome</p>
+              <p class="text-muted">${p.nome}</p>
             </div>
-
-            <div class="mb-4">
-              <p class="mb-1 fw-semibold text-dark">Categoria</p>
-              <p class="text-muted fs-6">${categoriaTexto}</p>
+            <div class="mb-3">
+              <p class="mb-0 fw-semibold text-dark">Categoria</p>
+              <p class="text-muted">${p.categoria || '—'}</p>
             </div>
-
-            <div class="row mb-4">
+            <div class="row mb-3">
               <div class="col">
-                <p class="mb-1 fw-semibold text-dark">Estoque Atual</p>
-                <p class="${corEstoque} fs-6 fw-semibold">${estoqueNumero} unidades</p>
+                <p class="mb-0 fw-semibold text-dark">Estoque Atual</p>
+                <p class="${corEstoque}">${p.quantidade} unidades</p>
               </div>
               <div class="col text-end">
-                <p class="mb-1 fw-semibold text-dark">Estoque Mínimo</p>
-                <p class="text-muted fs-6">${estoqueMinimo} unidades</p>
+                <p class="mb-0 fw-semibold text-dark">Estoque Mínimo</p>
+                <p class="text-muted">${p.estoque_min} unidades</p>
               </div>
             </div>
-
-            <div class="mb-4">
-              <p class="mb-1 fw-semibold text-dark">Preço Unitário</p>
-              <p class="text-muted fs-6">${preco}</p>
+            <div class="mb-3">
+              <p class="mb-0 fw-semibold text-dark">Preço Unitário</p>
+              <p class="text-muted">R$ ${parseFloat(p.preco).toFixed(2).replace('.', ',')}</p>
             </div>
-
-            <div class="mb-4">
-              <p class="mb-1 fw-semibold text-dark">Fornecedor</p>
-              <p class="text-muted fs-6">${fornecedor}</p>
+            <div class="mb-3">
+              <p class="mb-0 fw-semibold text-dark">Fornecedor</p>
+              <p class="text-muted">${p.fornecedor || '—'}</p>
+            </div>
+            <div class="mb-3">
+              <p class="mb-0 fw-semibold text-dark">Lotes</p>
+              <div class="mt-1">${lotesHTML}</div>
             </div>
           </div>
 
-          <div class="d-grid gap-3 mt-4">
-            <button class="btn btn-success fw-semibold py-2">Atualizar Estoque</button>
-            <button class="btn btn-outline-dark fw-semibold py-2">Editar Produto</button>
+          <div class="d-grid gap-2 mt-3">
+            <button class="btn btn-success fw-semibold py-2" id="btnAtualizarEstoque">Atualizar Estoque</button>
+            <button class="btn btn-outline-dark fw-semibold py-2" id="btnEditarProduto">Editar Produto</button>
           </div>
         </div>
       `;
+
+      document.getElementById('btnAtualizarEstoque').addEventListener('click', () => {
+        document.getElementById('produtoNome').textContent = p.nome;
+        document.getElementById('produtoCategoria').textContent = p.categoria || '—';
+        document.getElementById('estoqueAtual').textContent = `Estoque Atual: ${p.quantidade} unidades`;
+        document.getElementById('quantidade').value = 0;
+        document.getElementById('numeroLote').value = '';
+        document.getElementById('dataValidade').value = '';
+        document.getElementById('observacoes').value = '';
+        new bootstrap.Modal(document.getElementById('atualizarEstoqueModal')).show();
+      });
+
+      document.getElementById('btnEditarProduto').addEventListener('click', () => {
+      document.getElementById('editNome').value = p.nome;
+      document.getElementById('editCategoria').value = p.categoria || '';
+      document.getElementById('editEstoqueAtual').value = p.quantidade;
+      document.getElementById('editEstoqueMinimo').value = p.estoque_min;
+      document.getElementById('editPreco').value = p.preco;
+      document.getElementById('editFornecedor').value = p.fornecedor || '';
+      document.getElementById('editCodigoBarras').value = p.codigo_barras || ''; 
+      document.getElementById(p.tarja_preta ? 'editTarjaSim' : 'editTarjaNao').checked = true;
+      new bootstrap.Modal(document.getElementById('editarProdutoModal')).show();
     });
-  });
-
-  // --- Função para salvar novo produto ---
-  document.getElementById('salvarProduto').addEventListener('click', () => {
-    const form = document.getElementById('formNovoProduto');
-    const dados = Object.fromEntries(new FormData(form).entries());
-    console.log('Produto salvo:', dados);
-
-    // salvar o produto no banco de dados
-    const modal = bootstrap.Modal.getInstance(document.getElementById('novoProdutoModal'));
-    modal.hide();
-    form.reset();
-  });
-
-  // --- Evento para abrir o modal de Atualizar Estoque ---
-  document.addEventListener('click', (e) => {
-    if (e.target && e.target.textContent.includes('Atualizar Estoque')) {
-      const nome = document.querySelector('#infoProduto .text-muted.fs-6').textContent.trim();
-      const categoria = document.querySelectorAll('#infoProduto .text-muted.fs-6')[1]?.textContent.trim() || '';
-      const estoqueTexto = document.querySelector('#infoProduto .text-dark.fw-semibold + p')?.textContent || '';
-      
-      // Preenche os campos do modal
-      document.getElementById('produtoNome').textContent = nome;
-      document.getElementById('produtoCategoria').textContent = categoria;
-      document.getElementById('estoqueAtual').textContent = estoqueTexto ? estoqueTexto : "Estoque Atual: -";
-
-      // Exibe o modal
-      const modal = new bootstrap.Modal(document.getElementById('atualizarEstoqueModal'));
-      modal.show();
     }
+
+    // --- Salvar novo produto ---
+    document.getElementById('salvarProduto').addEventListener('click', async () => {
+    const nome = document.getElementById('novoNome').value.trim();
+    const categoria = document.getElementById('novoCategoria').value.trim();
+    const quantidade = parseInt(document.getElementById('novoQuantidade').value) || 0;
+    const estoque_min = parseInt(document.getElementById('novoEstoqueMin').value) || 0;
+    const preco = parseFloat(document.getElementById('novoPreco').value) || 0;
+    const fornecedor = document.getElementById('novoFornecedor').value.trim();
+    const codigo_barras = document.getElementById('codigoBarras').value.trim();
+    const tarja_preta = document.querySelector('input[name="remedioControlado"]:checked')?.value === 'sim';
+
+    if (!nome) return;
+
+    await window.electronAPI.cadastrarProduto({ nome, categoria, quantidade, estoque_min, preco, fornecedor, codigo_barras, tarja_preta });
+    bootstrap.Modal.getInstance(document.getElementById('novoProdutoModal')).hide();
+    document.getElementById('formNovoProduto').reset();
+    await carregarProdutos();
   });
 
-  // --- Evento de confirmação de atualização ---
-  document.getElementById('confirmarAtualizacao').addEventListener('click', () => {
-    const tipo = document.getElementById('tipoOperacao').value;
-    const quantidade = parseInt(document.getElementById('quantidade').value);
-    const lote = document.getElementById('numeroLote').value;
-    const validade = document.getElementById('dataValidade').value;
-    const observacoes = document.getElementById('observacoes').value;
+    // --- Confirmar atualização de estoque ---
+    document.getElementById('confirmarAtualizacao').addEventListener('click', async () => {
+      if (!produtoAtual) return;
+      const tipo = document.getElementById('tipoOperacao').value.includes('Entrada') ? 'entrada' : 'saida';
+      const quantidade = parseInt(document.getElementById('quantidade').value) || 0;
+      const numero_lote = document.getElementById('numeroLote').value.trim();
+      const data_validade = document.getElementById('dataValidade').value || null;
+      const prateleira = null;
 
-    console.log("Movimentação de estoque registrada:", {
-      tipo, quantidade, lote, validade, observacoes
+      await window.electronAPI.atualizarEstoque({
+        id_produto: produtoAtual.id, tipo, quantidade, numero_lote, data_validade, prateleira
+      });
+
+      bootstrap.Modal.getInstance(document.getElementById('atualizarEstoqueModal')).hide();
+      await carregarProdutos();
     });
 
-    // atualizar o valor de estoque e salvar no banco
-    const modal = bootstrap.Modal.getInstance(document.getElementById('atualizarEstoqueModal'));
-    modal.hide();
-  });
+    // --- Salvar edição do produto ---
+    document.getElementById('salvarEdicao').addEventListener('click', async () => {
+      if (!produtoAtual) return;
+      const nome = document.getElementById('editNome').value.trim();
+      const categoria = document.getElementById('editCategoria').value.trim();
+      const estoque_min = parseInt(document.getElementById('editEstoqueMinimo').value) || 0;
+      const preco = parseFloat(document.getElementById('editPreco').value) || 0;
+      const fornecedor = document.getElementById('editFornecedor').value.trim();
+      const codigo_barras = document.getElementById('editCodigoBarras').value.trim();
+      const tarja_preta = document.querySelector('input[name="editRemedioControlado"]:checked')?.value === 'sim';
 
-    // --- Evento para abrir o modal de Edição de Produto ---
-    document.addEventListener('click', (e) => {
-    if (e.target && e.target.textContent.includes('Editar Produto')) {
-        const painel = document.getElementById('infoProduto');
-
-        // encontra o <p> label e retorna o texto do próximo elemento (valor)
-        const getValueFromLabel = (labelText) => {
-        const labels = Array.from(painel.querySelectorAll('p.mb-1.fw-semibold.text-dark'));
-        const labelEl = labels.find(el => el.textContent.trim() === labelText);
-        if (!labelEl) return '';
-        const next = labelEl.nextElementSibling;
-        return next ? next.textContent.trim() : '';
-        };
-
-        const nome = getValueFromLabel('Nome do Produto') || '';
-        const categoria = getValueFromLabel('Categoria') || '';
-        const estoqueAtualTexto = getValueFromLabel('Estoque Atual') || '';
-        const estoqueMinimoTexto = getValueFromLabel('Estoque Mínimo') || '';
-        const precoTexto = getValueFromLabel('Preço Unitário') || '';
-        const fornecedor = getValueFromLabel('Fornecedor') || '';
-
-        const estoqueAtual = parseInt(estoqueAtualTexto.replace(/\D/g, '')) || 0;
-        const estoqueMinimo = parseInt(estoqueMinimoTexto.replace(/\D/g, '')) || 0;
-        const preco = precoTexto.replace(/[R$\s]/g, '').replace(',', '.').trim() || '';
-
-        // Preenche o formulário
-        document.getElementById('editNome').value = nome;
-        document.getElementById('editCategoria').value = categoria;
-        document.getElementById('editEstoqueAtual').value = estoqueAtual;
-        document.getElementById('editEstoqueMinimo').value = estoqueMinimo;
-        document.getElementById('editPreco').value = preco;
-        document.getElementById('editFornecedor').value = fornecedor;
-
-        // Abre o modal
-        const modal = new bootstrap.Modal(document.getElementById('editarProdutoModal'));
-        modal.show();
-    }
+      await window.electronAPI.editarProduto({ id: produtoAtual.id, nome, categoria, estoque_min, preco, fornecedor, codigo_barras, tarja_preta });
+      bootstrap.Modal.getInstance(document.getElementById('editarProdutoModal')).hide();
+      await carregarProdutos();
     });
 </script>
 

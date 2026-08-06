@@ -620,6 +620,7 @@
       .precoRemedio{
         margin-top: -25px;
         padding-left: 0px;
+        margin-bottom: -15px;
         display: flex;
         justify-content: left;
         width: 140px;
@@ -696,7 +697,31 @@
         border-radius: 5px;
       }
 
+      .btnTipoReceita {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        border: 1.5px solid #ccc;
+        border-radius: 8px;
+        padding: 8px 12px;
+        background: #fff;
+        color: #333;
+        font-size: 13px;
+        font-weight: 500;
+        margin: 0;
+      }
 
+      .btnTipoReceita .bolinha {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        border: 2px solid #999;
+        display: inline-block;
+      }
+
+      .btnTipoReceita.ativo .bolinha {
+        background: currentColor;
+      }
     </style>
 
 
@@ -875,6 +900,91 @@
     </div>
   </div>
 
+  <!-- MODAL RECEITA -->
+  <div id="modalReceita" class="modal">
+    <div class="modal-content" style="max-width: 560px; max-height: 100vh; overflow-y: auto;">
+      <span id="closeModalReceita" class="close">&times;</span>
+      <h4 style="color:#234e2d; margin-bottom: 15px;">📄 Registrar Receita Médica</h4>
+
+      <p style="font-size:13px; color:#888; margin-bottom:5px; margin-top:10px;"><b>DADOS DO MÉDICO</b></p>
+      <label style="font-size:13px; font-weight:600;">Nome do Médico</label>
+      <input type="text" id="receitaNomeMedico" class="form-control mb-2" placeholder="Dr. Nome Completo...">
+
+      <div class="d-flex gap-2">
+        <div style="flex:1;">
+          <label style="font-size:13px; font-weight:600;">CRM</label>
+          <input type="text" id="receitaCRM" class="form-control mb-2" placeholder="123456">
+        </div>
+        <div style="flex:1;">
+          <label style="font-size:13px; font-weight:600;">UF do CRM</label>
+          <select id="receitaUF" class="form-control mb-2">
+            <option value="">Selecione</option>
+            <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+            <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+            <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+            <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+            <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+            <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+            <option>SP</option><option>SE</option><option>TO</option>
+          </select>
+        </div>
+      </div>
+
+      <p style="font-size:13px; color:#888; margin-bottom:5px; margin-top:10px;"><b>DADOS DO PACIENTE</b></p>
+      <label style="font-size:13px; font-weight:600;">Nome do Paciente</label>
+      <input type="text" id="receitaNomePaciente" class="form-control mb-2" placeholder="Nome completo do paciente...">
+
+      <label style="font-size:13px; font-weight:600;">CPF do Paciente</label>
+      <input type="text" id="receitaCPFPaciente" class="form-control mb-2" placeholder="000.000.000-00" maxlength="14" oninput="formatarCPF(this)">
+
+      <p style="font-size:13px; color:#888; margin-bottom:5px; margin-top:10px;"><b>DADOS DA RECEITA</b></p>
+      <label style="font-size:13px; font-weight:600;">Tipo de Receita</label>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px;">
+        <button type="button" class="btnTipoReceita" data-tipo="branca" data-cor="#555">
+          <span class="bolinha"></span> Branca
+        </button>
+        <button type="button" class="btnTipoReceita" data-tipo="controle" data-cor="#0d6efd">
+          <span class="bolinha"></span> Controle Especial
+        </button>
+        <button type="button" class="btnTipoReceita" data-tipo="azul" data-cor="#0dcaf0">
+          <span class="bolinha"></span> Azul
+        </button>
+        <button type="button" class="btnTipoReceita" data-tipo="amarela" data-cor="#e6b800">
+          <span class="bolinha"></span> Amarela
+        </button>
+      </div>
+
+      <div class="d-flex gap-2">
+        <div style="flex:1;">
+          <label style="font-size:13px; font-weight:600;">Número da Receita</label>
+          <input type="text" id="receitaNumero" class="form-control mb-2" placeholder="Nº da receita...">
+        </div>
+        <div style="flex:1;">
+          <label style="font-size:13px; font-weight:600;">Data da Receita</label>
+          <input type="date" id="receitaData" class="form-control mb-2">
+        </div>
+      </div>
+
+      <p style="font-size:13px; color:#888; margin-bottom:5px; margin-top:10px;"><b>CONFERÊNCIA</b></p>
+      <div style="background:#fff8e1; border:1px solid #ffe082; border-radius:8px; padding:10px; margin-bottom:10px;">
+        <div style="font-size:13px; margin-bottom:5px;">
+          <input type="checkbox" id="receitaConf1"> Receita original conferida e retida
+        </div>
+        <div style="font-size:13px;">
+          <input type="checkbox" id="receitaConf2"> Documento de identificação do paciente verificado
+        </div>
+      </div>
+
+      <label style="font-size:13px; font-weight:600;">Observações</label>
+      <textarea id="receitaObs" class="form-control mb-3" rows="2" placeholder="Informações relevantes do atendimento..."></textarea>
+
+      <div class="d-flex gap-2 justify-content-end">
+        <button type="button" class="btn btn-outline-secondary" id="cancelarReceita">Cancelar</button>
+        <button type="button" class="btn" style="background:#234e2d; color:white;" id="confirmarReceita">Registrar Receita</button>
+      </div>
+    </div>
+  </div>
+
 
 </div><!--ULTIMA DIV-->
 
@@ -893,49 +1003,40 @@
       document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
     });
 
-    const produtos = [
-  {
-    nome: "Dipirona 500mg",
-    codigo: "7891234567890",
-    estoque: 150,
-    preco: 8.50
-  },
-  {
-    nome: "Amoxicilina 500mg",
-    codigo: "7891234567891",
-    estoque: 25,
-    preco: 22.90
-  },
-  {
-    nome: "Omeprazol 20mg",
-    codigo: "7891234567892",
-    estoque: 200,
-    preco: 15.00
-  } 
-];
-//para salvar o array
-localStorage.setItem("produtos", JSON.stringify(produtos));
+    const adicionarLista = document.querySelector('.lista-produtos');
 
+    async function carregarProdutosBalconista() {
+      try {
+        const produtos = await window.electronAPI.buscarProdutos();
 
-const adicionarLista = document.querySelector('.lista-produtos');
+        localStorage.setItem("produtos", JSON.stringify(produtos));
 
-produtos.forEach(produto => {
-  adicionarLista.innerHTML += `
-    <div class="produto-item">
-      <div class="infoRemedio">
-        <p class="nomeProduto">${produto.nome}</p>
-        <div class="produto-info">
-          Código: ${produto.codigo} | Estoque: ${produto.estoque}
-        </div>
-      </div>
+        adicionarLista.innerHTML = "";
 
-      <div class="d-flex adicionarRemedio gap-3">
-        <span class="preco">R$ ${produto.preco.toFixed(2)}</span>
-        <button class="btn-add" onclick="adicionaMedicamento(this)">+</button>
-      </div>
-    </div>
-  `;
-});
+        produtos.forEach(produto => {
+          adicionarLista.innerHTML += `
+            <div class="produto-item" data-tarja="${!!produto.tarja_preta}" data-codigo="${produto.codigo_barras || ''}">
+              <div class="infoRemedio">
+                <p class="nomeProduto">${produto.nome}</p>
+                <div class="produto-info">
+                  Código: ${produto.codigo_barras || 'Não informado'} | Estoque: ${produto.quantidade}
+                </div>
+              </div>
+
+              <div class="d-flex adicionarRemedio gap-3">
+                <span class="preco">R$ ${Number(produto.preco).toFixed(2)}</span>
+                <button class="btn-add" onclick="adicionaMedicamento(this)">+</button>
+              </div>
+            </div>
+          `;
+        });
+
+      } catch (err) {
+        console.error('Erro ao carregar produtos:', err);
+      }
+    }
+
+    carregarProdutosBalconista();
 
 
     //MODAL DE CLIENTE
@@ -1054,6 +1155,7 @@ produtos.forEach(produto => {
               clienteSelecionado = cliente;
               document.getElementById('clienteInformado').textContent = cliente.nome;
               modal.style.display = 'none';
+              atualizarAlertaControlado();
             });
 
           } else {
@@ -1082,6 +1184,7 @@ produtos.forEach(produto => {
 
       const nome = nomeElemento.textContent
       const valor = parseFloat(precoElemento.textContent.replace("R$", "").trim()) || 0
+      const tarjaPreta = produto.dataset.tarja === "true" 
 
       const vazio = adicionar.querySelector(".textoCarrinho");
         if (vazio) {
@@ -1107,19 +1210,26 @@ produtos.forEach(produto => {
         } else {
 
       adicionar.insertAdjacentHTML("beforeend", `
-        <div class="divCarrinho" data-preco="${valor}">
-          <div style="display: flex; color: #525252;">
+        <div class="divCarrinho" data-preco="${valor}" data-tarja="${tarjaPreta}" data-receita="false">
+          <div style="display: flex; color: #525252; justify-content: space-between; align-items:center;">
             <p>${nome}</p>
-            <button style="margin-right: -100px;" onclick="removerProdutoCarrinho(this)">
+            ${tarjaPreta ? '<span class="badge bg-danger" style="margin-bottom:20px;">Controlado</span>' : ''}
+            <button  onclick="removerProdutoCarrinho(this)">
               <img src="delete.png" class="icone3">
             </button>
           </div>
-          
+
           <div class="precoRemedio">
             <p><small>${precoElemento.textContent} × unidade</small></p>
           </div>
 
-          <div style="display: flex; gap: 5px;">
+            ${tarjaPreta ? `
+              <button class="btn btn-outline-danger btn-sm mt-1 btnRegistrarReceita" onclick="registrarReceita(this)" style="margin-left:-117px; margin-bottom: 0px;">
+                Registrar Receita
+              </button>
+            ` : ''}
+
+          <div style="display: flex; gap: 5px; margin-left:-15px; margin-top: 10px; margin-bottom: -20px;">
             <button class="acrescentandoDiminuindo">+</button>
             <div class="quantidade">1</div>
             <button class="acrescentandoDiminuindo">-</button>
@@ -1136,6 +1246,7 @@ produtos.forEach(produto => {
   }
 
       atualizarTotal()
+      atualizarAlertaControlado()
     }
 
     //controle de quantidade
@@ -1190,6 +1301,15 @@ produtos.forEach(produto => {
 
     // ========== MANDAR PARA O CAIXA ==========
     function enviarParaCaixa(){
+
+    const itensPendentes = Array.from(document.querySelectorAll('.divCarrinho'))
+    .filter(item => item.dataset.tarja === "true" && item.dataset.receita !== "true");
+
+    if(itensPendentes.length > 0){
+      alert("Não é possível enviar para o caixa: existem medicamentos controlados sem receita registrada.");
+      return;
+    }
+
     const hoje = new Date();
     const agora = new Date();
     const dia = hoje.getDate();
@@ -1266,12 +1386,14 @@ produtos.forEach(produto => {
       }
 
       atualizarTotal();
+      atualizarAlertaControlado(); 
     }
 
     // limpar carrinho inteiro
     function limparCarrinho() {
       adicionar.innerHTML = "Carrinho vazio"
       atualizarTotal()
+      atualizarAlertaControlado(); 
     }
 
     //CALCULAR TOTAL DE QUANTIDADE DE ITENS NO CARRINHO
@@ -1325,19 +1447,10 @@ produtos.forEach(produto => {
       let encontrado = false;
 
       produtos.forEach(produto => {
-        const info = produto.querySelector(".produto-info").textContent;
-
-        // pega só o número do código
-        const match = info.match(/\d+/);
-        const codigoProduto = match ? match[0] : null;
-
-        if (codigoProduto === codigoDigitado) {
+        if (produto.dataset.codigo === codigoDigitado) {
           encontrado = true;
-
-          // usa sua função já existente
           const botao = produto.querySelector(".btn-add");
           botao.click();
-
           mostrarStatusTemporario("✔ Produto adicionado!");
         }
       });
@@ -1417,6 +1530,115 @@ produtos.forEach(produto => {
       
       campo.value = v;
     }
+
+    let itemReceitaAtual = null;
+    let botaoReceitaAtual = null;
+
+    function registrarReceita(botao){
+      if(!clienteSelecionado){
+        alert("Selecione um cliente antes de registrar a receita.");
+        return;
+      }
+
+      itemReceitaAtual = botao.closest('.divCarrinho');
+      botaoReceitaAtual = botao;
+
+      // reset do formulário
+      document.getElementById('receitaNomeMedico').value = '';
+      document.getElementById('receitaCRM').value = '';
+      document.getElementById('receitaUF').value = '';
+      document.getElementById('receitaNomePaciente').value = clienteSelecionado.nome || '';
+      document.getElementById('receitaCPFPaciente').value = clienteSelecionado.CPF || '';
+      document.getElementById('receitaNumero').value = '';
+      document.getElementById('receitaData').value = '';
+      document.getElementById('receitaConf1').checked = false;
+      document.getElementById('receitaConf2').checked = false;
+      document.getElementById('receitaObs').value = '';
+
+      document.querySelectorAll('.btnTipoReceita').forEach(b => {
+        b.classList.remove('ativo');
+        b.style.background = '#fff';
+        b.style.color = '#333';
+        b.style.borderColor = '#ccc';
+      });
+
+      document.getElementById('modalReceita').style.display = 'block';
+    }
+
+    function atualizarAlertaControlado(){
+      const alertaAntigo = document.getElementById('alertaControlado');
+      if(alertaAntigo) alertaAntigo.remove();
+
+      const itensControlados = Array.from(document.querySelectorAll('.divCarrinho'))
+        .filter(item => item.dataset.tarja === "true" && item.dataset.receita !== "true");
+
+      if(itensControlados.length === 0) return;
+
+      const alerta = document.createElement('div');
+      alerta.id = 'alertaControlado';
+      alerta.className = 'alert alert-danger p-2';
+      alerta.style.fontSize = '13px';
+      alerta.innerHTML = `
+        <strong>⚠ Atenção:</strong> ${itensControlados.length} medicamento(s) controlado(s) no carrinho.
+        ${!clienteSelecionado ? 'Cadastre o cliente. ' : ''}
+        Registre as receitas médicas.
+      `;
+
+      adicionar.prepend(alerta);
+    }
+
+    // Seleção do tipo de receita
+    document.querySelectorAll('.btnTipoReceita').forEach(botao => {
+      botao.addEventListener('click', () => {
+        document.querySelectorAll('.btnTipoReceita').forEach(b => {
+          b.classList.remove('ativo');
+          b.style.background = '#fff';
+          b.style.color = '#333';
+          b.style.borderColor = '#ccc';
+        });
+
+        const cor = botao.dataset.cor;
+        botao.classList.add('ativo');
+        botao.style.background = cor + '22'; // cor com transparência leve
+        botao.style.color = cor;
+        botao.style.borderColor = cor;
+      });
+    });
+
+    // Fechar modal receita
+    document.getElementById('closeModalReceita').addEventListener('click', () => {
+      document.getElementById('modalReceita').style.display = 'none';
+    });
+
+    document.getElementById('cancelarReceita').addEventListener('click', () => {
+      document.getElementById('modalReceita').style.display = 'none';
+    });
+
+    // Confirmar registro da receita
+    document.getElementById('confirmarReceita').addEventListener('click', () => {
+      const tipoSelecionado = document.querySelector('.btnTipoReceita.ativo');
+
+      if (!document.getElementById('receitaNomeMedico').value.trim() ||
+          !document.getElementById('receitaCRM').value.trim() ||
+          !tipoSelecionado) {
+        alert("Preencha o nome do médico, CRM e selecione o tipo de receita.");
+        return;
+      }
+
+      if (itemReceitaAtual && botaoReceitaAtual) {
+        itemReceitaAtual.dataset.receita = "true";
+
+        botaoReceitaAtual.textContent = "✔ Receita Registrada";
+        botaoReceitaAtual.disabled = true;
+        botaoReceitaAtual.classList.remove('btn-outline-danger');
+        botaoReceitaAtual.classList.add('btn-outline-success');
+        botaoReceitaAtual.style = "margin-left: -100px;"
+
+        atualizarAlertaControlado();
+      }
+
+      document.getElementById('modalReceita').style.display = 'none';
+    });
      
 
 </script>

@@ -974,42 +974,38 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                 </div>
                 <div class="modal-body">
-                <form>
-                    <div class="mb-3">
-                    <label class="form-label">Código do Cupom</label>
-                    <input type="text" class="form-control" placeholder="EX: BEMVINDO20">
-                    </div>
-                    <div class="mb-3">
-                    <label class="form-label">Descrição</label>
-                    <input type="text" class="form-control" placeholder="Ex: Desconto de boas-vindas">
-                    </div>
-                    <div class="mb-3">
-                    <label class="form-label">Tipo de Desconto</label>
-                    <select class="form-select">
-                        <option selected>Selecione o tipo</option>
-                        <option>Porcentagem (%)</option>
-                        <option>Valor Fixo (R$)</option>
-                    </select>
-                    </div>
-                    <div class="row">
-                    <div class="col-6 mb-3">
-                        <label class="form-label">Valor</label>
-                        <input type="number" class="form-control" value="0">
-                    </div>
-                    <div class="col-6 mb-3">
-                        <label class="form-label">Limite de Uso</label>
-                        <input type="number" class="form-control" value="0">
-                    </div>
-                    </div>
-                    <div class="mb-3">
-                    <label class="form-label">Categoria</label>
-                    <input type="text" class="form-control" placeholder="Ex: Todos os planos">
-                    </div>
-                    <div class="mb-3">
-                    <label class="form-label">Válido até</label>
-                    <input type="text" class="form-control" placeholder="dd/mm/aaaa">
-                    </div>
-                </form>
+                <form id="formNovoCupom">
+                  <div class="mb-3">
+                      <label class="form-label">Código do Cupom</label>
+                      <input type="text" id="novoCodigo" class="form-control" placeholder="EX: BEMVINDO20">
+                  </div>
+                  <div class="mb-3">
+                      <label class="form-label">Descrição</label>
+                      <input type="text" id="novaDescricao" class="form-control" placeholder="Ex: Desconto de boas-vindas">
+                  </div>
+                  <div class="mb-3">
+                      <label class="form-label">Tipo de Desconto</label>
+                      <select id="novoTipo" class="form-select">
+                          <option value="">Selecione o tipo</option>
+                          <option value="porcentagem">Porcentagem (%)</option>
+                          <option value="valor_fixo">Valor Fixo (R$)</option>
+                      </select>
+                  </div>
+                  <div class="row">
+                      <div class="col-6 mb-3">
+                          <label class="form-label">Valor</label>
+                          <input type="number" id="novoValor" class="form-control" value="0">
+                      </div>
+                      <div class="col-6 mb-3">
+                          <label class="form-label">Limite de Uso</label>
+                          <input type="number" id="novoLimite" class="form-control" value="0">
+                      </div>
+                  </div>
+                  <div class="mb-3">
+                      <label class="form-label">Válido até</label>
+                      <input type="date" id="novaValidade" class="form-control">
+                  </div>
+              </form>
                 </div>
                 <div class="modal-footer d-flex justify-content-between">
                 <button type="button" class="btn-cancelar" data-bs-dismiss="modal">Cancelar</button>
@@ -1072,8 +1068,8 @@
                 <div class="mb-3">
                     <label class="form-label">Status</label>
                     <select class="form-select" id="editStatus">
-                    <option>Ativo</option>
-                    <option>Expirado</option>
+                        <option value="ativo">Ativo</option>
+                        <option value="expirado">Expirado</option>
                     </select>
                 </div>
                 </form>
@@ -1094,213 +1090,191 @@
     </div>
     </div>
 
-  <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('bd').addEventListener('click', () => window.electronAPI.abrirJanelaD());
-      document.getElementById('be').addEventListener('click', () => window.electronAPI.abrirJanelaE());
-      document.getElementById('ba').addEventListener('click', () => window.electronAPI.abrirJanelaV());
-      //document.getElementById('se').addEventListener('click', () => window.electronAPI.abrirJanelaSE());
-      document.getElementById('bde').addEventListener('click', () => window.electronAPI.abrirJanelaDE());
-      document.getElementById('br').addEventListener('click', () => window.electronAPI.abrirJanelaR());
-      document.getElementById('fn').addEventListener('click', () => window.electronAPI.abrirJanelaFunc());
-      document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
-    });
+    <script>
+      let cupomAtual = null;
 
-    function mostrarDataAtual() {
-      const hoje = new Date();
-      const dia = hoje.getDate();
-      const diaSemanaNum = hoje.getDay();
-      const mes = hoje.getMonth();
-      const ano = hoje.getFullYear();
+      window.addEventListener('DOMContentLoaded', async () => {
+        document.getElementById('bd').addEventListener('click', () => window.electronAPI.abrirJanelaD());
+        document.getElementById('be').addEventListener('click', () => window.electronAPI.abrirJanelaE());
+        document.getElementById('ba').addEventListener('click', () => window.electronAPI.abrirJanelaV());
+        document.getElementById('bde').addEventListener('click', () => window.electronAPI.abrirJanelaDE());
+        document.getElementById('br').addEventListener('click', () => window.electronAPI.abrirJanelaR());
+        document.getElementById('fn').addEventListener('click', () => window.electronAPI.abrirJanelaFunc());
+        document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
 
-      const semana = ["Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira", "Quinta-feira", "Sexta-feira", "Sábado"];
-      const mesesAno = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-
-      document.getElementById("dataAtual").textContent =
-        `${semana[diaSemanaNum]}, ${dia} de ${mesesAno[mes]} de ${ano}`;
-    }
-
-    //Para mostrar os detalhes do cupom
-    const cupons = {
-    BEMVINDO20: {
-      codigo: "BEMVINDO20",
-      valor: "20% OFF",
-      descricao: "Desconto de boas-vindas",
-      categoria: "Todos os planos",
-      tipo: "Percentual",
-      validade: "30/12/2025",
-      limite: 100,
-      usados: 45,
-      status: "Ativo"
-    },
-    MEDICAMENTOS15: {
-      codigo: "MEDICAMENTOS15",
-      valor: "15% OFF",
-      descricao: "Desconto em medicamentos",
-      categoria: "Medicamentos",
-      tipo: "Percentual",
-      validade: "15/11/2025",
-      limite: 200,
-      usados: 120,
-      status: "Ativo"
-    },
-    CONSULTA50: {
-      codigo: "CONSULTA50",
-      valor: "R$ 50,00 OFF",
-      descricao: "R$ 50 de desconto em consultas",
-      categoria: "Consultas",
-      tipo: "Valor Fixo",
-      validade: "20/10/2025",
-      limite: 50,
-      usados: 12,
-      status: "Ativo"
-    },
-    FAMILIA30: {
-      codigo: "FAMILIA30",
-      valor: "30% OFF",
-      descricao: "Desconto para plano família",
-      categoria: "Planos Familiares",
-      tipo: "Percentual",
-      validade: "01/08/2025",
-      limite: 30,
-      usados: 30,
-      status: "Expirado"
-    }
-  };
-
-  // adiciona handlers aos itens e mantém seleção visual
-  document.addEventListener('DOMContentLoaded', () => {
-    const itens = document.querySelectorAll('.cupom-item');
-    itens.forEach(item => {
-      //garantir texto sem espaços estranhos
-      item.addEventListener('click', () => {
-        // remover seleção anterior
-        document.querySelectorAll('.cupom-item').forEach(i => i.classList.remove('selected'));
-        item.classList.add('selected');
-
-        const codigo = item.querySelector('.codigo').textContent.trim();
-        mostrarDetalhes(cupons[codigo]);
+        await carregarCupons();
       });
-    });
-  });
 
-  function mostrarDetalhes(cupom) {
-    const painel = document.getElementById('conteudoDetalhe');
-    if (!cupom) {
-      painel.innerHTML = `<div class="conteudo-vazio text-muted" style="margin-top:40px; text-align:center;">
-        <div style="font-size:15px; color:#999;">Selecione um cupom para visualizar os dados</div>
-      </div>`;
-      return;
-    }
+      async function carregarCupons() {
+        const cupons = await window.electronAPI.buscarCupons();
+        renderizarLista(cupons);
+      }
 
-    // montar Detalhes cupom 
-    painel.innerHTML = `
-      <div class="cupom-destaque" role="region" aria-label="Resumo do cupom">
-        <div class="linha-top">
-          <div class="tag">
-            <span>🏷️</span>
-            <div class="codigo">${cupom.codigo}</div>
+      function formatarValor(c) {
+        if (c.tipo === 'porcentagem') return `${parseFloat(c.valor)}% OFF`;
+        return `R$ ${parseFloat(c.valor).toFixed(2).replace('.', ',')} OFF`;
+      }
+
+      function renderizarLista(cupons) {
+        const lista = document.querySelector('.lista-cupons');
+        const subtitulo = document.querySelector('.painel-lista .subtitulo');
+        subtitulo.textContent = `${cupons.length} Cupom(ns)`;
+
+        lista.innerHTML = cupons.map(c => {
+          const usos = c.usos_atuais || 0;
+          const limite = c.limite_uso || 1;
+          const pct = Math.min(100, Math.round((usos / limite) * 100));
+          const statusClass = c.status === 'ativo' ? 'ativo' : 'expirado';
+          const statusLabel = c.status === 'ativo' ? 'Ativo' : 'Expirado';
+
+          return `
+            <div class="cupom-item" data-id="${c.id}">
+              <div>
+                <div class="codigo">${c.codigo}</div>
+                <div class="descricao">${c.descricao || '—'}</div>
+                <div class="valor">${formatarValor(c)}</div>
+                <div class="barra">
+                  <div class="preenchido" style="width:${pct}%;"></div>
+                </div>
+                <small>${usos}/${limite} usos</small>
+              </div>
+              <span class="status ${statusClass}">${statusLabel}</span>
+            </div>
+          `;
+        }).join('');
+
+        lista.querySelectorAll('.cupom-item').forEach((item, idx) => {
+          item.addEventListener('click', () => {
+            lista.querySelectorAll('.cupom-item').forEach(i => i.classList.remove('selected'));
+            item.classList.add('selected');
+            cupomAtual = cupons[idx];
+            mostrarDetalhes(cupomAtual);
+          });
+        });
+      }
+
+      function mostrarDetalhes(c) {
+        const painel = document.getElementById('conteudoDetalhe');
+        const validade = c.validade ? new Date(c.validade).toLocaleDateString('pt-BR') : '—';
+        const statusClass = c.status === 'ativo' ? 'status-ativo' : 'status-expirado';
+        const statusLabel = c.status === 'ativo' ? 'Cupom Ativo' : 'Expirado';
+
+        painel.innerHTML = `
+          <div class="cupom-destaque" role="region">
+            <div class="linha-top">
+              <div class="tag">
+                <span>🏷️</span>
+                <div class="codigo">${c.codigo}</div>
+              </div>
+            </div>
+            <div class="valor-grande">${formatarValor(c)}</div>
           </div>
-        </div>
-        <div class="valor-grande">${cupom.valor}</div>
-      </div>
 
-      <div class="detalhes-lista">
-        <div class="detalhe-item">
-          <div class="label">Descrição</div>
-          <div class="valor">${cupom.descricao}</div>
-        </div>
-
-        <div class="detalhe-item">
-          <div class="label">Categoria</div>
-          <div class="valor">${cupom.categoria}</div>
-        </div>
-
-        <div class="detalhe-item">
-          <div class="label">Tipo de Desconto</div>
-          <div class="valor">${cupom.tipo}</div>
-        </div>
-
-        <div class="detalhe-item">
-          <div class="label">Válido até</div>
-          <div class="valor">
-            <svg class="icon-small" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="3" y="5" width="18" height="16" rx="2" stroke="#6b6b6b" stroke-width="1.2"></rect>
-              <path d="M16 3v4M8 3v4" stroke="#6b6b6b" stroke-width="1.2" stroke-linecap="round"></path>
-            </svg>
-            ${cupom.validade}
+          <div class="detalhes-lista">
+            <div class="detalhe-item">
+              <div class="label">Descrição</div>
+              <div class="valor">${c.descricao || '—'}</div>
+            </div>
+            <div class="detalhe-item">
+              <div class="label">Tipo de Desconto</div>
+              <div class="valor">${c.tipo === 'porcentagem' ? 'Percentual (%)' : 'Valor Fixo (R$)'}</div>
+            </div>
+            <div class="detalhe-item">
+              <div class="label">Válido até</div>
+              <div class="valor">${validade}</div>
+            </div>
+            <div class="dois-colunas">
+              <div class="box-pequeno">
+                <div class="label">Limite de Uso</div>
+                <div class="valor">${c.limite_uso}</div>
+              </div>
+              <div class="box-pequeno">
+                <div class="label">Já Utilizados</div>
+                <div class="valor">${c.usos_atuais}</div>
+              </div>
+            </div>
+            <div style="margin-top:8px;">
+              <div class="${statusClass}">${statusLabel}</div>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:12px;">
+              <button class="btn-editar" type="button" id="btnEditarCupom">Editar Cupom</button>
+              <button class="btn-editar" type="button" id="btnDeletarCupom"
+                style="background-color:#D9534F; color:white; border:none;">Excluir</button>
+            </div>
           </div>
-        </div>
+        `;
 
-        <div class="dois-colunas">
-          <div class="box-pequeno">
-            <div class="label">Limite de Uso</div>
-            <div class="valor">${cupom.limite}</div>
-          </div>
-          <div class="box-pequeno">
-            <div class="label">Já Utilizados</div>
-            <div class="valor">${cupom.usados}</div>
-          </div>
-        </div>
+        document.getElementById('btnEditarCupom').addEventListener('click', () => {
+          document.getElementById('editCodigo').value = c.codigo;
+          document.getElementById('editDescricao').value = c.descricao || '';
+          document.getElementById('editTipo').value = c.tipo;
+          document.getElementById('editValor').value = c.valor;
+          document.getElementById('editLimite').value = c.limite_uso;
+          document.getElementById('editValidade').value = c.validade
+            ? new Date(c.validade).toISOString().split('T')[0] : '';
+          document.getElementById('editStatus').value = c.status;
+          new bootstrap.Modal(document.getElementById('modalEditarCupom')).show();
+        });
 
-        <div style="margin-top:8px;">
-          <div class="${cupom.status.toLowerCase() === 'ativo' ? 'status-ativo' : 'status-expirado'}">
-            ${cupom.status === 'Ativo' ? 'Cupom Ativo' : 'Expirado'}
-          </div>
-        </div>
+        document.getElementById('btnDeletarCupom').addEventListener('click', async () => {
+          await window.electronAPI.deletarCupom(c.id);
+          document.getElementById('conteudoDetalhe').innerHTML =
+            `<div class="conteudo-vazio text-muted" style="margin-top:40px; text-align:center;">
+              <div style="font-size:15px; color:#999;">Selecione um cupom para visualizar os dados</div>
+            </div>`;
+          cupomAtual = null;
+          await carregarCupons();
+        });
+      }
 
-        <button class="btn-editar" type="button" id="btnEditarCupom">Editar Cupom</button>
-      </div>
-    `;
-  }
+      // --- Salvar novo cupom ---
+      document.querySelector('.modal-footer .btn-salvar').addEventListener('click', async () => {
+        const codigo = document.getElementById('novoCodigo').value.trim().toUpperCase();
+        const descricao = document.getElementById('novaDescricao').value.trim();
+        const tipo = document.getElementById('novoTipo').value;
+        const valor = parseFloat(document.getElementById('novoValor').value) || 0;
+        const limite_uso = parseInt(document.getElementById('novoLimite').value) || 0;
+        const validade = document.getElementById('novaValidade').value || null;
 
-    // Abrir modal de edição com os dados do cupom selecionado
-    document.addEventListener('click', (e) => {
-    if (e.target && e.target.id === 'btnEditarCupom') {
-        const codigo = document.querySelector('.cupom-item.selected .codigo').textContent.trim();
-        const cupom = cupons[codigo];
+        if (!codigo || !tipo) return;
 
-        if (!cupom) return;
+        const resultado = await window.electronAPI.cadastrarCupom({ codigo, descricao, tipo, valor, limite_uso, validade });
+        if (resultado.sucesso) {
+          bootstrap.Modal.getInstance(document.getElementById('modalNovoCupom')).hide();
+          document.getElementById('formNovoCupom').reset();
+          await carregarCupons();
+        } else {
+          alert(resultado.erro);
+        }
+      });
 
-        // Preenche os campos do modal
-        document.getElementById('editCodigo').value = cupom.codigo;
-        document.getElementById('editDescricao').value = cupom.descricao;
-        document.getElementById('editTipo').value = cupom.tipo.includes('%') ? 'Percentual (%)' : 'Valor Fixo (R$)';
-        document.getElementById('editValor').value = parseInt(cupom.valor);
-        document.getElementById('editLimite').value = cupom.limite;
-        document.getElementById('editCategoria').value = cupom.categoria;
-        document.getElementById('editValidade').value = cupom.validade;
-        document.getElementById('editStatus').value = cupom.status;
+      // --- Salvar edição do cupom ---
+      document.getElementById('btnSalvarAlteracoes').addEventListener('click', async () => {
+        if (!cupomAtual) return;
+        const descricao = document.getElementById('editDescricao').value.trim();
+        const tipo = document.getElementById('editTipo').value;
+        const valor = parseFloat(document.getElementById('editValor').value) || 0;
+        const limite_uso = parseInt(document.getElementById('editLimite').value) || 0;
+        const validade = document.getElementById('editValidade').value || null;
+        const status = document.getElementById('editStatus').value;
 
-        // Exibe o modal
-        const modal = new bootstrap.Modal(document.getElementById('modalEditarCupom'));
-        modal.show();
-    }
-    });
+        await window.electronAPI.editarCupom({
+          id: cupomAtual.id, descricao, tipo, valor, limite_uso, validade, status
+        });
 
-    // Salvar alterações
-    document.getElementById('btnSalvarAlteracoes').addEventListener('click', () => {
-    const codigo = document.getElementById('editCodigo').value;
-    if (!codigo || !cupons[codigo]) return;
+        bootstrap.Modal.getInstance(document.getElementById('modalEditarCupom')).hide();
+        await carregarCupons();
+      });
 
-    cupons[codigo] = {
-        ...cupons[codigo],
-        descricao: document.getElementById('editDescricao').value,
-        tipo: document.getElementById('editTipo').value,
-        valor: document.getElementById('editValor').value + (document.getElementById('editTipo').value.includes('%') ? '% OFF' : ' R$ OFF'),
-        limite: parseInt(document.getElementById('editLimite').value),
-        categoria: document.getElementById('editCategoria').value,
-        validade: document.getElementById('editValidade').value,
-        status: document.getElementById('editStatus').value
-    };
-
-    // Atualiza visualmente os detalhes
-    mostrarDetalhes(cupons[codigo]);
-
-    // Fecha o modal
-    const modal = bootstrap.Modal.getInstance(document.getElementById('modalEditarCupom'));
-    modal.hide();
-    });
+      // --- Busca por texto ---
+      document.querySelector('.buscar input').addEventListener('input', async (e) => {
+        const termo = e.target.value.toLowerCase();
+        const cupons = await window.electronAPI.buscarCupons();
+        const filtrados = cupons.filter(c =>
+          c.codigo.toLowerCase().includes(termo) || (c.descricao || '').toLowerCase().includes(termo)
+        );
+        renderizarLista(filtrados);
+      });
   </script>
 
 </body>

@@ -380,7 +380,7 @@
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-start">
                 <div>
-                  <div class="fs-4 fw-semibold text-dark">1.234</div>
+                  <div class="fs-4 fw-semibold text-dark" id="totalEstoque"></div>
                   <div class="text-muted small">Produtos em Estoque</div>
                 </div>
               </div>
@@ -396,7 +396,7 @@
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-start">
                 <div>
-                  <div class="fs-4 fw-semibold text-dark">23</div>
+                  <div class="fs-4 fw-semibold text-dark" id="totalAlertas"></div>
                   <div class="text-muted small">Alertas de Validade</div>
                 </div>
                 <span class="badge bg-warning-subtle text-warning border border-warning small">Próximos 30 dias</span>
@@ -413,7 +413,7 @@
             <div class="card-body">
               <div class="d-flex justify-content-between align-items-start">
                 <div>
-                  <div class="fs-4 fw-semibold text-dark">R$ 85.4K</div>
+                  <div class="fs-4 fw-semibold text-dark" id="vendasMes"></div>
                   <div class="text-muted small">Vendas do Mês</div>
                 </div>
               </div>
@@ -433,7 +433,7 @@
             <div class="card-header bg-white border-0 fw-semibold text-warning d-flex align-items-center">
               <img src="alertaAmarelo.png" class="iconA">Produtos Próximos ao Vencimento
             </div>
-            <div class="card-body">
+            <div class="card-body" id="proximosVencimentoBody">
               <div class="alert alert-warning bg-opacity-25 border-0 mb-3">
                 <div class="d-flex justify-content-between">
                   <div>
@@ -480,7 +480,7 @@
             <div class="card-header bg-white border-0 fw-semibold text-danger d-flex align-items-center">
               <img src="estoqueVermelho.png" class="iconA"> Estoque Baixo
             </div>
-            <div class="card-body">
+            <div class="card-body" id="estoqueBaixoBody">
               <div class="mb-4">
                 <div class="d-flex justify-content-between align-items-center">
                   <strong>Losartana 50mg</strong>
@@ -509,7 +509,8 @@
     </div>
 </div>
   <script>
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
+      await carregarDashboard();
       document.getElementById('bd').addEventListener('click', () => window.electronAPI.abrirJanelaD());
       document.getElementById('be').addEventListener('click', () => window.electronAPI.abrirJanelaE());
       document.getElementById('ba').addEventListener('click', () => window.electronAPI.abrirJanelaV());
@@ -533,6 +534,81 @@
 
       document.getElementById("dataAtual").textContent =
         `${semana[diaSemanaNum]}, ${dia} de ${mesesAno[mes]} de ${ano}`;
+    }
+
+    async function carregarDashboard() {
+      const dados = await window.electronAPI.buscarDashboard();
+
+      document.getElementById('totalEstoque').textContent = dados.totalEstoque.toLocaleString('pt-BR');
+      document.getElementById('totalAlertas').textContent = dados.totalAlertasValidade;
+      document.getElementById('vendasMes').textContent = formatarMoeda(dados.vendasDoMes);
+
+      renderizarProximosVencimento(dados.proximosVencimento);
+      renderizarEstoqueBaixo(dados.estoqueBaixo);
+    }
+
+    function formatarMoeda(valor) {
+      if (valor >= 1000) return `R$ ${(valor / 1000).toFixed(1)}K`;
+      return `R$ ${valor.toFixed(2).replace('.', ',')}`;
+    }
+
+    function renderizarProximosVencimento(lotes) {
+      const container = document.getElementById('proximosVencimentoBody');
+
+      if (lotes.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center mb-0">Nenhum produto próximo do vencimento</p>';
+        return;
+      }
+
+      const hoje = new Date();
+      hoje.setHours(0, 0, 0, 0);
+
+      container.innerHTML = lotes.map(l => {
+        const validade = new Date(l.data_validade);
+        validade.setHours(0, 0, 0, 0);
+        const dias = Math.round((validade - hoje) / (1000 * 60 * 60 * 24));
+
+        return `
+          <div class="alert alert-warning bg-opacity-25 border-0 mb-3">
+            <div class="d-flex justify-content-between">
+              <div>
+                <strong>${l.nome_produto}</strong><br>
+                <small class="text-muted">${l.quantidade} unidades</small>
+              </div>
+              <div class="text-end">
+                <strong class="text-danger">${dias} dias</strong><br>
+                <small class="text-muted">para vencer</small>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderizarEstoqueBaixo(produtos) {
+      const container = document.getElementById('estoqueBaixoBody');
+
+      if (produtos.length === 0) {
+        container.innerHTML = '<p class="text-muted text-center mb-0">Nenhum produto com estoque baixo</p>';
+        return;
+      }
+
+      container.innerHTML = produtos.map(p => {
+        const pct = p.estoque_min > 0 ? Math.min(100, Math.round((p.quantidade / p.estoque_min) * 100)) : 100;
+
+        return `
+          <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center">
+              <strong>${p.nome}</strong>
+              <span class="badge bg-danger">Crítico</span>
+            </div>
+            <div class="small text-muted mb-1">Atual: ${p.quantidade} — Mínimo: ${p.estoque_min}</div>
+            <div class="progress" style="height: 8px;">
+              <div class="progress-bar bg-danger" style="width: ${pct}%;"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
     }
   </script>
 

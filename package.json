@@ -22,7 +22,11 @@
   },
   "dependencies": {
     "@google/genai": "^1.50.1",
+    "bcrypt": "^6.0.0",
+    "dotenv": "^17.4.2",
     "flatpickr": "^4.6.13",
-    "mysql2": "^3.15.3"
+    "mysql2": "^3.15.3",
+    "pdfkit": "^0.19.1",
+    "xlsx": "^0.18.5"
   }
 }

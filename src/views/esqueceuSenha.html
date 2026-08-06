@@ -18,12 +18,11 @@
     body {
       width: 100%;
       height: 100vh;
-      background-image: url('testando.png');
+      background-image: url('senhaEsquecida.jpeg');
       background-position: center;
       background-size: cover;
       display: flex;
       align-items: center;
-      justify-content: flex-start;
     }
 
     .container {
@@ -31,11 +30,12 @@
       height: 100%;
       display: flex;
       align-items: center;
+      justify-content: flex-end;
     }
 
     .left-column {
       width: 420px;
-      margin-left: 90px;
+      margin-right: 90px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -63,7 +63,7 @@
       font-size: 40px;
       font-weight: 700;
       color: #355e3b;
-      margin-bottom: 2px;
+      margin-bottom: 12px;
       letter-spacing: 0.6px;
     }
 
@@ -77,13 +77,23 @@
 
     }
 
-
-
-
-
     .titulo {
       font-size: 24px;
       font-weight: 700;
+      color: #2e462e;
+      margin-bottom: 6px;
+    }
+
+    .legenda {
+      font-size: 24px;
+      font-weight: 700;
+      color: #2e462e;
+      margin-top: 80px;
+      margin-bottom: 20px;
+    }
+
+    .subtitulo {
+      font-size: 16px;
       color: #2e462e;
       margin-bottom: 6px;
     }
@@ -184,13 +194,6 @@
       margin-top: 4px;
     }
 
-    .entrar-com {
-      font-size: 15px;
-      font-weight: 600;
-      color: #2e462e;
-      margin-bottom: 6px;
-    }
-
     .social {
       display: flex;
       gap: 12px;
@@ -222,9 +225,9 @@
       border-color: #2f6d2f;
     }
 
-    .entrar {
+    .enviar {
       width: 320px;
-      padding: 12px 16px;
+      padding: 10px 16px;
       border-radius: 12px;
       border: none;
       background: #2f4f2f;
@@ -239,7 +242,7 @@
       transition: 0.2s ease;
     }
 
-    .entrar:hover { background: #355e3b; }
+    .enviar:hover { background: #355e3b; }
 
     .esqueci {
       font-size: 13px;
@@ -267,7 +270,9 @@
             FARMA<span>GRID</span>
             <img src="LogoFarmaGrid.png" alt="Símbolo de mais" class="plus-icon" />
           </div>
-          <div class="titulo">Login</div>
+          <div class="titulo">Esqueceu sua senha?</div>
+          <p class="subtitulo">Não se preocupe. Nós podemos te ajudar!</p>
+          <div class="legenda">Informe o e-mail para o qual deseja redefinir sua senha.</div>
         </div>
 
         <div class="form-inner">
@@ -275,167 +280,17 @@
             <label for="email">Email:</label>
             <div class="input-icon">
               <input id="email" type="email" />
-              <img src="login.png" alt="Ícone de email" />
+              <img src="email.png" alt="Ícone de email" />
             </div>
-          </div>
-
-          <div class="form-group">
-            <label for="senha">Senha:</label>
-            <div class="input-icon">
-              <input id="senha" type="password" />
-              <img src="senha.png" alt="Ícone de senha" />
-            </div>
-          </div>
-
-          <div class="remember">
-            <input id="lembrar" type="checkbox" />
-            <label for="lembrar">Lembrar de mim</label>
           </div>
         </div>
 
-        <div class="centered" style="margin-top:6px">
-          <div class="entrar-com">Entrar com:</div>
-          <div class="social">
-            <button class="icon" id="medicoLogin"><img src="medico.png" alt="Google"></button>
-            <button class="icon" id="farmaciaLogin"><img src="farmacia.png" alt="Apple"></button>
-          </div>
-          <div class="social">
-            <span class="entrar-com">Médico</span>
-            <span class="entrar-com">Farmácia</span>
-          </div>
-        </div>
-
-        <button class="entrar">Entrar</button>
-        <a class="esqueci" href="esqueceuSenha.html">Esqueceu sua senha?</a>
+        <button class="enviar">Enviar</button>
+        <a class="esqueci" href="index.html">Lembrou sua senha? Volte para o Login!</a>
       </div>
     </div>
   </div>
 
-
-  <script>
-  let tipoSelecionado = null; // 1 = médico, 2 = farmácia
-
-  document.addEventListener('DOMContentLoaded', () => {
-  const dadosSalvos = JSON.parse(localStorage.getItem('lembrarLogin'));
-
-  if (dadosSalvos) {
-    document.getElementById('email').value = dadosSalvos.email;
-    document.getElementById('lembrar').checked = true;
-
-    tipoSelecionado = dadosSalvos.tipo;
-
-    if (tipoSelecionado === 1) botaoMedico.classList.add('selected');
-    if (tipoSelecionado === 2) botaoFarmacia.classList.add('selected');
-  }
-});
-
-  // Selecionar o botão Médico ou Farmácia
-  const botaoMedico = document.getElementById('medicoLogin');
-  const botaoFarmacia = document.getElementById('farmaciaLogin');
-  const botoesTipo = [botaoMedico, botaoFarmacia];
-
-  botoesTipo.forEach(botao => {
-    botao.addEventListener('click', () => {
-      // Remove seleção anterior
-      botoesTipo.forEach(b => b.classList.remove('selected'));
-
-      // Adiciona classe no clicado
-      botao.classList.add('selected');
-
-      // Define o tipo
-      if (botao.id === 'medicoLogin') tipoSelecionado = 1;
-      if (botao.id === 'farmaciaLogin') tipoSelecionado = 2;
-    });
-  });
-
-  // Botão de Entrar
-  const botaoEntrar = document.querySelector('.entrar');
-
-  botaoEntrar.addEventListener('click', async () => {
-    const email = document.getElementById('email').value.trim();
-    const senha = document.getElementById('senha').value.trim();
-
-    if (!email || !senha) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Campos vazios',
-        text: 'Por favor, preencha o email e a senha!',
-      });
-      return;
-    }
-
-    if (!tipoSelecionado) {
-      Swal.fire({
-        icon: 'info',
-        title: 'Selecione o tipo de login',
-        text: 'Escolha se você é Médico ou Farmácia antes de continuar.',
-      });
-      return;
-    }
-
-    try {
-      const user = await window.electronAPI.login(email, senha, tipoSelecionado);
-
-      if (user) {
-
-        const lembrar = document.getElementById('lembrar').checked;
-
-          if (lembrar) {
-            localStorage.setItem('lembrarLogin', JSON.stringify({
-              email: email,
-              tipo: tipoSelecionado
-            }));
-          } else {
-            localStorage.removeItem('lembrarLogin');
-          }
-
-        localStorage.setItem('usuarioLogado', JSON.stringify(user));
-        Swal.fire({
-          icon: 'success',
-          title: 'Login realizado!',
-          text: `Bem-vindo(a) ${user.nome || ''}!`,
-          timer: 1500,
-          showConfirmButton: false
-        }).then(() => {
-
-          if (user.perfil === "medico") {
-            window.electronAPI.abrirJanelaIndex();
-
-          } else if (user.perfil === "farmacia") {
-            window.electronAPI.abrirJanelaD();
-
-          } else if (user.perfil === "balconista") {
-            window.electronAPI.abrirJanelaBalconista();
-
-          } else if (user.perfil === "caixa") {
-            window.electronAPI.abrirJanelaCaixa();
-
-          } else {
-            Swal.fire({
-              icon: 'error',
-              title: 'Perfil desconhecido',
-              text: 'Não foi possível identificar o tipo de usuário.',
-            });
-          }
-
-        });
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Erro no login',
-          text: 'Email, senha ou tipo incorretos!',
-        });
-      }
-    } catch (err) {
-      console.error('Erro ao tentar logar:', err);
-      Swal.fire({
-        icon: 'error',
-        title: 'Erro inesperado',
-        text: 'Ocorreu um erro ao conectar ao banco de dados.',
-      });
-    }
-  });
-</script>
 
 
 

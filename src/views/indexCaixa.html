@@ -948,22 +948,29 @@
       function listarProdutosDisponiveis() {
         const container = document.querySelector('.produtosDisponiveis')
         container.innerHTML = "";
-        produtos.forEach(p => {
+
+        const produtosPermitidos = produtos.filter(p => !p.tarja_preta);
+
+        produtosPermitidos.forEach(p => {
           container.innerHTML += `
             <div class="produto-item">
               <div class="infoRemedio">
                 <p class="nomeProduto">${p.nome}</p>
                 <div class="produto-info">
-                  Código: ${p.codigo} | Estoque: ${p.estoque}
+                  Código: ${p.codigo_barras || 'Não informado'} | Estoque: ${p.quantidade}
                 </div>
               </div>
               <div class="d-flex adicionarRemedio gap-3">
-                <span class="preco">R$ ${p.preco.toFixed(2)}</span>
+                <span class="preco">R$ ${Number(p.preco).toFixed(2)}</span>
                 <button class="btn-add" onclick="adicionarProdutoNaVenda(this)">+</button>
               </div>
             </div>
           `;
         });
+
+        if (produtosPermitidos.length === 0) {
+          container.innerHTML = '<p class="text-muted text-center">Nenhum produto disponível</p>';
+        }
       }
  
         window.addEventListener("DOMContentLoaded", () => {

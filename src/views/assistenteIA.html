@@ -680,6 +680,16 @@ select.form-control:focus {
 
   <script>
     window.addEventListener('DOMContentLoaded', async () => {
+
+      const fotoSalva = localStorage.getItem('fotoPerfilBase64');
+        if (fotoSalva) {
+            const fotoBarra = document.querySelector('.foto');
+            fotoBarra.style.backgroundImage = `url(data:image/jpeg;base64,${fotoSalva})`;
+            fotoBarra.style.backgroundSize = 'cover';
+            fotoBarra.style.backgroundPosition = 'center';
+            fotoBarra.textContent = '';
+        }
+
     const botBp = document.getElementById('bp');
     const botBt = document.getElementById('bt');
     const botBi = document.getElementById('bi');

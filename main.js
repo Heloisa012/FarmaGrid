@@ -1,6 +1,7 @@
 const { app, BrowserWindow, nativeTheme, Menu, shell, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const bcrypt = require('bcrypt');
 
 
 //Janela Principal
@@ -340,9 +341,24 @@ ipcMain.handle('login', async (event, email, senha, tipoSelecionado) => {
     const tabela = 'login';
 
     const [rows] = await db.promise().query(
-      `SELECT * FROM ${tabela} WHERE email = ? AND senha = ? AND tipo = ? LIMIT 1`,
-      [email, senha, tipoSelecionado]
+      `SELECT * FROM ${tabela} WHERE email = ? AND tipo = ? LIMIT 1`,
+      [email, tipoSelecionado]
     );
+
+    if(rows.length === 0){
+      return null;
+    }
+
+    const user = rows[0];
+
+    const senhaCorreta = await bcrypt.compare(
+      senha,
+      user.senha
+    );
+
+    if(!senhaCorreta){
+      return null;
+    }
 
     if (rows.length > 0) {
       const user = rows[0];
@@ -727,15 +743,627 @@ ipcMain.handle('deletar-relatorio', async (event, id) => {
     }
 });
 
-// === CHATBOT API - VERSÃO FINAL S.B.O ===
+// === BUSCAR DADOS DO MÉDICO (CONFIGURAÇÕES) ===
+ipcMain.handle('buscar-dados-medico', async (event, idMedico) => {
+  try {
+    const [rows] = await db.promise().query(`
+      SELECT m.*, mc.nome_clinica, mc.endereco_clinica, mc.tempo_consulta, mc.valor_consulta
+      FROM medico m
+      LEFT JOIN medico_clinica mc ON mc.id_medico = m.id
+      WHERE m.id = ?
+    `, [idMedico]);
+
+    if (rows.length === 0) return null;
+
+    const medico = rows[0];
+
+    if (medico.foto_perfil) {
+      medico.foto_perfil = medico.foto_perfil.toString('base64');
+    }
+
+    return medico;
+  } catch (err) {
+    console.error('Erro ao buscar dados do médico:', err);
+    throw err;
+  }
+});
+
+// === SALVAR ALTERAÇÕES DE CONFIGURAÇÕES DO MEDICO ===
+ipcMain.handle('atualizar-dados-medico', async (event, dados) => {
+  try {
+
+    await db.promise().query(`
+      UPDATE medico
+      SET
+        nome = ?,
+        sobrenome = ?,
+        email = ?,
+        telefone = ?,
+        data_nascimento = ?,
+        endereco = ?
+      WHERE id = ?
+    `, [
+      dados.nome,
+      dados.sobrenome,
+      dados.email,
+      dados.telefone,
+      dados.data_nascimento,
+      dados.endereco,
+      dados.id
+    ]);
+
+    return { sucesso: true };
+
+  } catch (err) {
+    console.error(err);
+    return { sucesso: false };
+  }
+});
+
+// === SALVAR ALTERAÇÕES PROFISSIONAIS DO MEDICO ===
+ipcMain.handle('atualizar-dados-profissionais', async (event, dados) => {
+  try {
+
+    await db.promise().query(`
+      UPDATE medico
+      SET
+        crm = ?,
+        rqe = ?,
+        especialidade = ?,
+        subespecialidades = ?
+      WHERE id = ?
+    `, [
+      dados.crm,
+      dados.rqe,
+      dados.especialidade,
+      dados.subespecialidades,
+      dados.id
+    ]);
+
+    await db.promise().query(`
+      UPDATE medico_clinica
+      SET
+        nome_clinica = ?,
+        endereco_clinica = ?,
+        tempo_consulta = ?,
+        valor_consulta = ?
+      WHERE id_medico = ?
+    `, [
+      dados.nome_clinica,
+      dados.endereco_clinica,
+      dados.tempo_consulta,
+      dados.valor_consulta,
+      dados.id
+    ]);
+
+    return { sucesso: true };
+
+  } catch (err) {
+    console.error(err);
+    return { sucesso: false };
+  }
+});
+
+// === SALVAR PREFERÊNCIAS DO MÉDICO ===
+ipcMain.handle('atualizar-preferencias', async (event, dados) => {
+  try {
+
+    await db.promise().query(`
+      UPDATE medico
+      SET
+        horario_inicio = ?,
+        horario_termino = ?
+      WHERE id = ?
+    `, [
+      dados.horario_inicio,
+      dados.horario_termino,
+      dados.id
+    ]);
+
+    return { sucesso: true };
+
+  } catch (err) {
+    console.error(err);
+    return { sucesso: false };
+  }
+});
+
+// === SALVAR FOTO DE PERFIL NO BANCO ===
+ipcMain.handle('salvar-foto-perfil', async (event, data) => {
+    const buffer = Buffer.from(data.foto);
+
+    await db.promise().query(
+        "UPDATE medico SET foto_perfil = ? WHERE id = ?",
+        [buffer, data.id]
+    );
+});
+
+// === BUSCAR TODOS OS PRODUTOS ===
+ipcMain.handle('buscar-produtos', async () => {
+  try {
+    const [rows] = await db.promise().query(`
+      SELECT p.*, 
+        (SELECT MIN(l.data_validade) FROM lotes l WHERE l.id_produto = p.id) AS proxima_validade,
+        (SELECT SUM(l.quantidade) FROM lotes l WHERE l.id_produto = p.id) AS total_lotes
+      FROM produtos p
+      ORDER BY p.nome ASC
+    `);
+    return rows;
+  } catch (err) {
+    console.error('Erro ao buscar produtos:', err);
+    throw err;
+  }
+});
+
+// === BUSCAR LOTES DE UM PRODUTO ===
+ipcMain.handle('buscar-lotes', async (event, idProduto) => {
+  try {
+    const [rows] = await db.promise().query(
+      'SELECT * FROM lotes WHERE id_produto = ? ORDER BY data_validade ASC',
+      [idProduto]
+    );
+    return rows;
+  } catch (err) {
+    console.error('Erro ao buscar lotes:', err);
+    throw err;
+  }
+});
+
+// === CADASTRAR PRODUTO ===
+ipcMain.handle('cadastrar-produto', async (event, dados) => {
+  try {
+    const { nome, categoria, quantidade, estoque_min, preco, fornecedor, codigo_barras, tarja_preta } = dados;
+    const [result] = await db.promise().query(
+      `INSERT INTO produtos (nome, categoria, quantidade, estoque_min, preco, fornecedor, codigo_barras, tarja_preta)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [nome, categoria, quantidade, estoque_min, preco, fornecedor, codigo_barras || null, tarja_preta ? 1 : 0]
+    );
+    return { sucesso: true, id: result.insertId };
+  } catch (err) {
+    console.error('Erro ao cadastrar produto:', err);
+    if (err.code === 'ER_DUP_ENTRY') {
+      return { sucesso: false, erro: 'Código de barras já cadastrado.' };
+    }
+    return { sucesso: false, erro: err.message };
+  }
+});
+
+// === EDITAR PRODUTO ===
+ipcMain.handle('editar-produto', async (event, dados) => {
+  try {
+    const { id, nome, categoria, estoque_min, preco, fornecedor, codigo_barras, tarja_preta } = dados;
+    await db.promise().query(
+      `UPDATE produtos SET nome = ?, categoria = ?, estoque_min = ?, preco = ?, fornecedor = ?, codigo_barras = ?, tarja_preta = ?
+       WHERE id = ?`,
+      [nome, categoria, estoque_min, preco, fornecedor, codigo_barras || null, tarja_preta ? 1 : 0, id]
+    );
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao editar produto:', err);
+    if (err.code === 'ER_DUP_ENTRY') {
+      return { sucesso: false, erro: 'Código de barras já cadastrado.' };
+    }
+    return { sucesso: false, erro: err.message };
+  }
+});
+
+// === ATUALIZAR ESTOQUE (ENTRADA/SAÍDA + LOTE) ===
+ipcMain.handle('atualizar-estoque', async (event, dados) => {
+  try {
+    const { id_produto, tipo, quantidade, numero_lote, data_validade, prateleira } = dados;
+    const qtd = tipo === 'entrada' ? quantidade : -quantidade;
+
+    await db.promise().query(
+      'UPDATE produtos SET quantidade = quantidade + ? WHERE id = ?',
+      [qtd, id_produto]
+    );
+
+    if (numero_lote || data_validade) {
+      await db.promise().query(
+        `INSERT INTO lotes (id_produto, numero_lote, quantidade, data_validade, prateleira)
+         VALUES (?, ?, ?, ?, ?)`,
+        [id_produto, numero_lote || null, quantidade, data_validade || null, prateleira || null]
+      );
+    }
+
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao atualizar estoque:', err);
+    return { sucesso: false, erro: err.message };
+  }
+});
+
+// === DELETAR PRODUTO ===
+ipcMain.handle('deletar-produto', async (event, id) => {
+  try {
+    await db.promise().query('DELETE FROM produtos WHERE id = ?', [id]);
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao deletar produto:', err);
+    return { sucesso: false, erro: err.message };
+  }
+});
+
+// === BUSCAR LOTES COM VALIDADE PRÓXIMA (até 30 dias) ===
+ipcMain.handle('buscar-alertas-validade', async () => {
+  try {
+    const [rows] = await db.promise().query(`
+      SELECT l.*, p.nome AS nome_produto
+      FROM lotes l
+      JOIN produtos p ON p.id = l.id_produto
+      WHERE l.data_validade IS NOT NULL
+        AND l.data_validade >= CURDATE()
+      ORDER BY l.data_validade ASC
+    `);
+    return rows;
+  } catch (err) {
+    console.error('Erro ao buscar alertas de validade:', err);
+    throw err;
+  }
+});
+
+// === REMOVER LOTE (MARCAR COMO RESOLVIDO) ===
+ipcMain.handle('remover-lote', async (event, id) => {
+  try {
+    await db.promise().query('DELETE FROM lotes WHERE id = ?', [id]);
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao remover lote:', err);
+    return { sucesso: false };
+  }
+});
+
+// === BUSCAR CUPONS ===
+ipcMain.handle('buscar-cupons', async () => {
+  try {
+    // Expira automaticamente por data ou limite de uso
+    await db.promise().query(`
+      UPDATE cupons
+      SET status = 'expirado'
+      WHERE status = 'ativo'
+        AND (
+          (validade IS NOT NULL AND validade < CURDATE())
+          OR (limite_uso > 0 AND usos_atuais >= limite_uso)
+        )
+    `);
+
+    const [rows] = await db.promise().query('SELECT * FROM cupons ORDER BY status ASC, codigo ASC');
+    return rows;
+  } catch (err) {
+    console.error('Erro ao buscar cupons:', err);
+    throw err;
+  }
+});
+
+// === CADASTRAR CUPOM ===
+ipcMain.handle('cadastrar-cupom', async (event, dados) => {
+  try {
+    const { codigo, descricao, tipo, valor, limite_uso, validade } = dados;
+    await db.promise().query(
+      `INSERT INTO cupons (codigo, descricao, tipo, valor, limite_uso, usos_atuais, validade, status)
+       VALUES (?, ?, ?, ?, ?, 0, ?, 'ativo')`,
+      [codigo, descricao, tipo, valor, limite_uso, validade || null]
+    );
+    return { sucesso: true };
+  } catch (err) {
+    if (err.code === 'ER_DUP_ENTRY') return { sucesso: false, erro: 'Código já existe.' };
+    return { sucesso: false, erro: err.message };
+  }
+});
+
+// === EDITAR CUPOM ===
+ipcMain.handle('editar-cupom', async (event, dados) => {
+  try {
+    const { id, descricao, tipo, valor, limite_uso, validade, status } = dados;
+    await db.promise().query(
+      `UPDATE cupons SET descricao = ?, tipo = ?, valor = ?, limite_uso = ?, validade = ?, status = ?
+       WHERE id = ?`,
+      [descricao, tipo, valor, limite_uso, validade || null, status, id]
+    );
+    return { sucesso: true };
+  } catch (err) {
+    return { sucesso: false, erro: err.message };
+  }
+});
+
+// === DELETAR CUPOM ===
+ipcMain.handle('deletar-cupom', async (event, id) => {
+  try {
+    await db.promise().query('DELETE FROM cupons WHERE id = ?', [id]);
+    return { sucesso: true };
+  } catch (err) {
+    return { sucesso: false, erro: err.message };
+  }
+});
+
+// === DADOS DO DASHBOARD ===
+ipcMain.handle('buscar-dashboard', async () => {
+  try {
+    const [[estoqueRow]] = await db.promise().query(
+      'SELECT COALESCE(SUM(quantidade), 0) AS total FROM produtos'
+    );
+
+    const [alertasRows] = await db.promise().query(`
+      SELECT l.*, p.nome AS nome_produto
+      FROM lotes l
+      JOIN produtos p ON p.id = l.id_produto
+      WHERE l.data_validade IS NOT NULL
+        AND l.data_validade BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+      ORDER BY l.data_validade ASC
+    `);
+
+    const [estoqueBaixoRows] = await db.promise().query(`
+      SELECT * FROM produtos
+      WHERE quantidade < estoque_min
+      ORDER BY quantidade ASC
+    `);
+
+    const [vendasRows] = await db.promise().query(
+      'SELECT total, data_venda FROM vendas_concluidas'
+    );
+
+    const hoje = new Date();
+    const mesAtual = hoje.getMonth();
+    const anoAtual = hoje.getFullYear();
+
+    const vendasDoMes = vendasRows
+      .filter(v => {
+        const partes = (v.data_venda || '').split('/');
+        if (partes.length !== 3) return false;
+        return (parseInt(partes[1]) - 1) === mesAtual && parseInt(partes[2]) === anoAtual;
+      })
+      .reduce((soma, v) => soma + parseFloat(v.total), 0);
+
+    return {
+      totalEstoque: estoqueRow.total,
+      totalAlertasValidade: alertasRows.length,
+      vendasDoMes,
+      proximosVencimento: alertasRows.slice(0, 3),
+      estoqueBaixo: estoqueBaixoRows.slice(0, 5)
+    };
+  } catch (err) {
+    console.error('Erro ao buscar dados do dashboard:', err);
+    throw err;
+  }
+});
+
+// === RELATÓRIOS DA FARMÁCIA ===
+const XLSX = require('xlsx');
+const PDFDocument = require('pdfkit');
+
+function calcularPeriodoRelatorio(tipo, periodo) {
+  const hoje = new Date();
+  const dias = periodo === 'Última Semana' ? 7
+             : periodo === 'Último Mês' ? 30
+             : periodo === 'Últimos 3 Meses' ? 90
+             : null;
+
+  if (!dias) return { inicio: null, fim: null };
+
+  // Validade olha pra FRENTE (próximos X dias), Vendas olha pra TRÁS (últimos X dias)
+  if (tipo === 'validade') {
+    const fim = new Date(hoje);
+    fim.setDate(fim.getDate() + dias);
+    return { inicio: hoje, fim };
+  } else {
+    const inicio = new Date(hoje);
+    inicio.setDate(inicio.getDate() - dias);
+    return { inicio, fim: hoje };
+  }
+}
+
+async function buscarDadosRelatorio(tipo, periodo) {
+  if (tipo === 'estoque') {
+    const [rows] = await db.promise().query(
+      'SELECT nome, categoria, quantidade, estoque_min, preco, fornecedor FROM produtos ORDER BY nome ASC'
+    );
+    return rows;
+  }
+
+  if (tipo === 'validade') {
+    const { inicio, fim } = calcularPeriodoRelatorio('validade', periodo);
+    let sql = `
+      SELECT p.nome, l.numero_lote, l.quantidade, l.data_validade, l.prateleira
+      FROM lotes l JOIN produtos p ON p.id = l.id_produto
+      WHERE l.data_validade IS NOT NULL
+    `;
+    const params = [];
+    if (inicio && fim) {
+      sql += ' AND l.data_validade BETWEEN ? AND ?';
+      params.push(inicio.toISOString().split('T')[0], fim.toISOString().split('T')[0]);
+    }
+    sql += ' ORDER BY l.data_validade ASC';
+    const [rows] = await db.promise().query(sql, params);
+    return rows;
+  }
+
+  if (tipo === 'vendas') {
+    const [rows] = await db.promise().query(
+      'SELECT cliente, total, quantidade, metodo_pago, data_venda FROM vendas_concluidas'
+    );
+    const { inicio, fim } = calcularPeriodoRelatorio('vendas', periodo);
+    if (!inicio) return rows;
+
+    return rows.filter(v => {
+      const partes = (v.data_venda || '').split('/');
+      if (partes.length !== 3) return false;
+      const data = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
+      return data >= inicio && data <= fim;
+    });
+  }
+
+  return [];
+}
+
+function gerarCSV(rows, caminho) {
+  if (rows.length === 0) {
+    fs.writeFileSync(caminho, 'Nenhum dado encontrado para este período.', 'utf8');
+    return;
+  }
+  const colunas = Object.keys(rows[0]);
+  const linhas = [colunas.join(',')];
+  rows.forEach(r => linhas.push(colunas.map(c => `"${r[c] ?? ''}"`).join(',')));
+  fs.writeFileSync(caminho, linhas.join('\n'), 'utf8');
+}
+
+function gerarXLSX(rows, caminho) {
+  const ws = XLSX.utils.json_to_sheet(rows.length ? rows : [{ aviso: 'Nenhum dado encontrado' }]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Relatorio');
+  XLSX.writeFile(wb, caminho);
+}
+
+function gerarPDF(rows, caminho, titulo) {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({ margin: 40 });
+    const stream = fs.createWriteStream(caminho);
+    doc.pipe(stream);
+
+    doc.fontSize(16).text(titulo, { underline: true });
+    doc.moveDown();
+
+    if (rows.length === 0) {
+      doc.fontSize(11).text('Nenhum dado encontrado para este período.');
+    } else {
+      const colunas = Object.keys(rows[0]);
+      doc.fontSize(9);
+      rows.forEach(r => {
+        doc.text(colunas.map(c => `${c}: ${r[c] ?? '—'}`).join('  |  '));
+        doc.moveDown(0.3);
+      });
+    }
+
+    doc.end();
+    stream.on('finish', resolve);
+    stream.on('error', reject);
+  });
+}
+
+ipcMain.handle('gerar-relatorio-farmacia', async (event, { tipo, periodo, formato }) => {
+  try {
+    const rows = await buscarDadosRelatorio(tipo, periodo);
+
+    const pasta = app.getPath('downloads');
+
+    const titulos = { estoque: 'Relatório de Estoque', validade: 'Relatório de Validade', vendas: 'Relatório de Vendas' };
+    const extensao = formato === 'PDF' ? 'pdf' : formato === 'XLSX' ? 'xlsx' : 'csv';
+    const nomeArquivo = `${tipo}_${Date.now()}.${extensao}`;
+    const caminho = path.join(pasta, nomeArquivo);
+
+    if (formato === 'CSV') gerarCSV(rows, caminho);
+    else if (formato === 'XLSX') gerarXLSX(rows, caminho);
+    else if (formato === 'PDF') await gerarPDF(rows, caminho, titulos[tipo]);
+
+    const tamanhoKb = Math.round(fs.statSync(caminho).size / 1024);
+
+    await db.promise().query(
+      `INSERT INTO relatorios_farmacia (tipo, periodo, formato, nome_arquivo, caminho, tamanho_kb)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [tipo, periodo, formato, nomeArquivo, caminho, tamanhoKb]
+    );
+
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao gerar relatório:', err);
+    return { sucesso: false, erro: err.message };
+  }
+});
+
+ipcMain.handle('buscar-relatorios-farmacia', async () => {
+  try {
+    const [rows] = await db.promise().query(
+      'SELECT * FROM relatorios_farmacia ORDER BY gerado_em DESC LIMIT 10'
+    );
+    return rows;
+  } catch (err) {
+    console.error('Erro ao buscar relatórios:', err);
+    throw err;
+  }
+});
+
+ipcMain.handle('baixar-relatorio-farmacia', async (event, id) => {
+  try {
+    const [rows] = await db.promise().query('SELECT caminho FROM relatorios_farmacia WHERE id = ?', [id]);
+    if (rows.length === 0) return { sucesso: false };
+    await shell.openPath(rows[0].caminho);
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao abrir relatório:', err);
+    return { sucesso: false };
+  }
+});
+
+ipcMain.handle('buscar-resumo-relatorios', async () => {
+  try {
+    const [[estoqueRow]] = await db.promise().query('SELECT COALESCE(SUM(quantidade), 0) AS total FROM produtos');
+
+    const [[alertasRow]] = await db.promise().query(`
+      SELECT COUNT(*) AS total FROM lotes
+      WHERE data_validade IS NOT NULL
+        AND data_validade BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+    `);
+
+    const [vendasRows] = await db.promise().query('SELECT total, data_venda FROM vendas_concluidas');
+
+    const somarMes = (mes, ano) => vendasRows
+      .filter(v => {
+        const partes = (v.data_venda || '').split('/');
+        if (partes.length !== 3) return false;
+        return (parseInt(partes[1]) - 1) === mes && parseInt(partes[2]) === ano;
+      })
+      .reduce((soma, v) => soma + parseFloat(v.total), 0);
+
+    const hoje = new Date();
+    const mesAtual = hoje.getMonth();
+    const anoAtual = hoje.getFullYear();
+    const mesAnterior = new Date(anoAtual, mesAtual - 1, 1);
+
+    const vendasMesAtual = somarMes(mesAtual, anoAtual);
+    const vendasMesAnterior = somarMes(mesAnterior.getMonth(), mesAnterior.getFullYear());
+
+    const variacaoVendas = vendasMesAnterior > 0
+      ? Math.round(((vendasMesAtual - vendasMesAnterior) / vendasMesAnterior) * 100)
+      : null;
+
+    return {
+      totalEstoque: estoqueRow.total,
+      vendasMesAtual,
+      variacaoVendas,
+      totalAlertas: alertasRow.total
+    };
+  } catch (err) {
+    console.error('Erro ao buscar resumo de relatórios:', err);
+    throw err;
+  }
+});
+
+// === ATUALIZAR DADOS DO FUNCIONÁRIO ===
+ipcMain.handle('atualizar-funcionario', async (event, dados) => {
+  try {
+    const { cpf, nome, email, telefone, funcao, status } = dados;
+    await db.promise().query(
+      `UPDATE funcFarma
+       SET nome = ?, email = ?, telefone = ?, funcao = ?, status = ?
+       WHERE CPF = ?`,
+      [nome, email, telefone, funcao, status, cpf]
+    );
+    console.log(`Funcionário ${cpf} atualizado com sucesso`);
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao atualizar funcionário:', err);
+    return { sucesso: false, erro: err.message };
+  }
+});
+
+// === CHATBOT API ===
+require('dotenv').config();
 const { GoogleGenAI } = require("@google/genai");
-const genAI = new GoogleGenAI({ apiKey: "AIzaSyCVeO4ny3ameXo0kPNqYR5qLW8fCa6mL-4" });
+const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 ipcMain.handle('enviar-prompt', async (event, prompt) => {
   try {
     const promptSeguro = "Atue como assistente acadêmico de farmacologia (não forneça dosagens): " + prompt;
 
-    // ✅ Nova forma de chamar no SDK @google/genai
     const response = await genAI.models.generateContent({
       model: "gemini-2.5-flash-lite",
       contents: promptSeguro,
