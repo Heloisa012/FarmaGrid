@@ -6,6 +6,7 @@ public class LoginResponse {
     public String email;
     public Integer tipo;
     public Long idMedico;
+    public Long idPaciente;
     public Long idFarmacia;
     public Long idBalconista;
     public Long idCaixa;
@@ -17,6 +18,7 @@ public class LoginResponse {
         this.email = login.getEmail();
         this.tipo = login.getTipo();
         this.idMedico = login.getIdMedico();
+        this.idPaciente = login.getIdPaciente();
         this.idFarmacia = login.getIdFarmacia();
         this.idBalconista = login.getIdBalconista();
         this.idCaixa = login.getIdCaixa();

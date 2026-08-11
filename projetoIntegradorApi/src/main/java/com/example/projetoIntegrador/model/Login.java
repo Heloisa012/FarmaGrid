@@ -29,6 +29,9 @@ public class Login {
     @Column(name = "id_medico")
     private Long idMedico;
 
+    @Column(name = "id_paciente")
+    private Long idPaciente;
+
     @Column(name = "id_farmacia")
     private Long idFarmacia;
 

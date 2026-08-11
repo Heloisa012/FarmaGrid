@@ -70,6 +70,8 @@ public class AuthController {
         String perfil;
         if (login.getTipo() != null && login.getTipo() == 1) {
             perfil = "medico";
+        } else if (login.getIdPaciente() != null) {
+            perfil = "paciente";
         } else if (login.getIdFarmacia() != null) {
             perfil = "farmacia";
         } else if (login.getIdBalconista() != null) {
