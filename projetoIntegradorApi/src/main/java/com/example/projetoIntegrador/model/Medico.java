@@ -3,6 +3,8 @@ package com.example.projetoIntegrador.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -42,6 +44,7 @@ public class Medico {
     private String endereco;
 
     @Lob
+    @JdbcTypeCode(SqlTypes.LONGVARBINARY)
     @Column(name = "foto_perfil")
     private byte[] fotoPerfil;
 
@@ -56,4 +59,7 @@ public class Medico {
 
     @Column(name = "horario_termino")
     private LocalTime horarioTermino;
+
+    @Column(name = "tipo_atendimento", length = 50)
+    private String tipoAtendimento;
 }

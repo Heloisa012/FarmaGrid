@@ -31,6 +31,11 @@ public class FarmagridController {
     @Autowired private ClienteFarmaRepository clienteFarmaRepo;
     @Autowired private VendaConcluidaRepository vendaConcluidaRepo;
     @Autowired private RelatorioFarmaciaRepository relatorioFarmaciaRepo;
+    @Autowired private DependenteRepository dependenteRepo;
+    @Autowired private AlergiaRepository alergiaRepo;
+    @Autowired private PacienteAlergiaRepository pacienteAlergiaRepo;
+    @Autowired private CartaoRepository cartaoRepo;
+    @Autowired private DisponibilidadeMedicoRepository disponibilidadeMedicoRepo;
 
     // ──────────────────────────────────────────────────────────────────────────
     // PACIENTE
@@ -97,8 +102,7 @@ public class FarmagridController {
 
     @PostMapping("/parceiros")
     public Parceiro criarParceiro(@RequestBody Parceiro obj) {
-        if (obj.getEncaminhamentos() == null) obj.setEncaminhamentos(0);
-        if (obj.getStatus() == null) obj.setStatus("Ativo");
+        if (obj.getStatus() == null) obj.setStatus("ativo");
         return service.salvar(parceiroRepo, obj);
     }
 
@@ -210,4 +214,76 @@ public class FarmagridController {
 
     @PostMapping("/relatorios-farmacia")
     public RelatorioFarmacia criarRelatorioFarmacia(@RequestBody RelatorioFarmacia obj) { return service.salvar(relatorioFarmaciaRepo, obj); }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // DEPENDENTE
+    // ──────────────────────────────────────────────────────────────────────────
+    @GetMapping("/dependentes/{id}")
+    public Dependente buscarDependente(@PathVariable Long id) { return service.buscar(dependenteRepo, id); }
+
+    @PostMapping("/dependentes")
+    public Dependente criarDependente(@RequestBody Dependente obj) { return service.salvar(dependenteRepo, obj); }
+
+    @PutMapping("/dependentes/{id}")
+    public Dependente atualizarDependente(@PathVariable Long id, @RequestBody Dependente obj) { return service.atualizar(dependenteRepo, id, obj); }
+
+    @DeleteMapping("/dependentes/{id}")
+    public void deletarDependente(@PathVariable Long id) { service.deletar(dependenteRepo, id); }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // ALERGIA (catálogo)
+    // ──────────────────────────────────────────────────────────────────────────
+    @GetMapping("/alergias")
+    public List<Alergia> listarAlergias() { return service.listar(alergiaRepo); }
+
+    @PostMapping("/alergias")
+    public Alergia criarAlergia(@RequestBody Alergia obj) { return service.salvar(alergiaRepo, obj); }
+
+    @DeleteMapping("/alergias/{id}")
+    public void deletarAlergia(@PathVariable Long id) { service.deletar(alergiaRepo, id); }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // PACIENTE_ALERGIA (associação, chave composta id_paciente + id_alergia)
+    // ──────────────────────────────────────────────────────────────────────────
+    @PostMapping("/paciente-alergias")
+    public PacienteAlergia criarPacienteAlergia(@RequestBody PacienteAlergiaId id) {
+        PacienteAlergia obj = new PacienteAlergia();
+        obj.setId(id);
+        return pacienteAlergiaRepo.save(obj);
+    }
+
+    @DeleteMapping("/paciente-alergias/{idPaciente}/{idAlergia}")
+    public void deletarPacienteAlergia(@PathVariable Long idPaciente, @PathVariable Long idAlergia) {
+        PacienteAlergiaId id = new PacienteAlergiaId();
+        id.setIdPaciente(idPaciente);
+        id.setIdAlergia(idAlergia);
+        pacienteAlergiaRepo.deleteById(id);
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // CARTÃO
+    // ──────────────────────────────────────────────────────────────────────────
+    @GetMapping("/cartoes/{id}")
+    public Cartao buscarCartao(@PathVariable Long id) { return service.buscar(cartaoRepo, id); }
+
+    @PostMapping("/cartoes")
+    public Cartao criarCartao(@RequestBody Cartao obj) { return service.salvar(cartaoRepo, obj); }
+
+    @PutMapping("/cartoes/{id}")
+    public Cartao atualizarCartao(@PathVariable Long id, @RequestBody Cartao obj) { return service.atualizar(cartaoRepo, id, obj); }
+
+    @DeleteMapping("/cartoes/{id}")
+    public void deletarCartao(@PathVariable Long id) { service.deletar(cartaoRepo, id); }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // DISPONIBILIDADE MÉDICO
+    // ──────────────────────────────────────────────────────────────────────────
+    @PostMapping("/disponibilidades")
+    public DisponibilidadeMedico criarDisponibilidade(@RequestBody DisponibilidadeMedico obj) { return service.salvar(disponibilidadeMedicoRepo, obj); }
+
+    @PutMapping("/disponibilidades/{id}")
+    public DisponibilidadeMedico atualizarDisponibilidade(@PathVariable Long id, @RequestBody DisponibilidadeMedico obj) { return service.atualizar(disponibilidadeMedicoRepo, id, obj); }
+
+    @DeleteMapping("/disponibilidades/{id}")
+    public void deletarDisponibilidade(@PathVariable Long id) { service.deletar(disponibilidadeMedicoRepo, id); }
 }

@@ -11,30 +11,30 @@ import java.util.List;
 public class GenericService {
 
     @Transactional(readOnly = true)
-    public <T> List<T> listar(JpaRepository<T, Long> repository) {
+    public <T, ID> List<T> listar(JpaRepository<T, ID> repository) {
         return repository.findAll();
     }
 
     @Transactional(readOnly = true)
-    public <T> T buscar(JpaRepository<T, Long> repository, Long id) {
+    public <T, ID> T buscar(JpaRepository<T, ID> repository, ID id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Registro não encontrado"));
     }
 
     @Transactional
-    public <T> T salvar(JpaRepository<T, Long> repository, T entity) {
+    public <T, ID> T salvar(JpaRepository<T, ID> repository, T entity) {
         return repository.save(entity);
     }
 
     @Transactional
-    public <T> T atualizar(JpaRepository<T, Long> repository, Long id, T entity) {
+    public <T, ID> T atualizar(JpaRepository<T, ID> repository, ID id, T entity) {
         T existente = buscar(repository, id);
         BeanUtils.copyProperties(entity, existente, "id");
         return repository.save(existente);
     }
 
     @Transactional
-    public <T> void deletar(JpaRepository<T, Long> repository, Long id) {
+    public <T, ID> void deletar(JpaRepository<T, ID> repository, ID id) {
         if (!repository.existsById(id)) {
             throw new RuntimeException("Registro não encontrado");
         }

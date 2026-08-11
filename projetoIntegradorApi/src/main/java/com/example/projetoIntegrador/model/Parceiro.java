@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "parceiros")
@@ -14,15 +16,18 @@ public class Parceiro {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
-    @Column(nullable = false, length = 100)
-    private String parceiro;
+    @Column(name = "id_medico", nullable = false)
+    private Long idMedico;
 
-    @Column(length = 50)
+    @Column(nullable = false, length = 150)
+    private String nome;
+
+    @Column(nullable = false, length = 50)
     private String tipo;
 
-    @Column(length = 100)
+    @Column(length = 150)
     private String email;
 
     @Column(length = 20)
@@ -31,11 +36,12 @@ public class Parceiro {
     @Column(precision = 5, scale = 2)
     private BigDecimal desconto;
 
-    private Integer encaminhamentos;
-
     @Column(length = 20)
     private String status;
 
-    @Column(name = "dataInicio", length = 20)
-    private String dataInicio;
+    @Column(name = "data_inicio", nullable = false)
+    private LocalDate dataInicio;
+
+    @Column(name = "criado_em", insertable = false, updatable = false)
+    private LocalDateTime criadoEm;
 }

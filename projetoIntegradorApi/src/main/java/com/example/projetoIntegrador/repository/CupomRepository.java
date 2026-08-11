@@ -5,10 +5,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CupomRepository extends JpaRepository<Cupom, Long> {
 
     List<Cupom> findByStatus(String status);
+
+    Optional<Cupom> findByCodigo(String codigo);
 
     @Query("SELECT c FROM Cupom c ORDER BY c.status ASC, c.codigo ASC")
     List<Cupom> findAllOrderByStatusAndCodigo();

@@ -8,6 +8,7 @@ public class MedicoProfissionalRequest {
     public String rqe;
     public String especialidade;
     public String subespecialidades;
+    public String tipoAtendimento;
 
     public String nomeClinica;
     public String enderecoClinica;

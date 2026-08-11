@@ -37,4 +37,19 @@ public class Paciente {
 
     @Column(name = "id_plano")
     private Long idPlano;
+
+    @Column(length = 20)
+    private String telefone;
+
+    @Column(length = 9)
+    private String cep;
+
+    @Column(name = "tipo_sanguineo", length = 3)
+    private String tipoSanguineo;
+
+    @Column(name = "contato_emergencia_nome", length = 100)
+    private String contatoEmergenciaNome;
+
+    @Column(name = "contato_emergencia_telefone", length = 20)
+    private String contatoEmergenciaTelefone;
 }

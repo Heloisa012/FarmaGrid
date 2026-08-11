@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "funcFarma")
+@Table(name = "`funcFarma`")
 @Getter
 @Setter
 public class Funcionario {

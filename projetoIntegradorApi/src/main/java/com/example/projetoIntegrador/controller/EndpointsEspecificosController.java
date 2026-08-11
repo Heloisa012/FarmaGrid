@@ -33,6 +33,10 @@ public class EndpointsEspecificosController {
     @Autowired private MedicoClinicaRepository medicoClinicaRepo;
     @Autowired private RelatorioRepository relatorioRepo;
     @Autowired private RelatorioFarmaciaRepository relatorioFarmaciaRepo;
+    @Autowired private DependenteRepository dependenteRepo;
+    @Autowired private PacienteAlergiaRepository pacienteAlergiaRepo;
+    @Autowired private CartaoRepository cartaoRepo;
+    @Autowired private DisponibilidadeMedicoRepository disponibilidadeMedicoRepo;
 
     // ──────────────────────────────────────────────────────────────────────────
     // PACIENTE — busca por nome
@@ -171,7 +175,7 @@ public class EndpointsEspecificosController {
     // CONSULTA — reagendar (atualiza só data/horário/duração, sem mexer no paciente)
     // ──────────────────────────────────────────────────────────────────────────
     @PatchMapping("/consultas/{id}/reagendar")
-    public ResponseEntity<?> reagendarConsulta(@PathVariable Long id, @RequestBody ReagendarConsultaRequest req) {
+    public ResponseEntity<?> reagendarConsulta(@PathVariable Integer id, @RequestBody ReagendarConsultaRequest req) {
         Consulta consulta = consultaRepo.findById(id).orElse(null);
         if (consulta == null) return ResponseEntity.notFound().build();
         consulta.setData(req.novaData);
@@ -204,6 +208,7 @@ public class EndpointsEspecificosController {
         r.subespecialidades = m.getSubespecialidades();
         r.horarioInicio = m.getHorarioInicio();
         r.horarioTermino = m.getHorarioTermino();
+        r.tipoAtendimento = m.getTipoAtendimento();
 
         medicoClinicaRepo.findByIdMedico(id).ifPresent(mc -> {
             r.nomeClinica = mc.getNomeClinica();
@@ -238,6 +243,7 @@ public class EndpointsEspecificosController {
         m.setRqe(req.rqe);
         m.setEspecialidade(req.especialidade);
         m.setSubespecialidades(req.subespecialidades);
+        m.setTipoAtendimento(req.tipoAtendimento);
         medicoRepo.save(m);
 
         MedicoClinica mc = medicoClinicaRepo.findByIdMedico(id).orElseGet(() -> {
@@ -315,5 +321,31 @@ public class EndpointsEspecificosController {
     @GetMapping("/relatorios-farmacia")
     public List<RelatorioFarmacia> ultimosRelatoriosFarmacia() {
         return relatorioFarmaciaRepo.findTop10ByOrderByGeradoEmDesc();
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // PACIENTE — dependentes, alergias e cartões
+    // ──────────────────────────────────────────────────────────────────────────
+    @GetMapping("/pacientes/{idPaciente}/dependentes")
+    public List<Dependente> dependentesPorPaciente(@PathVariable Long idPaciente) {
+        return dependenteRepo.findByIdPaciente(idPaciente);
+    }
+
+    @GetMapping("/pacientes/{idPaciente}/alergias")
+    public List<PacienteAlergia> alergiasPorPaciente(@PathVariable Long idPaciente) {
+        return pacienteAlergiaRepo.findByIdIdPaciente(idPaciente);
+    }
+
+    @GetMapping("/pacientes/{idPaciente}/cartoes")
+    public List<Cartao> cartoesPorPaciente(@PathVariable Long idPaciente) {
+        return cartaoRepo.findByIdPaciente(idPaciente);
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // MÉDICO — disponibilidade semanal
+    // ──────────────────────────────────────────────────────────────────────────
+    @GetMapping("/medicos/{idMedico}/disponibilidades")
+    public List<DisponibilidadeMedico> disponibilidadesPorMedico(@PathVariable Long idMedico) {
+        return disponibilidadeMedicoRepo.findByIdMedico(idMedico);
     }
 }

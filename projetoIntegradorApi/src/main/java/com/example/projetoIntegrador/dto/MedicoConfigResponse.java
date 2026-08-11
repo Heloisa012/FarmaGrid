@@ -20,6 +20,7 @@ public class MedicoConfigResponse {
     public String subespecialidades;
     public LocalTime horarioInicio;
     public LocalTime horarioTermino;
+    public String tipoAtendimento;
 
     public String nomeClinica;
     public String enderecoClinica;

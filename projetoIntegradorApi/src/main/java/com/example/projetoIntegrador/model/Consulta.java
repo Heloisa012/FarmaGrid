@@ -12,10 +12,10 @@ public class Consulta {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(name = "paciente_id", nullable = false)
-    private Long pacienteId;
+    private Integer pacienteId;
 
     private String data;
 

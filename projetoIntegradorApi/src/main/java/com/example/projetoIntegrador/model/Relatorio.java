@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "relatorios")
@@ -28,6 +30,7 @@ public class Relatorio {
     private String data;
 
     @Lob
+    @JdbcTypeCode(SqlTypes.LONGVARBINARY)
     @Column(name = "arquivo")
     @JsonIgnore
     private byte[] arquivo;

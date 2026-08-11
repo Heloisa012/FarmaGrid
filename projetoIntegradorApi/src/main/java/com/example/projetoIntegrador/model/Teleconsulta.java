@@ -35,6 +35,6 @@ public class Teleconsulta {
     @Column(length = 50)
     private String tipo;
 
-    @Column(name = "nomePaciente", length = 255)
+    @Column(name = "nome_paciente", length = 255)
     private String nomePaciente;
 }
