@@ -61,5 +61,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   buscarRelatoriosFarmacia: () => ipcRenderer.invoke('buscar-relatorios-farmacia'),
   baixarRelatorioFarmacia: (id) => ipcRenderer.invoke('baixar-relatorio-farmacia', id),
   buscarResumoRelatorios: () => ipcRenderer.invoke('buscar-resumo-relatorios'),
+  atualizarStatusFuncionario: (dados) => ipcRenderer.invoke('atualizar-status-funcionario', dados),
+  atualizarFuncionario: (dados) => ipcRenderer.invoke('atualizar-funcionario', dados),
 });
 

@@ -1269,6 +1269,24 @@ ipcMain.handle('buscar-resumo-relatorios', async () => {
   }
 });
 
+// === ATUALIZAR DADOS DO FUNCIONÁRIO ===
+ipcMain.handle('atualizar-funcionario', async (event, dados) => {
+  try {
+    const { cpf, nome, email, telefone, funcao, status } = dados;
+    await db.promise().query(
+      `UPDATE funcFarma
+       SET nome = ?, email = ?, telefone = ?, funcao = ?, status = ?
+       WHERE CPF = ?`,
+      [nome, email, telefone, funcao, status, cpf]
+    );
+    console.log(`Funcionário ${cpf} atualizado com sucesso`);
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao atualizar funcionário:', err);
+    return { sucesso: false, erro: err.message };
+  }
+});
+
 // === CHATBOT API ===
 const { GoogleGenAI } = require("@google/genai");
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
