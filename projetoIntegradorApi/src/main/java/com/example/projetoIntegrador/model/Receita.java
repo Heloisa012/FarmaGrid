@@ -4,8 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
-
 @Entity
 @Table(name = "receita")
 @Getter
@@ -16,28 +14,21 @@ public class Receita {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "id_paciente")
-    private Paciente paciente;
+    @Column(name = "id_medico")
+    private Long idMedico;
 
-    @ManyToOne
-    @JoinColumn(name = "id_medicamento")
-    private Medicamento medicamento;
+    @Column(name = "id_paciente")
+    private Long idPaciente;
 
-    @Column(name = "data_inicio")
-    private LocalDate dataInicio;
+    @Column(length = 100)
+    private String medicamento;
 
     @Column(length = 50)
     private String dosagem;
 
-    private Integer frequencia;
+    @Column(length = 50)
+    private String duracao;
 
-    private Integer duracao;
-
-    @Column(length = 30)
+    @Column(length = 50)
     private String status;
-
-    @ManyToOne
-    @JoinColumn(name = "id_consulta")
-    private Teleconsulta consulta;
 }

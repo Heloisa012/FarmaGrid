@@ -2,12 +2,24 @@ package com.example.projetoIntegrador.dto;
 
 public class LoginResponse {
     public String token;
-    public String tipo;
-    public String nome;
+    public Long id;
+    public String email;
+    public Integer tipo;
+    public Long idMedico;
+    public Long idFarmacia;
+    public Long idBalconista;
+    public Long idCaixa;
+    public String perfil;
 
-    public LoginResponse(String token, String tipo, String nome) {
+    public LoginResponse(String token, com.example.projetoIntegrador.model.Login login, String perfil) {
         this.token = token;
-        this.tipo  = tipo;
-        this.nome  = nome;
+        this.id = login.getId();
+        this.email = login.getEmail();
+        this.tipo = login.getTipo();
+        this.idMedico = login.getIdMedico();
+        this.idFarmacia = login.getIdFarmacia();
+        this.idBalconista = login.getIdBalconista();
+        this.idCaixa = login.getIdCaixa();
+        this.perfil = perfil;
     }
 }

@@ -1,26 +1,14 @@
 package com.example.projetoIntegrador.controller;
 
-import com.example.projetoIntegrador.dto.CadastroRequest;
 import com.example.projetoIntegrador.dto.LoginRequest;
 import com.example.projetoIntegrador.dto.LoginResponse;
-import com.example.projetoIntegrador.dto.UsuarioMeResponse;
-import com.example.projetoIntegrador.model.Funcionario;
-import com.example.projetoIntegrador.model.Medico;
-import com.example.projetoIntegrador.model.Paciente;
-import com.example.projetoIntegrador.model.Usuario;
-import com.example.projetoIntegrador.repository.FuncionarioRepository;
-import com.example.projetoIntegrador.repository.MedicoRepository;
-import com.example.projetoIntegrador.repository.PacienteRepository;
-import com.example.projetoIntegrador.repository.UsuarioRepository;
+import com.example.projetoIntegrador.model.Login;
+import com.example.projetoIntegrador.repository.LoginRepository;
 import com.example.projetoIntegrador.security.JwtUtil;
-import com.example.projetoIntegrador.service.AuthService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.CannotAcquireLockException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,11 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 public class AuthController {
 
-    @Autowired private UsuarioRepository usuarioRepo;
-    @Autowired private PacienteRepository pacienteRepo;
-    @Autowired private MedicoRepository medicoRepo;
-    @Autowired private FuncionarioRepository funcionarioRepo;
-    @Autowired private AuthService authService;
+    @Autowired private LoginRepository loginRepo;
     @Autowired private JwtUtil jwtUtil;
     @Autowired private PasswordEncoder passwordEncoder;
     @Autowired private jakarta.persistence.EntityManager entityManager;
@@ -71,93 +55,32 @@ public class AuthController {
 
     // ──────────────────────────────────────────────────────────────────────────
     // POST /auth/login
+    // Equivalente ao antigo handler ipcMain 'login' do Electron: busca por
+    // email + tipo na tabela `login`, compara a senha com bcrypt e resolve o
+    // perfil (medico / farmacia / balconista / caixa).
     // ──────────────────────────────────────────────────────────────────────────
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest req) {
-        Usuario usuario = usuarioRepo.findByEmail(req.email).orElse(null);
+        Login login = loginRepo.findByEmailAndTipo(req.email, req.tipo).orElse(null);
 
-        if (usuario == null || !passwordEncoder.matches(req.senha, usuario.getSenhaHash())) {
+        if (login == null || !passwordEncoder.matches(req.senha, login.getSenha())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Email ou senha incorretos.");
         }
 
-        String nome  = resolverNome(usuario);
-        String token = jwtUtil.gerarToken(usuario.getEmail(), usuario.getTipo());
-        return ResponseEntity.ok(new LoginResponse(token, usuario.getTipo(), nome));
-    }
-
-    // ──────────────────────────────────────────────────────────────────────────
-    // POST /auth/cadastro
-    // ──────────────────────────────────────────────────────────────────────────
-    @PostMapping("/cadastro")
-    public ResponseEntity<?> cadastro(@RequestBody CadastroRequest req) {
-        if (req.email == null || req.senha == null || req.tipo == null) {
-            return ResponseEntity.badRequest().body("email, senha e tipo são obrigatórios.");
+        String perfil;
+        if (login.getTipo() != null && login.getTipo() == 1) {
+            perfil = "medico";
+        } else if (login.getIdFarmacia() != null) {
+            perfil = "farmacia";
+        } else if (login.getIdBalconista() != null) {
+            perfil = "balconista";
+        } else if (login.getIdCaixa() != null) {
+            perfil = "caixa";
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário sem perfil associado.");
         }
 
-        final int maxAttempts = 3;
-        for (int attempt = 1; attempt <= maxAttempts; attempt++) {
-            try {
-                Usuario usuario = authService.registrarUsuario(req);
-                String token = jwtUtil.gerarToken(usuario.getEmail(), usuario.getTipo());
-                return ResponseEntity.status(HttpStatus.CREATED)
-                        .body(new LoginResponse(token, usuario.getTipo(), req.nome != null ? req.nome : req.email));
-            } catch (CannotAcquireLockException ex) {
-                if (attempt == maxAttempts) {
-                    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                            .body("Erro temporário no banco de dados. Tente novamente em alguns segundos.");
-                }
-            } catch (DataIntegrityViolationException ex) {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("Dados já existentes ou conflito de entidade.");
-            } catch (IllegalArgumentException ex) {
-                return ResponseEntity.badRequest().body(ex.getMessage());
-            }
-        }
-
-        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-                .body("Erro temporário no banco de dados. Tente novamente em alguns segundos.");
-    }
-
-    // ──────────────────────────────────────────────────────────────────────────
-    // GET /auth/me
-    // ──────────────────────────────────────────────────────────────────────────
-    @GetMapping("/me")
-    public ResponseEntity<?> me(Authentication auth) {
-        if (auth == null || auth.getPrincipal() == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Não autenticado.");
-        }
-
-        String email = auth.getPrincipal().toString();
-        Usuario usuario = usuarioRepo.findByEmail(email).orElse(null);
-        if (usuario == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Usuário não encontrado.");
-        }
-
-        return ResponseEntity.ok(buildMeResponse(usuario));
-    }
-
-    private UsuarioMeResponse buildMeResponse(Usuario usuario) {
-        Long idPaciente = usuario.getPaciente() != null ? usuario.getPaciente().getId() : null;
-        Long idMedico = usuario.getMedico() != null ? usuario.getMedico().getId() : null;
-        Long idFuncionario = usuario.getFuncionario() != null ? usuario.getFuncionario().getId() : null;
-
-        return new UsuarioMeResponse(
-                usuario.getId(),
-                usuario.getEmail(),
-                usuario.getTipo(),
-                resolverNome(usuario),
-                idPaciente,
-                idMedico,
-                idFuncionario
-        );
-    }
-
-    // ──────────────────────────────────────────────────────────────────────────
-    // Resolve o nome do usuário conforme o tipo
-    // ──────────────────────────────────────────────────────────────────────────
-    private String resolverNome(Usuario usuario) {
-        if (usuario.getPaciente()    != null) return usuario.getPaciente().getNome();
-        if (usuario.getMedico()      != null) return usuario.getMedico().getNome();
-        if (usuario.getFuncionario() != null) return "Funcionário #" + usuario.getFuncionario().getId();
-        return usuario.getEmail();
+        String token = jwtUtil.gerarToken(login.getEmail(), perfil);
+        return ResponseEntity.ok(new LoginResponse(token, login, perfil));
     }
 }
