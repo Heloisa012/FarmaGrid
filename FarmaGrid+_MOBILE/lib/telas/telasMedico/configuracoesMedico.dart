@@ -28,16 +28,10 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
   final _emailCtrl         = TextEditingController();
   final _telefoneCtrl      = TextEditingController();
   final _nascimentoCtrl    = TextEditingController(text: 'dd/mm/aaaa');
-  final _enderecoCtrl      = TextEditingController();
 
   final _crmCtrl           = TextEditingController();
-  final _rqeCtrl           = TextEditingController();
   final _especialidadeCtrl = TextEditingController();
-  final _subespecCtrl      = TextEditingController();
   final _clinicaNomeCtrl   = TextEditingController();
-  final _clinicaEndCtrl    = TextEditingController();
-  final _tempoCtrl         = TextEditingController();
-  final _valorCtrl         = TextEditingController();
 
   final _senhaAtualCtrl    = TextEditingController();
   final _novaSenhaCtrl     = TextEditingController();
@@ -90,9 +84,8 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
   void dispose() {
     for (final c in [
       _nomeCtrl, _sobrenomeCtrl, _emailCtrl, _telefoneCtrl,
-      _nascimentoCtrl, _enderecoCtrl, _crmCtrl, _rqeCtrl,
-      _especialidadeCtrl, _subespecCtrl, _clinicaNomeCtrl,
-      _clinicaEndCtrl, _tempoCtrl, _valorCtrl,
+      _nascimentoCtrl, _crmCtrl,
+      _especialidadeCtrl, _clinicaNomeCtrl,
       _senhaAtualCtrl, _novaSenhaCtrl, _confirmSenhaCtrl,
     ]) c.dispose();
     super.dispose();
@@ -455,16 +448,10 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
           const SizedBox(height: 14),
           _cardSecao(
             titulo: 'Informações da Clínica',
-            subtitulo: 'Local de atendimento e horários',
+            subtitulo: 'Local de atendimento',
             child: Column(
               children: [
                 _campo('Nome da Clínica/Hospital:', _clinicaNomeCtrl, habilitado: _editandoProfissional),
-                const SizedBox(height: 12),
-                _campo('Endereço da Clínica/Hospital:', _clinicaEndCtrl, habilitado: _editandoProfissional),
-                const SizedBox(height: 12),
-                Row(children: [
-                  Expanded(child: _campo('Valor da consulta:', _valorCtrl, habilitado: _editandoProfissional)),
-                ]),
               ],
             ),
           ),
