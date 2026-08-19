@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FarmaGrid+</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FarmaGrid+</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+    crossorigin="anonymous"></script>
 
-    <style>
-
+  <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
 
     * {
@@ -18,598 +21,606 @@
       font-family: 'Poppins', sans-serif;
     }
 
-    body{
+    body {
       background-color: #F8F9F4;
     }
 
-    html, body {
+    html,
+    body {
       height: 100%;
-      overflow: hidden; 
+      overflow: hidden;
     }
-    
-    .navbar{
+
+    .navbar {
       background-color: #ffffff;
       border-bottom: solid 1px;
     }
 
     .logo {
-        display: flex;
-        font-size: 30px;
-        font-weight: 700;
-        color: #355e3b;
-        margin-top: 10px;
-        margin-bottom: 2px;
-        letter-spacing: 0.6px;
-        text-align: center;
-      }
-  
-      .logo span { color: #4BA94B; }
-  
-      .plus-icon {
-          width: 30px;      
-          height: 30px;
-          position: relative;
-          top: -10px;
-  
-      }
-  
-      .titulo {
-        font-size: 15px;
-        font-weight: 700;
-        color: #2e462e;
-        text-align: center;
-      }
-      
-      .prontuarioIcon {
-        width: 60px;
-        height: 60px;
-        margin-right: 12px;
-      }
+      display: flex;
+      font-size: 30px;
+      font-weight: 700;
+      color: #355e3b;
+      margin-top: 10px;
+      margin-bottom: 2px;
+      letter-spacing: 0.6px;
+      text-align: center;
+    }
 
-      .nav-item {
-        display: flex;
-        align-items: center;
-        gap: 1px;        
-        padding: 8px 12px;
-        text-decoration: none;
-      }
+    .logo span {
+      color: #4BA94B;
+    }
 
-      .menu-text {
-        display: flex;
-        flex-direction: column; 
-        line-height: 1.1;
-      }
+    .plus-icon {
+      width: 30px;
+      height: 30px;
+      position: relative;
+      top: -10px;
 
-      .menu-title {
-        font-size: 25px;
-        font-weight: 600;
-        color: #234e2d;
-      }
+    }
 
-      .menu-date {
-        font-size: 14px;
-        font-weight: 500;
-        color: #2e462e;
-        margin-top: 3px;
-      }
+    .titulo {
+      font-size: 15px;
+      font-weight: 700;
+      color: #2e462e;
+      text-align: center;
+    }
 
-      #sinoNot{
-        width: 40px;
-        height: 40px;
-      }
+    .prontuarioIcon {
+      width: 60px;
+      height: 60px;
+      margin-right: 12px;
+    }
 
-      .colunaEsquerda{
-        width: 240px;
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
-        background-color: #ffffff;
-        border-right: solid 1px;
-        padding-top: 15px;
-      }
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 1px;
+      padding: 8px 12px;
+      text-decoration: none;
+    }
 
-      .borda{
-        border-right: solid 1px;
-      }
+    .menu-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
 
-      .principal{
-         margin-right: 6px;
-         margin-left: 10px;
-         margin-bottom: 20px;
-      }
+    .menu-title {
+      font-size: 25px;
+      font-weight: 600;
+      color: #234e2d;
+    }
 
-      .icone{
-        width: 30px;
-        height: 30px;
-      }
+    .menu-date {
+      font-size: 14px;
+      font-weight: 500;
+      color: #2e462e;
+      margin-top: 3px;
+    }
 
-      button{
-        color: #234e2d;
-        border: none;
-        background-color: #ffffff00;
-        margin-bottom: 20px;
-        text-align: left;
-        margin-left: 15px;
-        font-weight: 550;
-      }
+    #sinoNot {
+      width: 40px;
+      height: 40px;
+    }
 
-      .info{
-        display: flex;
-        flex-direction: column;
-        background-color: #ffffff;
-        margin-bottom: 0px;
-        height: 25vh;
-        margin-top: auto;
-        border-top: solid 1px;
-        padding-top: 10px;
-        padding-left: 5px;
-      }
+    .colunaEsquerda {
+      width: 240px;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      background-color: #ffffff;
+      border-right: solid 1px;
+      padding-top: 15px;
+    }
 
-      .perfil {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 5px;
-      }
+    .borda {
+      border-right: solid 1px;
+    }
 
-      .foto {
-        background-color: #dff4df;
-        color: #234e2d;
-        width: 45px;
-        height: 45px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        font-size: 16px;
-      }
+    .principal {
+      margin-right: 6px;
+      margin-left: 10px;
+      margin-bottom: 20px;
+    }
 
-      .dados {
-        display: flex;
-        flex-direction: column;
-        line-height: 1.2;
-      }
+    .icone {
+      width: 30px;
+      height: 30px;
+    }
 
-      .nome {
-        color: #234e2d;
-        font-weight: 600;
-        font-size: 14px;
-      }
+    button {
+      color: #234e2d;
+      border: none;
+      background-color: #ffffff00;
+      margin-bottom: 20px;
+      text-align: left;
+      margin-left: 15px;
+      font-weight: 550;
+    }
 
-      .crm {
-        color: #234e2d;
-        font-size: 13px;
-      }
+    .info {
+      display: flex;
+      flex-direction: column;
+      background-color: #ffffff;
+      margin-bottom: 0px;
+      height: 25vh;
+      margin-top: auto;
+      border-top: solid 1px;
+      padding-top: 10px;
+      padding-left: 5px;
+    }
 
-      .acoes {
-        display: flex;
-        flex-direction: column;
-        margin-top: 10px;
-      }
+    .perfil {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 5px;
+    }
 
-      .botao {
-        gap: 6px;
-        background: none;
-        border: none;
-        color: #234e2d;
-        font-weight: 500;
-        font-size: 14px;
-        border-radius: 5px;
-        margin-left:0px;
-        margin-right: 100px;
-        padding: 2px;
-      }
+    .foto {
+      background-color: #dff4df;
+      color: #234e2d;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 16px;
+    }
 
-      .botaoNovoPac{
-        gap: 6px;
-        background:#234e2d;
-        border: none;
-        color: white;
-        padding: 5px;
-        border-radius: 5px;
-      }
+    .dados {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.2;
+    }
 
-      .botao:hover {
-        background-color: #234e2d;
-        color: #dff4df;
-        font-weight: 500;
-      }
+    .nome {
+      color: #234e2d;
+      font-weight: 600;
+      font-size: 14px;
+    }
 
-      .icone1 {
-        width: 18px;
-        height: 18px;
-      }
+    .crm {
+      color: #234e2d;
+      font-size: 13px;
+    }
 
-      .icone2 {
-        width: 18px;
-        height: 18px;
-      }
+    .acoes {
+      display: flex;
+      flex-direction: column;
+      margin-top: 10px;
+    }
 
-      .botao:hover .icone1 {
-        content: url("configHover.png");
-      }
+    .botao {
+      gap: 6px;
+      background: none;
+      border: none;
+      color: #234e2d;
+      font-weight: 500;
+      font-size: 14px;
+      border-radius: 5px;
+      margin-left: 0px;
+      margin-right: 100px;
+      padding: 2px;
+    }
 
-      .botao:hover .icone2 {
-        content: url("sairHover.png");
-      }
+    .botaoNovoPac {
+      gap: 6px;
+      background: #234e2d;
+      border: none;
+      color: white;
+      padding: 5px;
+      border-radius: 5px;
+    }
 
-      .btn-img:hover{
-        background-color: #234e2d;
-        color: #dff4df;
-        font-weight: 550;
-        border: none;
-        border-radius: 5px;
-        width: 170px;
-        text-align: center;
-      }
+    .botao:hover {
+      background-color: #234e2d;
+      color: #dff4df;
+      font-weight: 500;
+    }
 
-      .btn-img:hover #iconeP{
-        content: url("prontuarioH.png");
-      }
+    .icone1 {
+      width: 18px;
+      height: 18px;
+    }
 
-      .btn-img:hover #iconeT{
-        content: url("videoCameraT.png");
-      }
+    .icone2 {
+      width: 18px;
+      height: 18px;
+    }
 
-      .btn-img:hover #iconeI{
-        content: url("brainI.png");
-      }
+    .botao:hover .icone1 {
+      content: url("configHover.png");
+    }
 
-      .btn-img:hover #iconePa{
-        content: url("parceria.png");
-      }
+    .botao:hover .icone2 {
+      content: url("sairHover.png");
+    }
 
-      .corpo{
-        display: flex;
-        flex: 1;
-      }
+    .btn-img:hover {
+      background-color: #234e2d;
+      color: #dff4df;
+      font-weight: 550;
+      border: none;
+      border-radius: 5px;
+      width: 170px;
+      text-align: center;
+    }
 
-      .containerPrincipal {
-        display: flex;
-        height: calc(100vh - 70px);
-      }
+    .btn-img:hover #iconeP {
+      content: url("prontuarioH.png");
+    }
 
-      .inicio{
-        display: flex;
-        flex-direction: column; 
-        line-height: 1.1;
-        margin: 10px;
-      }
+    .btn-img:hover #iconeT {
+      content: url("videoCameraT.png");
+    }
 
-      .tituloo{
-        font-size: 25px;
-        font-weight: 600;
-        color: #234e2d;
-      }
+    .btn-img:hover #iconeI {
+      content: url("brainI.png");
+    }
 
-      .subtitulo{
-        font-size: 14px;
-        font-weight: 500;
-        color: #42773b;
-        margin-top: 3px;
-      }
+    .btn-img:hover #iconePa {
+      content: url("parceria.png");
+    }
 
-      .container2{
-        display: flex;
-        flex-direction: column; 
-      }
+    .corpo {
+      display: flex;
+      flex: 1;
+    }
 
-      .buscar input{
-        background-image: url("buscar.png");
-        background-repeat: no-repeat;
-        background-position: 10px center; 
-        background-size: 18px; 
-        padding-left: 35px; 
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        height: 35px;
-        width: 1000px;
-        outline-color: #234e2d;
-        font-size: 14px;
-      }
+    .containerPrincipal {
+      display: flex;
+      height: calc(100vh - 70px);
+    }
 
-      .buscar{
-        margin: 10px;
-        justify-content: center;
-      }
+    .inicio {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+      margin: 10px;
+    }
 
-      .listaP{
-        font-size: 18px;
-        font-weight: 530;
-        color: #234e2d;
-      }
+    .tituloo {
+      font-size: 25px;
+      font-weight: 600;
+      color: #234e2d;
+    }
 
-      .listaPaciente{
-        background-color: #ffffff;
-        border: solid 1px;
-        height: auto;
-        border-radius: 8px;
-        margin-top: 0px;
-        padding: 5px;
-        margin-left: 10px;
-        display: flex;
-        flex-direction: column;
-        width: 350px;
-        height: 75vh;          
-        overflow-y: auto;      
-        overflow-x: hidden;  
-      }
+    .subtitulo {
+      font-size: 14px;
+      font-weight: 500;
+      color: #42773b;
+      margin-top: 3px;
+    }
+
+    .container2 {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .buscar input {
+      background-image: url("buscar.png");
+      background-repeat: no-repeat;
+      background-position: 10px center;
+      background-size: 18px;
+      padding-left: 35px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      height: 35px;
+      width: 1000px;
+      outline-color: #234e2d;
+      font-size: 14px;
+    }
+
+    .buscar {
+      margin: 10px;
+      justify-content: center;
+    }
+
+    .listaP {
+      font-size: 18px;
+      font-weight: 530;
+      color: #234e2d;
+    }
 
     .listaPaciente {
-      overflow-y: auto;       
-      scrollbar-width: none; 
+      background-color: #ffffff;
+      border: solid 1px;
+      height: auto;
+      border-radius: 8px;
+      margin-top: 0px;
+      padding: 5px;
+      margin-left: 10px;
+      display: flex;
+      flex-direction: column;
+      width: 350px;
+      height: 75vh;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+
+    .listaPaciente {
+      overflow-y: auto;
+      scrollbar-width: none;
     }
 
     .listaPaciente::-webkit-scrollbar {
-      display: none;       
-    } 
+      display: none;
+    }
 
     .modal::-webkit-scrollbar {
-      display: none;       
-    } 
+      display: none;
+    }
 
-      .containerListas {
-        display: flex;
-        flex-direction: row;
-      }
+    .containerListas {
+      display: flex;
+      flex-direction: row;
+    }
 
-      .infoP{
-        border-radius: 8px;
-        border: solid 1px;
-        background-color: #ffffff;
-        padding: 2px;
-        padding-left: 5px;
-        display: flex;
-        margin-bottom: 10px;
-        width: auto;
-        height: auto;
-        position: relative;
-      }
+    .infoP {
+      border-radius: 8px;
+      border: solid 1px;
+      background-color: #ffffff;
+      padding: 2px;
+      padding-left: 5px;
+      display: flex;
+      margin-bottom: 10px;
+      width: auto;
+      height: auto;
+      position: relative;
+    }
 
-      .idadeP{
-        color: #42773b;
-        font-weight: 500;
-        font-size: 14px;
-        margin-top: 10px;
-      }
+    .idadeP {
+      color: #42773b;
+      font-weight: 500;
+      font-size: 14px;
+      margin-top: 10px;
+    }
 
-      .condicaoP{
-        color: #42773b;
-        font-weight: 500;
-        font-size: 14px;
-        margin-top: 10px;
-      }
+    .condicaoP {
+      color: #42773b;
+      font-weight: 500;
+      font-size: 14px;
+      margin-top: 10px;
+    }
 
-      .nomeP{
-        color: #234e2d;
-        font-weight: 500;
-        font-size: 14px;
-      }
+    .nomeP {
+      color: #234e2d;
+      font-weight: 500;
+      font-size: 14px;
+    }
 
-      .inicioP{
-        display: flex;
-        flex-direction: column;
-        margin: 10px;
-      }
+    .inicioP {
+      display: flex;
+      flex-direction: column;
+      margin: 10px;
+    }
 
-      .ultimaVisitaP{
-        color: #42773b;
-        font-weight: 500;
-        font-size: 14px;
-        margin-top: 2px;
-      }
+    .ultimaVisitaP {
+      color: #42773b;
+      font-weight: 500;
+      font-size: 14px;
+      margin-top: 2px;
+    }
 
-      .status{
-        position: absolute;
-        top: 7px;
-        right: 10px; 
-      }
+    .status {
+      position: absolute;
+      top: 7px;
+      right: 10px;
+    }
 
-      .statusP{
-        border: none;
-        border-radius: 5px;
-        background-color: #4BA94B;
-        padding: 2px;
-        color: white;
-        font-weight: 500;
-        font-size: 14px;
-      }
-
-
-      .selecionarPaciente{
-        background-color: #ffffff;
-        border: solid 1px;
-        height: auto;
-        border-radius: 8px;
-        margin-top: 0px;
-        padding: 5px;
-        margin-left: 10px;
-        width: 640px;
-        position: relative;
-        display: block;
-      }
-
-      .textoMeio{
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;   
-        justify-content: center;
-        text-align: center;
-        font-size: 14px;
-        font-weight: 500;
-        color: #42773b;
-        pointer-events: none; /* permite clicar nos elementos atrás */
-      }
-
-      #bp{
-        background-color: #234e2d;
-        color: #dff4df;
-        font-weight: 550;
-        border: none;
-        border-radius: 5px;
-        width: 170px;
-        text-align: center;
-      }
-
-      .abas-container {
-        display: flex;
-        background-color: #d3e0d6; 
-        border-radius: 10px;
-        padding: 3px;
-        margin: 10px;
-        gap: 4px;
-        height: 40px;
-      }
-
-      .aba {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: transparent;
-        color: #234e2d;
-        border: none;
-        border-radius: 8px;
-        font-weight: 600;
-        padding: 6px 10px;
-        transition: all 0.3s ease;
-        height: 33px;
-      }
-
-      .aba img.iconeAba {
-        width: 25px;
-        height: 25px;
-        margin-right: 6px;
-        opacity: 0.9;
-      }
-
-      .aba:hover {
-        background-color: rgba(255,255,255,0.15);
-      }
-
-      .aba.ativa {
-        background-color: #ffffff;
-        color: #234e2d;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-      }
+    .statusP {
+      border: none;
+      border-radius: 5px;
+      background-color: #4BA94B;
+      padding: 2px;
+      color: white;
+      font-weight: 500;
+      font-size: 14px;
+    }
 
 
-      .novaConsulta{
-        gap: 6px;
-        background:#234e2d;
-        border: none;
-        color: white;
-        padding: 5px;
-        border-radius: 5px;
-        font-size: 14px;
-      }
+    .selecionarPaciente {
+      background-color: #ffffff;
+      border: solid 1px;
+      height: auto;
+      border-radius: 8px;
+      margin-top: 0px;
+      padding: 5px;
+      margin-left: 10px;
+      width: 640px;
+      position: relative;
+      display: block;
+    }
 
-      .table th {
-        padding: 12px 25px;
-        text-align: left;
-      }
+    .textoMeio {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 14px;
+      font-weight: 500;
+      color: #42773b;
+      pointer-events: none;
+      /* permite clicar nos elementos atrás */
+    }
 
-      .table td {
-        padding: 10px 15px; 
-      }
+    #bp {
+      background-color: #234e2d;
+      color: #dff4df;
+      font-weight: 550;
+      border: none;
+      border-radius: 5px;
+      width: 170px;
+      text-align: center;
+    }
 
-      
-      .container-relatorios {
-        background-color: #ffffff;
-        border: 1px solid #dfeee0;
-        border-radius: 12px;
-        padding: 20px;
-        margin: 10px;
-        overflow-y: auto;
-        max-height: 55vh;
-        scrollbar-width: none;
-      }
+    .abas-container {
+      display: flex;
+      background-color: #d3e0d6;
+      border-radius: 10px;
+      padding: 3px;
+      margin: 10px;
+      gap: 4px;
+      height: 40px;
+    }
 
-      .container-relatorios::-webkit-scrollbar {
-          display: none;
-      }
+    .aba {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      color: #234e2d;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      padding: 6px 10px;
+      transition: all 0.3s ease;
+      height: 33px;
+    }
 
-      .descricao-relatorios {
-        color: #42773b;
-        margin-bottom: 20px;
-        font-size: 14px;
-      }
+    .aba img.iconeAba {
+      width: 25px;
+      height: 25px;
+      margin-right: 6px;
+      opacity: 0.9;
+    }
 
-      .relatorio-cards {
-        display: flex;
-        gap: 20px;
-        flex-wrap: wrap;
-      }
+    .aba:hover {
+      background-color: rgba(255, 255, 255, 0.15);
+    }
 
-      .relatorio-card {
-        flex: 1;
-        min-width: 260px;
-        border: 1px solid #dfeee0;
-        border-radius: 10px;
-        padding: 16px;
-        background: #ffffff;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center; 
-        text-align: center;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-      }
+    .aba.ativa {
+      background-color: #ffffff;
+      color: #234e2d;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
 
-      .relatorio-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
-      }
 
-      .relatorio-card h6 {
-        color: #234e2d;
-        font-weight: 600;
-        margin-bottom: 6px;
-      }
+    .novaConsulta {
+      gap: 6px;
+      background: #234e2d;
+      border: none;
+      color: white;
+      padding: 5px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
 
-      .relatorio-data {
-        color: #42773b;
-        font-size: 14px;
-        margin-bottom: 15px;
-      }
+    .table th {
+      padding: 12px 25px;
+      text-align: left;
+    }
 
-      .btn-relatorio {
-        border: none;
-        background: #f0faf2;
-        color: #234e2d;
-        border-radius: 8px;
-        padding: 8px 16px;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 6px;
-        transition: background 0.2s ease;
-      }
+    .table td {
+      padding: 10px 15px;
+    }
 
-      .btn-relatorio:hover {
-        background: #dff4df;
-      }
 
-      .btn-relatorio img {
-        width: 16px;
-        height: 16px;
-      }
+    .container-relatorios {
+      background-color: #ffffff;
+      border: 1px solid #dfeee0;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 10px;
+      overflow-y: auto;
+      max-height: 55vh;
+      scrollbar-width: none;
+    }
 
-      .modal {
-        display: none; /* Inicialmente escondido */
-        position: fixed;
-        z-index: 1; /* Fica sobre o conteúdo da página */
-        left: 0;
-        top: 0;
-        width: 100%;
-        height: 100%;
-        background-color: rgba(0, 0, 0, 0.4); /* Fundo semi-transparente */
-        align-items: center; /* centraliza verticalmente */
-        justify-content: center;
-    }  
+    .container-relatorios::-webkit-scrollbar {
+      display: none;
+    }
+
+    .descricao-relatorios {
+      color: #42773b;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+
+    .relatorio-cards {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .relatorio-card {
+      flex: 1;
+      min-width: 260px;
+      border: 1px solid #dfeee0;
+      border-radius: 10px;
+      padding: 16px;
+      background: #ffffff;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .relatorio-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .relatorio-card h6 {
+      color: #234e2d;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .relatorio-data {
+      color: #42773b;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+
+    .btn-relatorio {
+      border: none;
+      background: #f0faf2;
+      color: #234e2d;
+      border-radius: 8px;
+      padding: 8px 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.2s ease;
+    }
+
+    .btn-relatorio:hover {
+      background: #dff4df;
+    }
+
+    .btn-relatorio img {
+      width: 16px;
+      height: 16px;
+    }
+
+    .modal {
+      display: none;
+      /* Inicialmente escondido */
+      position: fixed;
+      z-index: 1;
+      /* Fica sobre o conteúdo da página */
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.4);
+      /* Fundo semi-transparente */
+      align-items: center;
+      /* centraliza verticalmente */
+      justify-content: center;
+    }
 
     .modal-content {
       background-color: #fefefe;
@@ -621,15 +632,15 @@
       max-width: 500px;
     }
 
-    .icone3{
+    .icone3 {
       width: 40px;
       height: 40px;
     }
 
-    #CPF{
-      background-color: #def0eb; 
-      border-radius: 10px; 
-      padding: 6px; 
+    #CPF {
+      background-color: #def0eb;
+      border-radius: 10px;
+      padding: 6px;
       display: flex;
       flex-direction: column;
       margin-top: 10px;
@@ -639,44 +650,379 @@
       color: #7FC6BB;
     }
 
-    .close{
+    .close {
       cursor: pointer;
     }
 
-    .busca{
+    .busca {
       height: 40px;
       margin-top: -15px;
       background-color: rgb(238, 238, 238);
     }
 
-    .textArea{
+    .busca2 {
+      height: 40px;
+      margin-top: 5px;
+      background-color: rgb(238, 238, 238);
+      border: 1px solid #59aa53;
+    }
+
+    .textArea {
       height: 90px;
       margin-top: -15px;
       background-color: rgb(238, 238, 238);
     }
 
-    .registrar{
-        background-color: #7FC6BB;
-        text-align: center;
-        color: white;
-        border-radius: 6px;
-        height: 35px;
-        width: 100%;
-        margin-left: -1px;
+    .textArea2 {
+      margin-top: 5px;
+      background-color: rgb(238, 238, 238);
     }
 
-    
-      
-    </style>
+    .registrar {
+      background-color: #7FC6BB;
+      text-align: center;
+      color: white;
+      border-radius: 6px;
+      height: 35px;
+      width: 100%;
+      margin-left: -1px;
+    }
 
-   
+    .label-form {
+      color: #234e2d;
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .obrigatorio {
+      color: #d9534f;
+    }
+
+    .tipo-atendimento-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .opcao-tipo {
+      padding: 6px 14px;
+      border: 1px solid #d9e3da;
+      border-radius: 20px;
+      background: #ffffff;
+      color: #5b6b5e;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .opcao-tipo.selecionada {
+      border-color: #6f8fe0;
+      color: #3a5bc7;
+      background: #ecf0fd;
+      font-weight: 600;
+    }
+
+    .sinais-vitais-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .campo-sinal label {
+      display: block;
+      font-size: 12px;
+      color: #42773b;
+      margin-bottom: 3px;
+    }
+
+    .campo-sinal input {
+      width: 100%;
+      height: 34px;
+      padding: 4px 8px;
+      font-size: 13px;
+    }
+
+    .campo-duplo {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .dica-salvar {
+      display: block;
+      text-align: center;
+      font-size: 12px;
+      color: #7a8c7d;
+      margin-top: 6px;
+    }
+
+    .registrar:disabled {
+      background-color: #b7c4b9 !important;
+      cursor: not-allowed;
+    }
+
+    .prontuario-header {
+      background: #e3f3e8;
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .prontuario-icon {
+      width: 44px;
+      height: 44px;
+      background: #7FC6BB;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .badge-tipo {
+      display: inline-block;
+      background: #ecf0fd;
+      color: #3a5bc7;
+      border: 1px solid #cdd8f7;
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+
+    .badge-cid {
+      display: inline-block;
+      background: #ffffff;
+      color: #234e2d;
+      border: 1px solid #d9e3da;
+      border-radius: 6px;
+      padding: 2px 8px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .sinais-vitais-cards {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .card-sinal {
+      background: #ffffff;
+      border: 1px solid #d9e3da;
+      border-radius: 8px;
+      padding: 10px;
+      text-align: left;
+    }
+
+    .card-sinal span {
+      font-size: 11px;
+      color: #5b6b5e;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .card-sinal h6 {
+      color: #234e2d;
+      font-weight: 700;
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .card-sinal small {
+      color: #7a8c7d;
+      font-size: 11px;
+    }
+
+    .campo-info-box {
+      background: #ffffff;
+      border: 1px solid #d9e3da;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 6px;
+      font-size: 13px;
+      color: #234e2d;
+    }
+
+    .campo-conduta-box {
+      background: #eef8ee;
+      border: 1px solid #bfe3c2;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 6px;
+      font-size: 13px;
+      color: #234e2d;
+    }
+
+    .campo-retorno-box {
+      background: #ffffff;
+      border: 1px solid #d9e3da;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 16px;
+    }
+
+    .campo-retorno-box span {
+      font-size: 12px;
+      color: #3a5bc7;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .campo-retorno-box h6 {
+      margin: 0;
+      color: #234e2d;
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+        /* ===== NOVO MODAL DE RECEITA ===== */
+    #myModal3 .modal-content {
+      flex-direction: column;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    .receita-duas-colunas {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 8px;
+    }
+
+    .via-admin-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .via-admin-grid .opcao-tipo.selecionada {
+      border-color: #234e2d;
+      color: #ffffff;
+      background: #234e2d;
+    }
+
+    .prescrever-btn {
+      background-color: #234e2d;
+      color: #ffffff;
+      text-align: center;
+      border-radius: 8px;
+      height: 36px;
+      flex: 1;
+      border: none;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .prescrever-btn:disabled {
+      background-color: #b7c4b9 !important;
+      cursor: not-allowed;
+    }
+
+        /* ===== MODAL VER RECEITA ===== */
+    .receita-header {
+      background: #d9ede3;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .receita-icon {
+      width: 44px;
+      height: 44px;
+      background: #7FC6BB;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .badge-ativa {
+      display: inline-block;
+      background: #234e2d;
+      color: #ffffff;
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+
+    .badge-via {
+      display: inline-block;
+      background: #ffffff;
+      color: #234e2d;
+      border: 1px solid #bcdbc7;
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .posologia-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .card-posologia {
+      background: #f7faf7;
+      border: 1px solid #d9e3da;
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .card-posologia span {
+      font-size: 12px;
+      color: #5b6b5e;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .card-posologia h6 {
+      color: #234e2d;
+      font-weight: 700;
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .campo-instrucoes-box {
+      background: #f7faf7;
+      border: 1px solid #d9e3da;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 6px;
+      font-size: 13px;
+      color: #234e2d;
+    }
+  </style>
+
+
 
 </head>
+
 <body>
 
-   
-<div class="containerPrincipal">
-<div class="colunaEsquerda">
+
+  <div class="containerPrincipal">
+    <div class="colunaEsquerda">
 
       <div class="principal">
         <div class="logo">
@@ -685,282 +1031,373 @@
         </div>
         <div class="titulo">Sistema para Farmácia</div>
       </div>
-  
-    <button type="button" class="btn-img" id="bp">
+
+      <button type="button" class="btn-img" id="bp">
         <img src="prontuarioH.png" alt="Ícone" class="icone" id="iconeP">
         Prontuários
-    </button>
+      </button>
 
-    <button type="button" class="btn-img" id="bt">
+      <button type="button" class="btn-img" id="bt">
         <img src="videoCamera.png" alt="Ícone" class="icone" id="iconeT">
         Teleconsultas
-    </button>
+      </button>
 
-    <button type="button" class="btn-img" id="bi">
+      <button type="button" class="btn-img" id="bi">
         <img src="ia.png" alt="Ícone" class="icone" id="iconeI">
         Assistente IA
-    </button>
+      </button>
 
-    <button type="button" class="btn-img" id="bpa">
+      <button type="button" class="btn-img" id="bpa">
         <img src="parcerias.png" alt="Ícone" class="icone" id="iconePa">
         Parcerias
-    </button>
+      </button>
 
-    <div class="info">
-      
-      <div class="perfil">
-       <div class="foto">DR</div>
-        <div class="dados">
-          <span class="nome">Dra. Rafaela Albiero</span>
-          <span class="crm">CRM 12345-SP</span>
-        </div>
-      </div>
+      <div class="info">
 
-      <div class="acoes">
-
-        <button class="botao" id="Sair">
-          <img src="sair.png" alt="sair" class="icone2">
-          Sair
-        </button>
-        <button class="botao" id="conf">
-          <img src="config.png" alt="configuração" class="icone1">
-          Configuração
-        </button>
-      </div>
-
-    </div>
-  
-</div>
-
-  <div class="corpo">
-
-  <div class="container2">
-    <div class="inicio">
-        <span class="tituloo">Prontuários de Pacientes</span>
-        <span class="subtitulo">Gerencie prontuários, receitas e relatórios médicos</span>
-    </div>
-
-    <div class="buscar">
-      <input src="buscar.png" type="text" placeholder="Buscar paciente...">
-
-    </div>
-
-   
-
-    <!-- NOVO CONTAINER -->
-    <div class="containerListas">
-
-      
-      <div class="listaPaciente">
-        <div class="inicio">
-          <span class="listaP">Lista de Pacientes</span>
-          <span class="subtitulo">3 Pacientes</span>
-        </div>
-
-        <div class="infoP">
-          <div class="inicioP">
-            <span class="nomeP"></span>
-            <span class="idadeP"></span> <span class="condicaoP"></span> 
-            <span class="ultimaVisitaP"></span>
-          </div>
-
-          <div class="status">
-            <span class="statusP">Ativo</span>
+        <div class="perfil">
+          <div class="foto">DR</div>
+          <div class="dados">
+            <span class="nome">Dra. Rafaela Albiero</span>
+            <span class="crm">CRM 12345-SP</span>
           </div>
         </div>
 
-      </div>
-     
+        <div class="acoes">
 
-      <div class="selecionarPaciente">
-        <div class="inicio">
-          <span class="listaP">Selecione um paciente</span>
-          <span class="subtitulo">Escolha um paciente da lista</span>
+          <button class="botao" id="Sair">
+            <img src="sair.png" alt="sair" class="icone2">
+            Sair
+          </button>
+          <button class="botao" id="conf">
+            <img src="config.png" alt="configuração" class="icone1">
+            Configuração
+          </button>
         </div>
-        <div class="textoMeio">Selecione um paciente para visualizar os dados</div>
+
       </div>
 
     </div>
 
+    <div class="corpo">
+
+      <div class="container2">
+        <div class="inicio">
+          <span class="tituloo">Prontuários de Pacientes</span>
+          <span class="subtitulo">Gerencie prontuários, receitas e relatórios médicos</span>
+        </div>
+
+        <div class="buscar">
+          <input src="buscar.png" type="text" placeholder="Buscar paciente...">
+
+        </div>
+
+
+
+        <!-- NOVO CONTAINER -->
+        <div class="containerListas">
+
+
+          <div class="listaPaciente">
+            <div class="inicio">
+              <span class="listaP">Lista de Pacientes</span>
+              <span class="subtitulo">3 Pacientes</span>
+            </div>
+
+            <div class="infoP">
+              <div class="inicioP">
+                <span class="nomeP"></span>
+                <span class="idadeP"></span> <span class="condicaoP"></span>
+                <span class="ultimaVisitaP"></span>
+              </div>
+
+              <div class="status">
+                <span class="statusP">Ativo</span>
+              </div>
+            </div>
+
+          </div>
+
+
+          <div class="selecionarPaciente">
+            <div class="inicio">
+              <span class="listaP">Selecione um paciente</span>
+              <span class="subtitulo">Escolha um paciente da lista</span>
+            </div>
+            <div class="textoMeio">Selecione um paciente para visualizar os dados</div>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- MODAL PRONTUARIO-->
+      <div id="myModal" class="modal">
+        <div class="modal-content"
+          style="flex-direction: column; max-width: 560px; max-height: 85vh; overflow-y: auto; background:#ffffff;">
+          <div style="display:flex; justify-content:flex-end;">
+            <span id="closeModalBtn" class="close">&times;</span>
+          </div>
+
+          <div id="prontuarioConteudo">
+            <p style="text-align:center; color:#555;">Carregando...</p>
+          </div>
+
+          <div style="margin-top: 15px;">
+            <hr class="text-muted">
+            <button id="fecharProntuarioBtn"
+              style="width:100%; background:#ffffff; border:1px solid #ccc; color:#234e2d; border-radius:8px; padding:8px; margin:0;">Fechar</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL NOVO PRONTUÁRIO-->
+      <div id="myModal2" class="modal">
+        <div class="modal-content"
+          style="flex-direction: column; max-width: 560px; max-height: 95vh; overflow-y: auto;">
+          <div style="display:flex; justify-content: space-between; align-items:flex-start;">
+            <h4><img src="paciente.png" alt="Ícone" class="icone3"> Novo Prontuário</h4>
+            <span id="closeModalBtn2" class="close">&times;</span>
+          </div>
+          <span class="text-muted" style="font-size: 14px; margin-top: -10px; margin-bottom: 10px;">
+            Paciente: <b id="nomePacienteProntuario" style="color:#000;"></b> · <span
+              id="idadePacienteProntuario"></span> anos
+          </span>
+
+          <b style="color:#59aa53; font-size: 13px;">IDENTIFICAÇÃO</b>
+
+          <p class="label-form" style="margin-top: 10px;">Tipo de Atendimento</p>
+          <div class="tipo-atendimento-container" id="tipoAtendimentoContainer">
+            <div class="opcao-tipo selecionada" data-tipo="Consulta">Consulta</div>
+            <div class="opcao-tipo" data-tipo="Retorno">Retorno</div>
+            <div class="opcao-tipo" data-tipo="Exame">Exame</div>
+            <div class="opcao-tipo" data-tipo="Procedimento">Procedimento</div>
+            <div class="opcao-tipo" data-tipo="Urgência">Urgência</div>
+          </div>
+
+          <p class="label-form" style="margin-top: 14px;">Data do Atendimento</p>
+          <input type="text" class="form-control mb-2 busca2" id="dataAtendimentoProntuario" readonly>
+
+          <b style="color:#59aa53; font-size: 13px; margin-top: 10px; display:block;">SINAIS VITAIS <span
+              class="text-muted" style="font-weight:400;">(opcional)</span></b>
+          <div class="sinais-vitais-grid">
+            <div class="campo-sinal">
+              <label>PA (mmHg)</label>
+              <input type="text" id="paProntuario" class="busca2" placeholder="120/80">
+            </div>
+            <div class="campo-sinal">
+              <label>Temp (°C)</label>
+              <input type="text" id="tempProntuario" class="busca2" placeholder="36.5">
+            </div>
+            <div class="campo-sinal">
+              <label>Peso (kg)</label>
+              <input type="text" id="pesoProntuario" class="busca2" placeholder="70">
+            </div>
+            <div class="campo-sinal">
+              <label>SpO2 (%)</label>
+              <input type="text" id="spo2Prontuario" class="busca2" placeholder="98">
+            </div>
+          </div>
+
+          <b style="color:#59aa53; font-size: 13px; margin-top: 14px; display:block;">DIAGNÓSTICO</b>
+          <div class="campo-duplo">
+            <div style="flex: 2;">
+              <p class="label-form">Diagnóstico <span class="obrigatorio">*</span></p>
+              <input type="text" id="diagnosticoProntuario" class="busca2"
+                placeholder="Ex: Hipertensão arterial controlada">
+            </div>
+            <div style="flex: 1;">
+              <p class="label-form">CID-10</p>
+              <input type="text" id="cidProntuario" class="busca2" placeholder="Ex: I10">
+            </div>
+          </div>
+
+          <b style="color:#59aa53; font-size: 13px; margin-top: 14px; display:block;">REGISTRO CLÍNICO</b>
+
+          <p class="label-form" style="margin-top: 8px;">Anamnese / Queixa principal <span class="obrigatorio">*</span>
+          </p>
+          <textarea class="form-control mb-2 textArea2" id="anamneseProntuario" rows="3"
+            placeholder="Descreva a queixa principal, história da doença atual, histórico relevante..."></textarea>
+
+          <p class="label-form">Exame Físico <span class="text-muted" style="font-weight:400;">(opcional)</span></p>
+          <textarea class="form-control mb-2 textArea2" id="exameFisicoProntuario" rows="3"
+            placeholder="Achados do exame físico: ausculta, palpação, inspeção..."></textarea>
+
+          <b style="color:#59aa53; font-size: 13px; margin-top: 10px; display:block;">CONDUTA</b>
+
+          <p class="label-form" style="margin-top: 8px;">Plano terapêutico / Conduta</p>
+          <textarea class="form-control mb-2 textArea2" id="condutaProntuario" rows="5"
+            placeholder="Medicações prescritas, encaminhamentos, orientações ao paciente..."></textarea>
+
+          <p class="label-form">Data de Retorno <span class="text-muted" style="font-weight:400;">(opcional)</span></p>
+          <input type="text" class="form-control mb-3 busca2" id="dataRetornoProntuario" placeholder="dd/mm/aaaa">
+
+          <div style="display: flex; gap: 10px; margin-top: 5px;">
+            <button id="cancelarProntuarioBtn"
+              style="flex:1; background:#ffffff; border:1px solid #ccc; color:#234e2d; border-radius: 8px; padding-left: 12px; margin: 0; height: 36px;">Cancelar</button>
+            <button id="salvarProntuarioBtn" class="registrar" style="flex:1; border-radius: 8px;" disabled><img
+                src="paper.png" class="icone2" style="filter: brightness(0) invert(1);"> Salvar Prontuário</button>
+          </div>
+          <span id="dicaSalvarProntuario" class="dica-salvar">Preencha ao menos o diagnóstico e a anamnese para
+            salvar</span>
+        </div>
+      </div>
+
+      <!-- MODAL NOVA RECEITA-->
+      <div id="myModal3" class="modal">
+        <div class="modal-content">
+          <div style="display:flex; justify-content: space-between; align-items:flex-start;">
+            <h4><img src="capsula.png" alt="Ícone" class="icone3"> Nova Prescrição</h4>
+            <span id="closeModalBtn3" class="close">&times;</span>
+          </div>
+          <span class="text-muted" style="font-size: 14px; margin-top: -10px; margin-bottom: 10px;">
+            Paciente: <b id="nomePacienteReceita" style="color:#000;"></b> · <span id="idadePacienteReceita"></span> anos
+          </span>
+
+          <b style="color:#59aa53; font-size: 13px;">MEDICAMENTO</b>
+          <div class="receita-duas-colunas">
+            <div>
+              <p class="label-form" style="margin-top: 10px;">Nome <span class="obrigatorio">*</span></p>
+              <input type="text" id="nomeMedicamentoReceita" class="busca2" placeholder="Ex: Losartana, Amoxicilina">
+            </div>
+            <div>
+              <p class="label-form" style="margin-top: 10px;">Concentração</p>
+              <input type="text" id="concentracaoReceita" class="busca2" placeholder="Ex: 50mg, 500mg/5ml">
+            </div>
+          </div>
+
+          <b style="color:#59aa53; font-size: 13px; margin-top: 14px; display:block;">POSOLOGIA</b>
+          <p class="label-form" style="margin-top: 10px;">Dose <span class="obrigatorio">*</span></p>
+          <input type="text" id="doseReceita" class="busca2" placeholder="Ex: 1 comprimido, 10ml">
+
+          <p class="label-form" style="margin-top: 10px;">Frequência</p>
+          <div class="tipo-atendimento-container" id="frequenciaContainer">
+            <div class="opcao-tipo" data-freq="1x ao dia">1x ao dia</div>
+            <div class="opcao-tipo" data-freq="2x ao dia">2x ao dia</div>
+            <div class="opcao-tipo" data-freq="3x ao dia">3x ao dia</div>
+            <div class="opcao-tipo" data-freq="4x ao dia">4x ao dia</div>
+            <div class="opcao-tipo" data-freq="A cada 8h">A cada 8h</div>
+            <div class="opcao-tipo" data-freq="A cada 12h">A cada 12h</div>
+            <div class="opcao-tipo" data-freq="Uso contínuo">Uso contínuo</div>
+            <div class="opcao-tipo" data-freq="Se necessário">Se necessário</div>
+          </div>
+
+          <div class="receita-duas-colunas">
+            <div>
+              <p class="label-form" style="margin-top: 14px;">Duração</p>
+              <input type="text" id="duracaoReceita" class="busca2" placeholder="Ex: 7 dias, 30 dias">
+            </div>
+            <div>
+              <p class="label-form" style="margin-top: 14px;">Via de Administração</p>
+              <div class="via-admin-grid" id="viaAdminContainer">
+                <div class="opcao-tipo selecionada" data-via="Oral">Oral</div>
+                <div class="opcao-tipo" data-via="Sublingual">Sublingual</div>
+                <div class="opcao-tipo" data-via="Intravenosa">Intravenosa</div>
+                <div class="opcao-tipo" data-via="Intramuscular">Intramuscular</div>
+                <div class="opcao-tipo" data-via="Tópica">Tópica</div>
+                <div class="opcao-tipo" data-via="Inalatória">Inalatória</div>
+                <div class="opcao-tipo" data-via="Retal">Retal</div>
+              </div>
+            </div>
+          </div>
+
+          <b style="color:#59aa53; font-size: 13px; margin-top: 14px; display:block;">INSTRUÇÕES</b>
+          <p class="label-form" style="margin-top: 8px;">Instruções ao paciente</p>
+          <textarea class="form-control mb-2 textArea2" id="instrucoesReceita" rows="3"
+            placeholder="Ex: Tomar em jejum, evitar exposição ao sol..."></textarea>
+
+          <p class="label-form">Observações clínicas <span class="text-muted" style="font-weight:400;">(opcional)</span></p>
+          <textarea class="form-control mb-3 textArea2" id="observacoesReceita" rows="3"
+            placeholder="Ex: Monitorar função renal, repetir exame em 30 dias..."></textarea>
+
+          <div style="display: flex; gap: 10px; margin-top: 5px;">
+            <button id="cancelarReceitaBtn"
+              style="flex:1; background:#ffffff; border:1px solid #ccc; color:#234e2d; border-radius: 8px; padding-left: 12px; margin: 0; height: 36px;">Cancelar</button>
+            <button id="prescreverBtn" class="prescrever-btn" disabled>
+              <img src="capsula.png" class="icone2" style="filter: brightness(0) invert(1); width:16px; height:16px;"> Prescrever
+            </button>
+          </div>
+          <span id="dicaPrescrever" class="dica-salvar">Preencha o nome do medicamento e a dose para salvar</span>
+        </div>
+      </div>
+
+      <!-- MODAL VER RECEITA-->
+      <div id="myModal4" class="modal">
+        <div class="modal-content"
+          style="flex-direction: column; max-width: 560px; max-height: 85vh; overflow-y: auto; background:#ffffff;">
+          <div style="display:flex; justify-content:flex-end;">
+            <span id="closeModalBtn4" class="close">&times;</span>
+          </div>
+
+          <div id="receitaConteudo">
+            <p style="text-align:center; color:#555;">Carregando...</p>
+          </div>
+
+          <div style="margin-top: 15px;">
+            <hr class="text-muted">
+            <button id="fecharReceitaVerBtn"
+              style="width:100%; background:#ffffff; border:1px solid #ccc; color:#234e2d; border-radius:8px; padding:8px; margin:0;">Fechar</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 
 
-  <!-- MODAL PRONTUARIO-->
-    <div id="myModal" class="modal">
-      <div class="modal-content">
-        <span id="closeModalBtn" class="close">&times;</span>
-        <h4><img src="paciente.png" alt="Ícone" class="icone3" > Prontuário do Paciente</h4>
-
-        <div id="CPF">
-          <span id="nomeDoPaciente" style="color: rgb(0, 0, 0); font-size: 18px; margin-bottom: 5px;"></span>
-          <span class="text-muted" style="font-size: 14px;">CPF: ***123.456-** | <span id="idadePaciente"></span> anos | Feminino</span>
-        </div>
-
-        <div id="informacoesGerais" style="margin-top: 10px;">
-          <b style="color: #59aa53; font-weight: 300;"><img src="paciente2.png" alt="Ícone" class="icone"> Informações Gerais</b>
-          <div style="display: flex; flex-direction: column;">
-            <div style="margin-top: 10px; display: flex; flex-direction: column; margin-left: 35px;">
-              <span style="margin-bottom: 10px;"><img src="telefone.png" alt="Ícone" class="icone2"> (11) 98765-4321</span>
-              <span style="margin-bottom: 10px;"><img src="email.png" alt="Ícone" class="icone2"> maria.silva@email.com</span>
-              <span style="margin-bottom: 10px;"><img src="endereco.png" alt="Ícone" class="icone2"> Rua das Flores, 123 - São Paulo/SP</span>
-            </div>
-          </div>
-        </div>
-
-        <div id="condicaoCronica" style="margin-top: 7px;">
-          <b style="color: #59aa53; font-weight: 300;"><img src="coracao.png" alt="Ícone" class="icone"> Condições Crônicas</b>
-          <div style="display: flex; margin-left: 25px;">
-            <div class="condicoes"></div>
-          </div>
-        </div>
-
-        <div id="alergias" style="margin-top: 3px;">
-          <b style="color: #59aa53; font-weight: 300;"><img src="alergias.png" alt="Ícone" class="icone"> Alergias</b>
-          <div style="display: flex; margin-left: 35px;">
-            <div class="alergia" style="font-size: 14px; margin-top: 10px;">Penicilina, Dipirona</div>
-          </div>
-        </div>
-
-        <div id="medicamentos" style="margin-top: 10px;">
-          <b style="color: #59aa53; font-weight: 300;"><img src="medicamento.png" alt="Ícone" class="icone"> Mediacamentos em Uso</b>
-          <div style="display: flex; margin-left: 35px;">
-            <div class="alergia" style="font-size: 14px; margin-top: 10px;">
-              <ul class="lista">
-                
-              </ul>
-            </div>
-          </div>
-        </div>
-
-        <div id="alergias" style="margin-top: 3px;">
-          <b style="color: #59aa53; font-weight: 300;"><img src="alergias.png" alt="Ícone" class="icone"> Observações</b>
-          <div style="display: flex; margin-left: 35px;">
-            <div class="alergia" style="font-size: 14px; margin-top: 5px;">Paciente apresenta pressão arterial dentro dos parâmetros</div>
-          </div>
-        </div>
-
-        <div style="display: flex; flex-direction: column; margin-bottom: -20px;">
-          <hr class="text-muted">
-          <button style="background-color: #59aa53; color: white; text-align: center; width: 100%; margin-left: 0px; padding: 5px; border-radius: 10px;"><img src="paper.png" alt="PDF" class="icone2"> Exportar PDF</button>
-        </div>
-       
-      </div>
-    </div>
-
-    <!-- MODAL NOVO PRONTUÁRIO-->
-    <div id="myModal2" class="modal">
-      <div class="modal-content">
-        <span id="closeModalBtn2" class="close">&times;</span>
-        <h4><img src="paciente.png" alt="Ícone" class="icone3" > Registrar novo Prontuário</h4>
-
-        <div style="margin-top: 10px;">
-          <p style="margin-top: 6px; color: #59aa53; font-size: 14px;"><b>Diagnóstico</b></p>
-          <input type="text" class="form-control mb-3 busca"
-          placeholder="Digite o diagnóstico (condição)">
-
-          <p style="margin-top: 6px; color: #59aa53; font-size: 14px;"><b>Observações</b></p>
-          <textarea class="form-control mb-3 textArea" rows="4" placeholder="Digite as observações do paciente"></textarea>
-
-          <button class="registrar">Registrar</button>
-        </div>
-       
-      </div>
-    </div>
-
-    <!-- MODAL NOVA RECEITA-->
-    <div id="myModal3" class="modal">
-      <div class="modal-content">
-        <span id="closeModalBtn3" class="close">&times;</span>
-        <h4><img src="capsula.png" alt="Ícone" class="icone3" > Registrar nova Receita</h4>
-
-        <div style="margin-top: 10px;">
-          <p style="margin-top: 6px; color: #59aa53; font-size: 14px;"><b>Paciente</b></p>
-          <input type="text" id="nomePaciente" class="form-control mb-3 busca" value="" readonly>
-
-          <p style="margin-top: 6px; color: #59aa53; font-size: 14px;"><b>Medicamento</b></p>
-          <input type="text" class="form-control mb-3 busca"
-          placeholder="Digite o nome do medicamento">
-
-          <p style="margin-top: 6px; color: #59aa53; font-size: 14px;"><b>Dosagem</b></p>
-          <input type="text" class="form-control mb-3 busca"
-          placeholder="Ex: 50mg">
-
-          <p style="margin-top: 6px; color: #59aa53; font-size: 14px;"><b>Frequência</b></p>
-          <input type="text" class="form-control mb-3 busca"
-          placeholder="Ex: 1x ao dia">
-
-          <p style="margin-top: 6px; color: #59aa53; font-size: 14px;"><b>Instruções</b></p>
-          <textarea class="form-control mb-3 textArea" rows="4" placeholder="Digite as instruções para o paciente"></textarea>
-
-          <p style="margin-top: 6px; color: #59aa53; font-size: 14px;"><b>Data de Inicio</b></p>
-          <input type="text" class="form-control mb-3 busca" value="" id="dataDeInicio">
-
-
-          <button class="registrar">Assinar e Emitir receita</button>
-        </div>
-       
-      </div>
-    </div>
-
-      
-
-    </div>
-  </div>
-
-
-<script>
-  window.addEventListener('DOMContentLoaded', async () => {
-    const fotoSalva = localStorage.getItem('fotoPerfilBase64');
+  <script>
+    window.addEventListener('DOMContentLoaded', async () => {
+      const fotoSalva = localStorage.getItem('fotoPerfilBase64');
       if (fotoSalva) {
-          const fotoBarra = document.querySelector('.foto');
-          fotoBarra.style.backgroundImage = `url(data:image/jpeg;base64,${fotoSalva})`;
-          fotoBarra.style.backgroundSize = 'cover';
-          fotoBarra.style.backgroundPosition = 'center';
-          fotoBarra.textContent = '';
+        const fotoBarra = document.querySelector('.foto');
+        fotoBarra.style.backgroundImage = `url(data:image/jpeg;base64,${fotoSalva})`;
+        fotoBarra.style.backgroundSize = 'cover';
+        fotoBarra.style.backgroundPosition = 'center';
+        fotoBarra.textContent = '';
       }
 
-    const botBp = document.getElementById('bp');
-    const botBt = document.getElementById('bt');
-    const botBi = document.getElementById('bi');
-    const botBpa = document.getElementById('bpa');
+      const botBp = document.getElementById('bp');
+      const botBt = document.getElementById('bt');
+      const botBi = document.getElementById('bi');
+      const botBpa = document.getElementById('bpa');
 
-    // Navegação entre janelas
-    botBp.addEventListener('click', () => window.electronAPI.abrirJanelaIndex());
-    botBt.addEventListener('click', () => window.electronAPI.abrirJanelaT());
-    botBi.addEventListener('click', () => window.electronAPI.abrirJanelaIA());
-    botBpa.addEventListener('click', () => window.electronAPI.abrirJanelaParceria());
-    document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
-    document.getElementById('conf').addEventListener('click', () => window.electronAPI.abrirJanelaConfig());
+      // Navegação entre janelas
+      botBp.addEventListener('click', () => window.electronAPI.abrirJanelaIndex());
+      botBt.addEventListener('click', () => window.electronAPI.abrirJanelaT());
+      botBi.addEventListener('click', () => window.electronAPI.abrirJanelaIA());
+      botBpa.addEventListener('click', () => window.electronAPI.abrirJanelaParceria());
+      document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
+      document.getElementById('conf').addEventListener('click', () => window.electronAPI.abrirJanelaConfig());
 
-    try {
-      const pacientes = await window.electronAPI.buscarProntuarios();
-      const painel = document.querySelector('.selecionarPaciente');
-      const listaContainer = document.querySelector('.listaPaciente');
+      try {
+        const pacientes = await window.electronAPI.buscarPacientesProntuario();
+        const painel = document.querySelector('.selecionarPaciente');
+        const listaContainer = document.querySelector('.listaPaciente');
 
-      listaContainer.innerHTML = `
+        listaContainer.innerHTML = `
         <div class="inicio">
           <span class="listaP">Lista de Pacientes</span>
           <span class="subtitulo">${pacientes.length} Pacientes</span>
         </div>
       `;
 
-      pacientes.forEach(p => {
-        const div = document.createElement('div');
-        div.classList.add('infoP');
-        div.innerHTML = `
+        pacientes.forEach(p => {
+          const div = document.createElement('div');
+          div.classList.add('infoP');
+          div.innerHTML = `
           <div class="inicioP">
             <span class="nomeP">${p.nome_paciente}</span>
-            <span class="idadeP">${p.idade} anos • <span class="condicaoP">${p.condicao}</span></span> 
-            <span class="ultimaVisitaP">Última visita: ${p.ultima_visita}</span>
+            <span class="idadeP">${p.idade} anos • <span class="condicaoP">${p.condicao || 'Sem registro'}</span></span> 
+            <span class="ultimaVisitaP">Última visita: ${p.ultima_visita || '—'}</span>
           </div>
           <div class="status">
-            <span class="statusP" style="background-color:${p.status === 'Ativo' ? '#4BA94B' : '#7FC6BBEE'};">${p.status}</span>
+            <span class="statusP" style="background-color:${p.status === 'Ativo' ? '#4BA94B' : '#7FC6BBEE'};">${p.status || 'Ativo'}</span>
           </div>
         `;
-        listaContainer.appendChild(div);
+          listaContainer.appendChild(div);
 
-        div.addEventListener('click', () => {
-          painel.innerHTML = `
+          div.addEventListener('click', () => {
+            painel.innerHTML = `
             <div class="inicio">
               <span class="listaP">${p.nome_paciente}</span>
               <span class="subtitulo">Histórico e informações médicas</span>
@@ -981,103 +1418,174 @@
             <div id="conteudoAba"></div>
           `;
 
-          const abas = painel.querySelectorAll('.aba');
-          const conteudo = painel.querySelector('#conteudoAba');
+            const abas = painel.querySelectorAll('.aba');
+            const conteudo = painel.querySelector('#conteudoAba');
 
-          async function mostrarAba(tipo) {
-            abas.forEach(a => a.classList.remove('ativa'));
-            painel.querySelector(`[data-aba="${tipo}"]`).classList.add('ativa');
+            async function mostrarAba(tipo) {
+              abas.forEach(a => a.classList.remove('ativa'));
+              painel.querySelector(`[data-aba="${tipo}"]`).classList.add('ativa');
 
-            // ---------- ABA PRONTUÁRIOS ----------
-            if (tipo === "prontuarios") {
-              conteudo.innerHTML = `
+              // ---------- ABA PRONTUÁRIOS ----------
+              if (tipo === "prontuarios") {
+                conteudo.innerHTML = `
                 <div style="text-align: right; margin: 10px;">
                   <button class="novaConsulta" style="background-color:#7FC6BB;" id="openModalBtn2">
                     <img src="plus.png" class="icone2"> Novo Prontuário
                   </button>
                 </div>
-
-                <table class="table table-sm" style="font-size:12px; color:#234e2d;">
-                  <thead>
-                    <tr>
-                      <th>Paciente</th>
-                      <th>CPF</th>
-                      <th>Idade</th>
-                      <th>Última Consulta</th>
-                      <th>Condição Principal</th>
-                      <th>Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>${p.nome_paciente}</td>
-                      <td>***123.456-**</td>
-                      <td>${p.idade} anos</td>
-                      <td>${p.ultima_visita}</td>
-                      <td>${p.condicao}</td>
-                      <td>
-                        <button style="color:white; background-color: #7FC6BB; border-radius: 10px; padding: 3px; width: 80px" id="openModalBtn">Ver Prontuário</button>  
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
+                <div id="prontuariosContainer">
+                  <p style="text-align:center; margin-top:20px; color:#555;">Carregando prontuários...</p>
+                </div>
               `;
 
-              const modal = document.getElementById("myModal");
-              const openModalBtn = document.getElementById("openModalBtn");
-              const closeModalBtn = document.getElementById("closeModalBtn");
-              const modal2 = document.getElementById("myModal2");
-              const openModalBtn2 = document.getElementById("openModalBtn2");
-              const closeModalBtn2 = document.getElementById("closeModalBtn2");
+                const modal = document.getElementById("myModal");
+                const closeModalBtn = document.getElementById("closeModalBtn");
+                const modal2 = document.getElementById("myModal2");
+                const openModalBtn2 = document.getElementById("openModalBtn2");
+                const closeModalBtn2 = document.getElementById("closeModalBtn2");
 
-              openModalBtn.addEventListener('click', function() {
-                const nomePaciente = document.getElementById("nomeDoPaciente");
-                nomePaciente.innerHTML = `${p.nome_paciente}`;
-                const idadePaciente = document.getElementById("idadePaciente");
-                idadePaciente.innerHTML = `${p.idade}`;
-                const condicaoPaciente = document.querySelector(".condicoes");
-                condicaoPaciente.innerHTML = `<button style="background-color: #b3dfd2; color: white; border-radius: 10px;  padding: 5px 10px; font-size: 12px; margin-top: 7px;">${p.condicao}</button>`;
-                
-                const medicamentosUso = document.querySelector(".lista");
-                window.electronAPI.buscarReceitas(p.id).then(receitas => {
-                  if (receitas.length === 0) {
-                    medicamentosUso.innerHTML = "<li>Nenhum medicamento em uso</li>";
-                  } else {
-                    const lista = receitas
-                      .map(r => `<li>${r.medicamento}</li>`)
-                      .join('');
-
-                    medicamentosUso.innerHTML = lista;
-                  }
+                document.getElementById('fecharProntuarioBtn').addEventListener('click', function () {
+                  modal.style.display = "none";
                 });
 
-                modal.style.display = "flex";
-               
-              });
+                window.addEventListener('click', function (event) {
+                  if (event.target === modal) modal.style.display = "none";
+                  if (event.target === modal2) modal2.style.display = "none";
+                });
 
-              closeModalBtn.addEventListener('click', function() { 
-                modal.style.display = "none"; 
-              });
+                openModalBtn2.addEventListener('click', function () {
+                  document.getElementById('nomePacienteProntuario').textContent = p.nome_paciente;
+                  document.getElementById('idadePacienteProntuario').textContent = p.idade;
 
-              window.addEventListener('click', function(event) {
-                if (event.target === modal) modal.style.display = "none";
-                if (event.target === modal2) modal2.style.display = "none";
-              });
+                  const hojeP = new Date();
+                  const diaP = String(hojeP.getDate()).padStart(2, '0');
+                  const mesP = String(hojeP.getMonth() + 1).padStart(2, '0');
+                  const anoP = hojeP.getFullYear();
+                  document.getElementById('dataAtendimentoProntuario').value = `${diaP}/${mesP}/${anoP}`;
 
-              openModalBtn2.addEventListener('click', function() {
-                modal2.style.display = "flex";
-              });
+                  modal2.style.display = "flex";
+                });
 
-              closeModalBtn2.addEventListener('click', function() { 
-                modal2.style.display = "none"; 
-              });
+                const salvarProntuarioBtn = document.getElementById('salvarProntuarioBtn');
+                salvarProntuarioBtn.onclick = async () => {
+                  const tipoSelecionado = document.querySelector('#tipoAtendimentoContainer .opcao-tipo.selecionada')?.dataset.tipo || 'Consulta';
 
+                  const dadosProntuario = {
+                    idPaciente: p.id,
+                    nomePaciente: p.nome_paciente,
+                    idade: p.idade,
+                    tipo: tipoSelecionado,
+                    dataAtendimento: document.getElementById('dataAtendimentoProntuario').value,
+                    pa: document.getElementById('paProntuario').value.trim(),
+                    temperatura: document.getElementById('tempProntuario').value.trim(),
+                    peso: document.getElementById('pesoProntuario').value.trim(),
+                    spo2: document.getElementById('spo2Prontuario').value.trim(),
+                    diagnostico: document.getElementById('diagnosticoProntuario').value.trim(),
+                    cid10: document.getElementById('cidProntuario').value.trim(),
+                    anamnese: document.getElementById('anamneseProntuario').value.trim(),
+                    exameFisico: document.getElementById('exameFisicoProntuario').value.trim(),
+                    conduta: document.getElementById('condutaProntuario').value.trim(),
+                    dataRetorno: document.getElementById('dataRetornoProntuario').value.trim()
+                  };
 
-            }
+                  try {
+                    await window.electronAPI.cadastrarProntuario(dadosProntuario);
+                    alert('Prontuário salvo com sucesso!');
+                    modal2.style.display = 'none';
 
-            // ---------- ABA RECEITAS ----------
-            else if (tipo === "receitas") {
-              conteudo.innerHTML = `
+                    // Limpa o formulário
+                    document.getElementById('diagnosticoProntuario').value = '';
+                    document.getElementById('cidProntuario').value = '';
+                    document.getElementById('anamneseProntuario').value = '';
+                    document.getElementById('exameFisicoProntuario').value = '';
+                    document.getElementById('condutaProntuario').value = '';
+                    document.getElementById('dataRetornoProntuario').value = '';
+                    document.getElementById('paProntuario').value = '';
+                    document.getElementById('tempProntuario').value = '';
+                    document.getElementById('pesoProntuario').value = '';
+                    document.getElementById('spo2Prontuario').value = '';
+                    document.querySelectorAll('#tipoAtendimentoContainer .opcao-tipo').forEach(el => el.classList.remove('selecionada'));
+                    document.querySelector('#tipoAtendimentoContainer .opcao-tipo[data-tipo="Consulta"]').classList.add('selecionada');
+                    salvarProntuarioBtn.disabled = true;
+
+                    // Recarrega a lista de prontuários
+                    document.querySelector('[data-aba="prontuarios"]')?.click();
+
+                  } catch (error) {
+                    console.error('Erro ao salvar prontuário:', error);
+                    alert('Erro ao salvar prontuário.');
+                  }
+                };
+
+                closeModalBtn2.addEventListener('click', function () {
+                  modal2.style.display = "none";
+                });
+
+                // carregando os prontuários dentro do container
+                const prontuariosContainer = document.getElementById("prontuariosContainer");
+
+                window.electronAPI.buscarProntuariosPaciente(p.id).then(prontuarios => {
+                  if (prontuarios.length === 0) {
+                    prontuariosContainer.innerHTML = `
+                    <p style="text-align:center; margin-top:20px; color:#555;">
+                      Nenhum prontuário registrado para este paciente.
+                    </p>`;
+                    return;
+                  }
+
+                  let linhas = prontuarios.map((pr, index) => `
+                    <tr>
+                      <td>${p.nome_paciente}</td>
+                      <td>${mascararCPF(p.CPF)}</td>
+                      <td>${pr.idade} anos</td>
+                      <td>${pr.ultima_visita || '—'}</td>
+                      <td>${pr.condicao || '—'}</td>
+                      <td>
+                        <button class="btnVerProntuario" data-index="${index}" style="color:white; background-color: #7FC6BB; border-radius: 10px; padding: 3px; width: 50px; gap:5px; display: flex; align-items:center;">Ver 
+                          <svg xmlns="http://w3.org" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                          </svg>
+                        </button>  
+                      </td>
+                    </tr>
+                  `).join('');
+
+                  prontuariosContainer.innerHTML = `
+                    <table class="table table-sm" style="font-size:12px; color:#234e2d;">
+                      <thead>
+                        <tr>
+                          <th>Paciente</th>
+                          <th>CPF</th>
+                          <th>Idade</th>
+                          <th>Última Consulta</th>
+                          <th>Condição Principal</th>
+                          <th>Ações</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${linhas}
+                      </tbody>
+                    </table>
+                  `;
+
+                  document.querySelectorAll('.btnVerProntuario').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                      const registro = prontuarios[btn.dataset.index];
+                      const conteudoModal = document.getElementById('prontuarioConteudo');
+                      conteudoModal.innerHTML = montarConteudoProntuario(registro, p);
+                      modal.style.display = "flex";
+                    });
+                  });
+                }).catch(err => {
+                  prontuariosContainer.innerHTML = `<p style="text-align:center; color:red;">Erro ao carregar prontuários.</p>`;
+                  console.error(err);
+                });
+              }
+
+              // ---------- ABA RECEITAS ----------
+              else if (tipo === "receitas") {
+                conteudo.innerHTML = `
                 <div style="text-align:right; margin: 10px;">
                   <button class="novaConsulta" style="background-color:#7FC6BB;" id="openModalBtn3">
                     <img src="plus.png" class="icone2"> Nova Receita
@@ -1088,55 +1596,129 @@
                 </div>
               `;
 
-              const modal3 = document.getElementById("myModal3");
-              const openModalBtn3 = document.getElementById("openModalBtn3");
-              const closeModalBtn3 = document.getElementById("closeModalBtn3");
-              const nomePaciente = document.getElementById("nomePaciente");
-              nomePaciente.value = p.nome_paciente;
-              const dataDeInicio = document.getElementById("dataDeInicio");
-              const hoje = new Date();
-              const dia = String(hoje.getDate()).padStart(2, '0');
-              const mes = String(hoje.getMonth() + 1).padStart(2, '0');
-              const ano = hoje.getFullYear();
-              dataDeInicio.value = `${dia}/${mes}/${ano}`;
+                const modal3 = document.getElementById("myModal3");
+                const openModalBtn3 = document.getElementById("openModalBtn3");
+                const closeModalBtn3 = document.getElementById("closeModalBtn3");
 
-              if (openModalBtn3) {
-                openModalBtn3.addEventListener('click', () => {
-                  modal3.style.display = "flex";
+                if (openModalBtn3) {
+                  openModalBtn3.addEventListener('click', () => {
+                    document.getElementById('nomePacienteReceita').textContent = p.nome_paciente;
+                    document.getElementById('idadePacienteReceita').textContent = p.idade;
+                    modal3.style.display = "flex";
+                  });
+                }
+
+                if (closeModalBtn3) {
+                  closeModalBtn3.addEventListener('click', () => {
+                    modal3.style.display = "none";
+                  });
+                }
+
+                const cancelarReceitaBtn = document.getElementById('cancelarReceitaBtn');
+                if (cancelarReceitaBtn) {
+                  cancelarReceitaBtn.addEventListener('click', () => {
+                    modal3.style.display = "none";
+                  });
+                }
+
+                                const prescreverBtn = document.getElementById('prescreverBtn');
+                prescreverBtn.onclick = async () => {
+                  const frequenciaSelecionada = document.querySelector('#frequenciaContainer .opcao-tipo.selecionada')?.dataset.freq || null;
+                  const viaSelecionada = document.querySelector('#viaAdminContainer .opcao-tipo.selecionada')?.dataset.via || 'Oral';
+
+                  const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+
+                  const dadosReceita = {
+                    idMedico: usuarioLogado.id,
+                    idPaciente: p.id,
+                    medicamento: document.getElementById('nomeMedicamentoReceita').value.trim(),
+                    concentracao: document.getElementById('concentracaoReceita').value.trim(),
+                    dosagem: document.getElementById('doseReceita').value.trim(),
+                    frequencia: frequenciaSelecionada,
+                    duracao: document.getElementById('duracaoReceita').value.trim(),
+                    viaAdministracao: viaSelecionada,
+                    instrucoes: document.getElementById('instrucoesReceita').value.trim(),
+                    observacoes: document.getElementById('observacoesReceita').value.trim()
+                  };
+
+                  try {
+                    const resultado = await window.electronAPI.cadastrarReceita(dadosReceita);
+                    if (!resultado.sucesso) {
+                      alert('Erro ao salvar receita: ' + resultado.erro);
+                      return;
+                    }
+
+                    alert('Receita prescrita com sucesso!');
+                    modal3.style.display = 'none';
+
+                    // Limpa o formulário
+                    document.getElementById('nomeMedicamentoReceita').value = '';
+                    document.getElementById('concentracaoReceita').value = '';
+                    document.getElementById('doseReceita').value = '';
+                    document.getElementById('duracaoReceita').value = '';
+                    document.getElementById('instrucoesReceita').value = '';
+                    document.getElementById('observacoesReceita').value = '';
+                    document.querySelectorAll('#frequenciaContainer .opcao-tipo').forEach(el => el.classList.remove('selecionada'));
+                    document.querySelectorAll('#viaAdminContainer .opcao-tipo').forEach(el => el.classList.remove('selecionada'));
+                    document.querySelector('#viaAdminContainer .opcao-tipo[data-via="Oral"]').classList.add('selecionada');
+                    prescreverBtn.disabled = true;
+
+                    // Recarrega a lista de receitas
+                    document.querySelector('[data-aba="receitas"]')?.click();
+
+                  } catch (error) {
+                    console.error('Erro ao salvar receita:', error);
+                    alert('Erro ao salvar receita.');
+                  }
+                };
+
+                window.addEventListener('click', (event) => {
+                  if (event.target === modal3) modal3.style.display = "none";
+                  const modal4Check = document.getElementById("myModal4");
+                  if (event.target === modal4Check) modal4Check.style.display = "none";
                 });
-              }
 
-              if (closeModalBtn3) {
-                closeModalBtn3.addEventListener('click', () => {
-                  modal3.style.display = "none";
-                });
-              }
+                                const closeModalBtn4 = document.getElementById("closeModalBtn4");
+                if (closeModalBtn4) {
+                  closeModalBtn4.addEventListener('click', () => {
+                    document.getElementById("myModal4").style.display = "none";
+                  });
+                }
+                const fecharReceitaVerBtn = document.getElementById("fecharReceitaVerBtn");
+                if (fecharReceitaVerBtn) {
+                  fecharReceitaVerBtn.addEventListener('click', () => {
+                    document.getElementById("myModal4").style.display = "none";
+                  });
+                }
 
-              window.addEventListener('click', (event) => {
-                if (event.target === modal3) modal3.style.display = "none";
-              });
+                // carregando as receitas dentro do container
+                const receitasContainer = document.getElementById("receitasContainer");
 
-              // carregando as receitas dentro do container
-              const receitasContainer = document.getElementById("receitasContainer");
-
-              window.electronAPI.buscarReceitas(p.id).then(receitas => {
-                if (receitas.length === 0) {
-                  receitasContainer.innerHTML = `
+                window.electronAPI.buscarReceitas(p.id).then(receitas => {
+                  if (receitas.length === 0) {
+                    receitasContainer.innerHTML = `
                     <p style="text-align:center; margin-top:20px; color:#555;">
                       Nenhuma receita cadastrada para este paciente.
                     </p>`;
-                } else {
-                  let linhas = receitas.map(r => `
+                  } else {
+                    let linhas = receitas.map((r, index) => `
                     <tr>
-                      <td>${p.ultima_visita || '—'}</td>
+                      <td>${r.data_prescricao ? formatarDataExtenso(new Date(r.data_prescricao).toLocaleDateString('pt-BR')) : (p.ultima_visita || '—')}</td>
                       <td>${r.medicamento || '—'}</td>
                       <td>${r.dosagem || '—'}</td>
                       <td>${r.duracao || '—'}</td>
-                      <td>${r.status || 'Pendente'}</td>
+                      <td>
+                        <button class="btnVerReceita" data-index="${index}" style="color:white; background-color: #7FC6BB; border-radius: 10px; padding: 3px; width: 50px; gap:5px; display: flex; align-items:center;">Ver 
+                          <svg xmlns="http://w3.org" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                          </svg>
+                        </button> 
+                      </td>
                     </tr>
                   `).join('');
 
-                  receitasContainer.innerHTML = `
+                    receitasContainer.innerHTML = `
                     <table class="table table-sm" style="font-size:14px; color:#234e2d;">
                       <thead>
                         <tr>
@@ -1144,7 +1726,7 @@
                           <th>Medicamento</th>
                           <th>Dosagem</th>
                           <th>Duração</th>
-                          <th>Status</th>
+                          <th>Ações</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1152,16 +1734,27 @@
                       </tbody>
                     </table>
                   `;
-                }
-              }).catch(err => {
-                receitasContainer.innerHTML = `<p style="text-align:center; color:red;">Erro ao carregar receitas.</p>`;
-                console.error(err);
-              });
-            }
 
-            // ---------- ABA RELATÓRIOS ----------
-            else if (tipo === "relatorios") {
-              conteudo.innerHTML = `
+                   const modal4 = document.getElementById("myModal4");
+                    document.querySelectorAll('.btnVerReceita').forEach(btn => {
+                      btn.addEventListener('click', () => {
+                        const receita = receitas[btn.dataset.index];
+                        const conteudo = document.getElementById('receitaConteudo');
+                        conteudo.innerHTML = montarConteudoReceita(receita, p);
+                        modal4.style.display = "flex";
+                      });
+                    });
+
+                  }
+                }).catch(err => {
+                  receitasContainer.innerHTML = `<p style="text-align:center; color:red;">Erro ao carregar receitas.</p>`;
+                  console.error(err);
+                });
+              }
+
+              // ---------- ABA RELATÓRIOS ----------
+              else if (tipo === "relatorios") {
+                conteudo.innerHTML = `
                   <div class="container-relatorios">
                       <div style="display: flex; justify-content: right;">
                           <button class="novaConsulta" style="margin-left:0; background-color:#7FC6BB;" id="btnNovoRelatorio">
@@ -1174,15 +1767,15 @@
                   </div>
               `;
 
-              const relatorios = await window.electronAPI.buscarRelatorios(p.id);
+                const relatorios = await window.electronAPI.buscarRelatorios(p.id);
 
-              function renderizarRelatorios(lista) {
-                const container = document.getElementById('listaRelatorios');
-                if (lista.length === 0) {
+                function renderizarRelatorios(lista) {
+                  const container = document.getElementById('listaRelatorios');
+                  if (lista.length === 0) {
                     container.innerHTML = `<p style="color:#555; font-size:14px;">Nenhum relatório adicionado.</p>`;
                     return;
-                }
-                container.innerHTML = lista.map(r => `
+                  }
+                  container.innerHTML = lista.map(r => `
                     <div class="relatorio-card">
                         <h6>${r.titulo}</h6>
                         <p class="relatorio-data">${r.data}</p>
@@ -1195,17 +1788,17 @@
                         </button>
                     </div>
                 `).join('');
-            }
+                }
 
-              renderizarRelatorios(relatorios); // ← ESSA LINHA ESTAVA FALTANDO
+                renderizarRelatorios(relatorios); // ← ESSA LINHA ESTAVA FALTANDO
 
-              document.getElementById('btnNovoRelatorio').addEventListener('click', async () => {
+                document.getElementById('btnNovoRelatorio').addEventListener('click', async () => {
                   const caminho = await window.electronAPI.selecionarPDF();
                   if (!caminho) return;
 
                   // Cria modal de input inline
                   const containerRel = document.querySelector('.container-relatorios');
-                  
+
                   // Remove input anterior se existir
                   const inputAnterior = document.getElementById('inputTituloRel');
                   if (inputAnterior) inputAnterior.remove();
@@ -1223,88 +1816,253 @@
                   containerRel.appendChild(divInput);
 
                   document.getElementById('btnCancelarRelatorio').addEventListener('click', () => {
-                      divInput.remove();
+                    divInput.remove();
                   });
 
                   document.getElementById('btnConfirmarRelatorio').addEventListener('click', async () => {
-                      const titulo = document.getElementById('tituloRelatorio').value.trim();
-                      if (!titulo) return;
+                    const titulo = document.getElementById('tituloRelatorio').value.trim();
+                    if (!titulo) return;
 
-                      divInput.remove();
+                    divInput.remove();
 
-                      const hoje = new Date();
-                      const data = `${String(hoje.getDate()).padStart(2,'0')}/${String(hoje.getMonth()+1).padStart(2,'0')}/${hoje.getFullYear()}`;
+                    const hoje = new Date();
+                    const data = `${String(hoje.getDate()).padStart(2, '0')}/${String(hoje.getMonth() + 1).padStart(2, '0')}/${hoje.getFullYear()}`;
 
-                      await window.electronAPI.salvarRelatorio({
-                          pacienteId: p.id,
-                          nome: titulo,
-                          data,
-                          caminho
-                      });
+                    await window.electronAPI.salvarRelatorio({
+                      pacienteId: p.id,
+                      nome: titulo,
+                      data,
+                      caminho
+                    });
 
-                      const atualizados = await window.electronAPI.buscarRelatorios(p.id);
-                      renderizarRelatorios(atualizados);
+                    const atualizados = await window.electronAPI.buscarRelatorios(p.id);
+                    renderizarRelatorios(atualizados);
                   });
-              });
+                });
+              }
             }
-          }
 
-          abas.forEach(a => {
-            a.addEventListener('click', () => {
-              const tipo = a.dataset.aba;
-              mostrarAba(tipo);
+            abas.forEach(a => {
+              a.addEventListener('click', () => {
+                const tipo = a.dataset.aba;
+                mostrarAba(tipo);
+              });
             });
-          });
 
-          mostrarAba("prontuarios");
+            mostrarAba("prontuarios");
+          });
+        });
+      } catch (err) {
+        console.error('Erro ao buscar pacientes:', err);
+      }
+    }
+    );
+
+    // ========== MOSTRAR DATA ATUAL ==========
+    function mostrarDataAtual() {
+      const hoje = new Date();
+      const dia = hoje.getDate();
+      const diaSemanaNum = hoje.getDay();
+      const mes = hoje.getMonth();
+      const ano = hoje.getFullYear();
+
+      const semana = [
+        "Domingo", "Segunda-feira", "Terça-feira", "Quarta-feira",
+        "Quinta-feira", "Sexta-feira", "Sábado"
+      ];
+
+      const mesesAno = [
+        "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+        "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+      ];
+
+      const diaSemanaTexto = semana[diaSemanaNum];
+      const mesTexto = mesesAno[mes];
+      const dataFormatada = `${diaSemanaTexto}, ${dia} de ${mesTexto} de ${ano}`;
+      document.getElementById("dataAtual").textContent = dataFormatada;
+    }
+
+    document.addEventListener("DOMContentLoaded", mostrarDataAtual);
+
+
+    async function deletarRelatorio(id) {
+      const confirmar = confirm('Deseja realmente apagar este relatório?');
+      if (!confirmar) return;
+      await window.electronAPI.deletarRelatorio(id);
+      // Recarrega a aba de relatórios
+      document.querySelector('[data-aba="relatorios"]')?.click();
+    }
+
+    function formatarDataExtenso(dataStr) {
+      if (!dataStr) return '-';
+      const [dia, mes, ano] = dataStr.split('/');
+      const mesesAno = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+      if (!dia || !mes || !ano) return dataStr;
+      return `${parseInt(dia)} de ${mesesAno[parseInt(mes) - 1]} de ${ano}`;
+    }
+
+    function formatarDataComDiaSemana(dataStr) {
+      if (!dataStr) return '-';
+      const [dia, mes, ano] = dataStr.split('/');
+      if (!dia || !mes || !ano) return dataStr;
+      const data = new Date(`${ano}-${mes}-${dia}`);
+      const semana = ["domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"];
+      const mesesAno = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+      return `${semana[data.getDay()]}, ${parseInt(dia)} de ${mesesAno[parseInt(mes) - 1]} de ${ano}`;
+    }
+
+    function montarConteudoProntuario(pront, paciente) {
+      const tipo = pront.tipo || 'Consulta';
+      const cid = pront.cid10 || '-';
+      const diagnostico = pront.condicao || 'Sem diagnóstico registrado';
+      const dataAtendimento = formatarDataExtenso(pront.ultima_visita);
+
+      return `
+      <div class="prontuario-header">
+        <div class="prontuario-icon">🩺</div>
+        <div>
+          <span class="badge-tipo">${tipo}</span>
+          <span class="badge-cid">${cid}</span>
+          <h5 style="margin-top:6px; color:#234e2d;">${diagnostico}</h5>
+          <span class="text-muted" style="font-size:13px;">👤 ${paciente.nome_paciente} · ${paciente.idade} anos &nbsp; 📅 ${dataAtendimento}</span>
+        </div>
+      </div>
+
+      <b style="color:#234e2d; font-size:13px; display:block; margin-top:16px;">SINAIS VITAIS</b>
+      <div class="sinais-vitais-cards">
+        <div class="card-sinal"><span>❤️ Pressão Arterial</span><h6>${pront.pa || '-'}</h6><small>mmHg</small></div>
+        <div class="card-sinal"><span>🌡️ Temperatura</span><h6>${pront.temperatura || '-'}</h6><small>°C</small></div>
+        <div class="card-sinal"><span>⚖️ Peso</span><h6>${pront.peso || '-'}</h6><small>kg</small></div>
+        <div class="card-sinal"><span>📈 SpO2</span><h6>${pront.spo2 || '-'}</h6><small>%</small></div>
+      </div>
+
+      <b style="color:#234e2d; font-size:13px; display:block; margin-top:16px;">DIAGNÓSTICO</b>
+      <div class="campo-info-box">
+        <b>${diagnostico}</b><br>
+        <span style="color:#42773b; font-size:13px;">CID-10: ${cid}</span>
+      </div>
+
+      <b style="color:#234e2d; font-size:13px; display:block; margin-top:16px;">📝 ANAMNESE</b>
+      <div class="campo-info-box">${pront.anamnese || 'Sem anamnese registrada'}</div>
+
+      <b style="color:#234e2d; font-size:13px; display:block; margin-top:16px;">🩺 EXAME FÍSICO</b>
+      <div class="campo-info-box">${pront.exame_fisico || 'Sem exame físico registrado'}</div>
+
+      <b style="color:#234e2d; font-size:13px; display:block; margin-top:16px;">📋 CONDUTA / PLANO TERAPÊUTICO</b>
+      <div class="campo-conduta-box">${pront.conduta || 'Sem conduta registrada'}</div>
+
+      ${pront.data_retorno ? `
+      <div class="campo-retorno-box">
+        <span>📅 Data de Retorno</span>
+        <h6>${formatarDataComDiaSemana(pront.data_retorno)}</h6>
+      </div>` : ''}
+    `;
+    }
+
+    // === MODAL NOVO PRONTUÁRIO ===
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('#tipoAtendimentoContainer .opcao-tipo').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#tipoAtendimentoContainer .opcao-tipo').forEach(el => el.classList.remove('selecionada'));
+          btn.classList.add('selecionada');
         });
       });
-    } catch (err) {
-      console.error('Erro ao buscar pacientes:', err);
+
+      const diagnosticoInput = document.getElementById('diagnosticoProntuario');
+      const anamneseInput = document.getElementById('anamneseProntuario');
+      const salvarBtn = document.getElementById('salvarProntuarioBtn');
+
+      function checarCamposObrigatorios() {
+        salvarBtn.disabled = !(diagnosticoInput.value.trim() && anamneseInput.value.trim());
+      }
+
+      diagnosticoInput.addEventListener('input', checarCamposObrigatorios);
+      anamneseInput.addEventListener('input', checarCamposObrigatorios);
+
+      document.getElementById('cancelarProntuarioBtn').addEventListener('click', () => {
+        document.getElementById('myModal2').style.display = 'none';
+      });
+
+      document.getElementById('salvarProntuarioBtn').addEventListener('click', async () => {
+        // isso vai ser preenchido logo 
+      });
+
+      // === MODAL NOVA RECEITA: validação ===
+      document.querySelectorAll('#frequenciaContainer .opcao-tipo').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const jaSelecionado = btn.classList.contains('selecionada');
+          document.querySelectorAll('#frequenciaContainer .opcao-tipo').forEach(el => el.classList.remove('selecionada'));
+          if (!jaSelecionado) btn.classList.add('selecionada');
+        });
+      });
+
+      document.querySelectorAll('#viaAdminContainer .opcao-tipo').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('#viaAdminContainer .opcao-tipo').forEach(el => el.classList.remove('selecionada'));
+          btn.classList.add('selecionada');
+        });
+      });
+
+      const nomeMedicamentoInput = document.getElementById('nomeMedicamentoReceita');
+      const doseInput = document.getElementById('doseReceita');
+      const prescreverBtn = document.getElementById('prescreverBtn');
+
+      function checarCamposReceita() {
+        prescreverBtn.disabled = !(nomeMedicamentoInput.value.trim() && doseInput.value.trim());
+      }
+
+      nomeMedicamentoInput.addEventListener('input', checarCamposReceita);
+      doseInput.addEventListener('input', checarCamposReceita);
+    });
+
+        function montarConteudoReceita(receita, paciente) {
+      const via = receita.via || 'Oral';
+      const dataFormatada = receita.data_prescricao
+        ? formatarDataExtenso(new Date(receita.data_prescricao).toLocaleDateString('pt-BR'))
+        : formatarDataExtenso(paciente.ultima_visita);
+
+      return `
+      <div class="receita-header">
+        <div class="receita-icon">
+          <img src="capsula.png" alt="Ícone" style="width:22px; height:22px; filter: brightness(0) invert(1);">
+        </div>
+        <div>
+          <span class="badge-ativa">Ativa</span>
+          <span class="badge-via">${via}</span>
+          <h5 style="margin-top:6px; color:#234e2d;">${receita.medicamento || '-'}${receita.concentracao ? ' ' + receita.concentracao : ''}</h5>
+          <span class="text-muted" style="font-size:13px;">👤 ${paciente.nome_paciente} &nbsp; 📅 ${dataFormatada}</span>
+        </div>
+      </div>
+
+      <b style="color:#234e2d; font-size:13px; display:block; margin-top:16px;">POSOLOGIA</b>
+      <div class="posologia-cards">
+        <div class="card-posologia"><span>Dose</span><h6>${receita.dosagem || '-'}</h6></div>
+        <div class="card-posologia"><span>Frequência</span><h6>${receita.frequencia || '-'}</h6></div>
+        <div class="card-posologia"><span>Duração</span><h6>${receita.duracao || '-'}</h6></div>
+        <div class="card-posologia"><span>Via de Administração</span><h6>${via}</h6></div>
+      </div>
+
+      <b style="color:#234e2d; font-size:13px; display:block; margin-top:16px;">INSTRUÇÕES AO PACIENTE</b>
+      <div class="campo-instrucoes-box">${receita.instrucoes || 'Sem instruções registradas'}</div>
+
+      <b style="color:#234e2d; font-size:13px; display:block; margin-top:16px;">OBSERVAÇÕES CLÍNICAS</b>
+      <div class="campo-conduta-box">${receita.observacoes || 'Sem observações registradas'}</div>
+    `;
     }
-  }
-);
 
-  // ========== MOSTRAR DATA ATUAL ==========
-  function mostrarDataAtual() {
-    const hoje = new Date();
-    const dia = hoje.getDate();
-    const diaSemanaNum = hoje.getDay();
-    const mes = hoje.getMonth();
-    const ano = hoje.getFullYear();
+    function mascararCPF(cpf) {
+      if (!cpf) return '—';
+      const digitos = cpf.replace(/\D/g, '');
+      if (digitos.length !== 11) return cpf;
+      return `***.${digitos.slice(3, 6)}.${digitos.slice(6, 9)}-**`;
+    }
 
-    const semana = [
-      "Domingo","Segunda-feira","Terça-feira","Quarta-feira",
-      "Quinta-feira","Sexta-feira","Sábado"
-    ];
-
-    const mesesAno = [
-      "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
-      "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"
-    ];
-
-    const diaSemanaTexto = semana[diaSemanaNum];
-    const mesTexto = mesesAno[mes];
-    const dataFormatada = `${diaSemanaTexto}, ${dia} de ${mesTexto} de ${ano}`;
-    document.getElementById("dataAtual").textContent = dataFormatada;
-  }
-
-  document.addEventListener("DOMContentLoaded", mostrarDataAtual);
-
-
-  async function deletarRelatorio(id) {
-    const confirmar = confirm('Deseja realmente apagar este relatório?');
-    if (!confirmar) return;
-    await window.electronAPI.deletarRelatorio(id);
-    // Recarrega a aba de relatórios
-    document.querySelector('[data-aba="relatorios"]')?.click();
-}
-
-</script>
+  </script>
 
 
 
 
 
 </body>
+
 </html>

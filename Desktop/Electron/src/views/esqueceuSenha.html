@@ -258,6 +258,10 @@
       background-color: rgba(75,169,75,0.12);
       border-color: #2f6d2f;
     }
+
+    .form-inner.oculto {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -275,7 +279,7 @@
           <div class="legenda">Informe o e-mail para o qual deseja redefinir sua senha.</div>
         </div>
 
-        <div class="form-inner">
+        <div class="form-inner" id="formEmail">
           <div class="form-group">
             <label for="email">Email:</label>
             <div class="input-icon">
@@ -285,14 +289,96 @@
           </div>
         </div>
 
-        <button class="enviar">Enviar</button>
+        <div class="form-inner oculto" id="formNovaSenha">
+          <div class="form-group">
+            <label for="novaSenha">Nova Senha:</label>
+            <div class="input-icon">
+              <input id="novaSenha" type="password" />
+              <img src="cadeado.png" alt="Ícone de senha" onerror="this.style.display='none'" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="confNovaSenha">Confirmar Nova Senha:</label>
+            <div class="input-icon">
+              <input id="confNovaSenha" type="password" />
+              <img src="cadeado.png" alt="Ícone de senha" onerror="this.style.display='none'" />
+            </div>
+          </div>
+        </div>
+
+        <button class="enviar" id="btnEnviar">Enviar</button>
         <a class="esqueci" href="index.html">Lembrou sua senha? Volte para o Login!</a>
       </div>
     </div>
   </div>
 
 
+    <script>
+    let idLoginRecuperacao = null;
+    let etapaAtual = 'email'; // 'email' | 'senha'
 
+    const btnEnviar = document.getElementById('btnEnviar');
+    const formEmail = document.getElementById('formEmail');
+    const formNovaSenha = document.getElementById('formNovaSenha');
+
+    btnEnviar.addEventListener('click', async () => {
+      if (etapaAtual === 'email') {
+        const email = document.getElementById('email').value.trim();
+
+        if (!email) {
+          Swal.fire({ icon: 'warning', title: 'Preencha o e-mail.' });
+          return;
+        }
+
+        const resultado = await window.electronAPI.verificarEmailRecuperacao(email);
+
+        if (!resultado.existe) {
+          Swal.fire({ icon: 'error', title: 'E-mail não encontrado.', text: 'Verifique o e-mail digitado e tente novamente.' });
+          return;
+        }
+
+        idLoginRecuperacao = resultado.idLogin;
+
+        formEmail.classList.add('oculto');
+        formNovaSenha.classList.remove('oculto');
+        btnEnviar.textContent = 'Redefinir Senha';
+        etapaAtual = 'senha';
+
+      } else if (etapaAtual === 'senha') {
+        const novaSenha = document.getElementById('novaSenha').value;
+        const confNovaSenha = document.getElementById('confNovaSenha').value;
+
+        if (!novaSenha || !confNovaSenha) {
+          Swal.fire({ icon: 'warning', title: 'Preencha os dois campos de senha.' });
+          return;
+        }
+
+        if (novaSenha.length < 6) {
+          Swal.fire({ icon: 'warning', title: 'Senha muito curta.', text: 'Use ao menos 6 caracteres.' });
+          return;
+        }
+
+        if (novaSenha !== confNovaSenha) {
+          Swal.fire({ icon: 'error', title: 'As senhas não coincidem.' });
+          return;
+        }
+
+        const resultado = await window.electronAPI.redefinirSenha({
+          idLogin: idLoginRecuperacao,
+          novaSenha: novaSenha
+        });
+
+        if (!resultado.sucesso) {
+          Swal.fire({ icon: 'error', title: 'Erro ao redefinir senha.', text: resultado.erro || '' });
+          return;
+        }
+
+        await Swal.fire({ icon: 'success', title: 'Senha redefinida com sucesso!', text: 'Você já pode fazer login com a nova senha.' });
+        window.location.href = 'index.html';
+      }
+    });
+  </script>
 
 </body>
 </html>

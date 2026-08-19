@@ -1,8 +1,8 @@
-require('dotenv').config();
-
 const { app, BrowserWindow, nativeTheme, Menu, shell, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
+const bcrypt = require('bcrypt');
+
 
 //Janela Principal
 const createWindow = () => {
@@ -332,199 +332,116 @@ ipcMain.on('abrir-janela-config', () => {
 });
 
 
-// === CONEXÃO COM A API ===
-const api = require('./src/api/client');
-
-// ── Mapeadores: JSON da API (camelCase) -> mesma forma que o front-end já espera ──
-const mapProntuario = (p) => ({
-  id: p.id,
-  id_paciente: p.idPaciente,
-  nome_paciente: p.nomePaciente,
-  idade: p.idade,
-  condicao: p.condicao,
-  ultima_visita: p.ultimaVisita,
-  status: p.status,
-  tipo: p.tipo,
-  notas: p.notas,
-});
-
-const mapReceita = (r) => ({
-  id: r.id,
-  id_medico: r.idMedico,
-  id_paciente: r.idPaciente,
-  medicamento: r.medicamento,
-  dosagem: r.dosagem,
-  duracao: r.duracao,
-  status: r.status,
-});
-
-const mapTeleconsulta = (t) => ({
-  id: t.id,
-  data: t.data,
-  horario: t.horario,
-  status: t.status,
-  duracao: t.duracao,
-  tipo: t.tipo,
-  nomePaciente: t.nomePaciente,
-});
-
-const mapFuncionario = (f) => ({
-  CPF: f.cpf,
-  nome: f.nome,
-  email: f.email,
-  telefone: f.telefone,
-  funcao: f.funcao,
-  status: f.status,
-});
-
-const mapCliente = (c) => c && ({
-  CPF: c.cpf,
-  nome: c.nome,
-  telefone: c.telefone,
-  email: c.email,
-});
-
-const mapProduto = (p) => ({
-  id: p.id,
-  nome: p.nome,
-  categoria: p.categoria,
-  quantidade: p.quantidade,
-  estoque_min: p.estoqueMin,
-  preco: p.preco,
-  fornecedor: p.fornecedor,
-  criado_em: p.criadoEm,
-  tarja_preta: p.tarjaPreta,
-  codigo_barras: p.codigoBarras,
-  proxima_validade: p.proximaValidade,
-  total_lotes: p.totalLotes,
-});
-
-const mapLote = (l) => ({
-  id: l.id,
-  id_produto: l.idProduto,
-  numero_lote: l.numeroLote,
-  quantidade: l.quantidade,
-  data_validade: l.dataValidade,
-  prateleira: l.prateleira,
-});
-
-const mapLoteComProduto = (l) => ({
-  id: l.id,
-  id_produto: l.idProduto,
-  numero_lote: l.numeroLote,
-  quantidade: l.quantidade,
-  data_validade: l.dataValidade,
-  prateleira: l.prateleira,
-  nome_produto: l.nomeProduto,
-});
-
-const mapCupom = (c) => ({
-  id: c.id,
-  codigo: c.codigo,
-  descricao: c.descricao,
-  tipo: c.tipo,
-  valor: c.valor,
-  limite_uso: c.limiteUso,
-  usos_atuais: c.usosAtuais,
-  validade: c.validade,
-  status: c.status,
-});
-
-const mapVenda = (v) => ({
-  id: v.id,
-  cliente: v.cliente,
-  total: v.total,
-  quantidade: v.quantidade,
-  metodo_pago: v.metodoPago,
-  troco: v.troco,
-  data_venda: v.dataVenda,
-  produtos: JSON.parse(v.produtos || '[]'),
-});
-
-const mapRelatorio = (r) => ({
-  id: r.id,
-  id_paciente: r.idPaciente,
-  titulo: r.titulo,
-  tipo: r.tipo,
-  data: r.data,
-});
-
-const mapRelatorioFarmacia = (r) => ({
-  id: r.id,
-  tipo: r.tipo,
-  periodo: r.periodo,
-  formato: r.formato,
-  nome_arquivo: r.nomeArquivo,
-  caminho: r.caminho,
-  tamanho_kb: r.tamanhoKb,
-  gerado_em: r.geradoEm,
-});
-
-const mapMedicoConfig = (m) => ({
-  id: m.id,
-  nome: m.nome,
-  sobrenome: m.sobrenome,
-  crm: m.crm,
-  especialidade: m.especialidade,
-  email: m.email,
-  telefone: m.telefone,
-  data_nascimento: m.dataNascimento,
-  endereco: m.endereco,
-  foto_perfil: m.fotoPerfil,
-  rqe: m.rqe,
-  subespecialidades: m.subespecialidades,
-  horario_inicio: m.horarioInicio,
-  horario_termino: m.horarioTermino,
-  nome_clinica: m.nomeClinica,
-  endereco_clinica: m.enderecoClinica,
-  tempo_consulta: m.tempoConsulta,
-  valor_consulta: m.valorConsulta,
-});
-
-const hojeISO = () => new Date().toISOString().slice(0, 10);
-const somarDiasISO = (dias) => {
-  const d = new Date();
-  d.setDate(d.getDate() + dias);
-  return d.toISOString().slice(0, 10);
-};
+// === CONEXÃO COM O BANCO DE DADOS ===
+const db = require('./src/db/conexao');
 
 // === LOGIN ===
 ipcMain.handle('login', async (event, email, senha, tipoSelecionado) => {
   try {
-    const resposta = await api.apiPost('/auth/login', { email, senha, tipo: tipoSelecionado });
-    api.setToken(resposta.token);
-    return {
-      id: resposta.id,
-      email: resposta.email,
-      tipo: resposta.tipo,
-      id_medico: resposta.idMedico,
-      id_farmacia: resposta.idFarmacia,
-      id_balconista: resposta.idBalconista,
-      id_caixa: resposta.idCaixa,
-      perfil: resposta.perfil,
-    };
+    const tabela = 'login';
+
+    const [rows] = await db.promise().query(
+      `SELECT * FROM ${tabela} WHERE email = ? AND tipo = ? LIMIT 1`,
+      [email, tipoSelecionado]
+    );
+
+    if(rows.length === 0){
+      return null;
+    }
+
+    const user = rows[0];
+
+    const senhaCorreta = await bcrypt.compare(
+      senha,
+      user.senha
+    );
+
+    if(!senhaCorreta){
+      return null;
+    }
+
+    if (rows.length > 0) {
+      const user = rows[0];
+
+      if (user.tipo === 1) {
+        user.perfil = "medico";
+
+      } else if (user.tipo === 2) {
+
+        if (user.id_farmacia != null) {
+          user.perfil = "farmacia";
+
+        } else if (user.id_balconista != null) {
+          user.perfil = "balconista";
+
+        } else if (user.id_caixa != null) {
+          user.perfil = "caixa";
+        }
+      }
+
+      console.log('Usuário encontrado com perfil:', user);
+      return user;
+
+    } else {
+      console.log('Nenhum usuário encontrado com essas credenciais.');
+      return null;
+    }
+
   } catch (err) {
     console.error('Erro ao buscar usuário:', err);
-    return null;
+    throw err;
   }
 });
 
 // === BUSCAR PRONTUÁRIOS ===
 ipcMain.handle('buscar-prontuarios', async () => {
   try {
-    const rows = await api.apiGet('/api/prontuarios');
-    return rows.map(mapProntuario);
+    const [rows] = await db.promise().query('SELECT * FROM prontuario');
+    console.log('Prontuários buscados com sucesso:', rows);
+    return rows;
   } catch (error) {
     console.error('Erro ao buscar prontuários:', error);
     throw error;
   }
 });
 
+// === CADASTRAR PRONTUÁRIO ===
+ipcMain.handle('cadastrar-prontuario', async (event, dados) => {
+  try {
+    const {
+      idPaciente, nomePaciente, idade, tipo, dataAtendimento,
+      pa, temperatura, peso, spo2,
+      diagnostico, cid10, anamnese, exameFisico, conduta, dataRetorno
+    } = dados;
+
+    const [result] = await db.promise().query(
+      `INSERT INTO prontuario
+        (id_paciente, nome_paciente, idade, condicao, ultima_visita, status, tipo, cid10, anamnese, exame_fisico, conduta, data_retorno, pa, temperatura, peso, spo2)
+       VALUES (?, ?, ?, ?, ?, 'Ativo', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        idPaciente, nomePaciente, idade, diagnostico, dataAtendimento, tipo,
+        cid10 || null, anamnese, exameFisico || null, conduta || null,
+        dataRetorno || null, pa || null, temperatura || null, peso || null, spo2 || null
+      ]
+    );
+
+    console.log('Prontuário cadastrado com sucesso!');
+    return { sucesso: true, id: result.insertId };
+  } catch (err) {
+    console.error('Erro ao cadastrar prontuário:', err);
+    return { sucesso: false, erro: err.message };
+  }
+});
+
 // === BUSCAR RECEITAS ===
 ipcMain.handle('buscar-receitas', async (event, idPaciente) => {
   try {
-    const rows = await api.apiGet(`/api/receitas/paciente/${idPaciente}`);
-    return rows.map(mapReceita);
+    const [rows] = await db.promise().query(
+      'SELECT * FROM receita WHERE id_paciente = ?',
+      [idPaciente]
+    );
+    console.log('Receitas buscadas com sucesso:', rows);
+    return rows;
   } catch (error) {
     console.error('Erro ao buscar receitas:', error);
     throw error;
@@ -534,8 +451,14 @@ ipcMain.handle('buscar-receitas', async (event, idPaciente) => {
 // === CADASTRAR PARCEIRO ===
 ipcMain.handle('cadastrar-parceiro', async (event, novoParceiro) => {
   try {
-    const { parceiro, tipo, email, telefone, desconto, dataInicio } = novoParceiro;
-    const result = await api.apiPost('/api/parceiros', { parceiro, tipo, email, telefone, desconto, dataInicio });
+    const { idMedico, parceiro, tipo, email, telefone, desconto, dataInicio } = novoParceiro;
+    const sql = `
+      INSERT INTO parceiros (id_medico, nome, tipo, email, telefone, desconto, status, data_inicio)
+      VALUES (?, ?, ?, ?, ?, ?, 'ativo', STR_TO_DATE(?, '%d/%m/%Y'))
+    `;
+    const [result] = await db.promise().query(sql, [
+      idMedico, parceiro, tipo, email, telefone, desconto, dataInicio,
+    ]);
     console.log('Parceiro cadastrado com sucesso!');
     return result;
   } catch (err) {
@@ -544,13 +467,67 @@ ipcMain.handle('cadastrar-parceiro', async (event, novoParceiro) => {
   }
 });
 
+// === BUSCAR PARCEIROS (do médico logado) ===
+ipcMain.handle('buscar-parceiros', async (event, idMedico) => {
+  try {
+    const [parceiros] = await db.promise().query(`
+      SELECT
+        p.id,
+        p.nome,
+        p.tipo,
+        p.email,
+        p.telefone,
+        p.desconto,
+        p.status,
+        DATE_FORMAT(p.data_inicio, '%d/%m/%Y') AS dataInicio,
+        (SELECT COUNT(*) FROM parceiro_encaminhamentos pe
+         WHERE pe.id_parceiro = p.id
+         AND MONTH(pe.data_encaminhamento) = MONTH(CURDATE())
+         AND YEAR(pe.data_encaminhamento) = YEAR(CURDATE())
+        ) AS encaminhamentosMes
+      FROM parceiros p
+      WHERE p.id_medico = ?
+      ORDER BY p.nome
+    `, [idMedico]);
+
+    const [servicos] = await db.promise().query(`
+      SELECT ps.id_parceiro, ps.nome_servico
+      FROM parceiro_servicos ps
+      INNER JOIN parceiros p ON p.id = ps.id_parceiro
+      WHERE p.id_medico = ?
+    `, [idMedico]);
+
+    const parceirosComServicos = parceiros.map(p => ({
+      ...p,
+      servicos: servicos.filter(s => s.id_parceiro === p.id).map(s => s.nome_servico)
+    }));
+
+    return parceirosComServicos;
+  } catch (err) {
+    console.error('Erro ao buscar parceiros:', err);
+    throw err;
+  }
+});
+
 // === CONSULTAS DO MÉDICO LOGADO ===
 ipcMain.handle('buscar-consultas-medico', async (event, idMedico) => {
   try {
-    const rows = await api.apiGet(`/api/teleconsultas/medico/${idMedico}`);
-    const consultas = rows.map(mapTeleconsulta);
-    console.log('Consultas encontradas:', consultas);
-    return consultas;
+    const [rows] = await db.promise().query(`
+      SELECT 
+        t.id,
+        t.data,
+        t.horario,
+        t.status,
+        t.duracao,
+        t.tipo,
+        t.nome_paciente AS nomePaciente
+      FROM teleconsulta t
+      WHERE t.id_medico = ?
+      ORDER BY STR_TO_DATE(t.data, '%d/%m/%Y') ASC, t.horario ASC
+    `, [idMedico]);
+
+    console.log('Consultas encontradas:', rows);
+    return rows;
   } catch (error) {
     console.error('Erro ao buscar consultas do médico:', error);
     throw error;
@@ -561,12 +538,23 @@ ipcMain.handle('buscar-consultas-medico', async (event, idMedico) => {
 ipcMain.handle('cadastrar-funcionario', async (event, novoFuncionario) => {
   try {
     const { cpf, nome, email, telefone, funcao, status } = novoFuncionario;
-    const resultado = await api.apiPost('/api/funcionarios', { cpf, nome, email, telefone, funcao, status });
+
+    // Salva o CPF como texto formatado: "123.456.789-00"
+    const sql = `
+      INSERT INTO funcFarma (CPF, nome, email, telefone, funcao, status)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `;
+
+    const [result] = await db.promise().query(sql, [
+      cpf, nome, email, telefone, funcao, status
+    ]);
+
     console.log('Funcionário cadastrado com sucesso!');
-    return { sucesso: true, resultado };
+    return { sucesso: true, resultado: result };
+
   } catch (err) {
     console.error('Erro ao cadastrar funcionário:', err);
-    if (String(err.message).includes('CPF já cadastrado')) {
+    if (err.code === 'ER_DUP_ENTRY') {
       return { sucesso: false, erro: 'CPF já cadastrado.' };
     }
     throw err;
@@ -576,8 +564,8 @@ ipcMain.handle('cadastrar-funcionario', async (event, novoFuncionario) => {
 // === BUSCAR FUNCIONÁRIOS ===
 ipcMain.handle('buscar-funcionarios', async () => {
   try {
-    const rows = await api.apiGet('/api/funcionarios');
-    return rows.map(mapFuncionario);
+    const [rows] = await db.promise().query('SELECT * FROM funcFarma');
+    return rows;
   } catch (err) {
     console.error('Erro ao buscar funcionários:', err);
     throw err;
@@ -588,7 +576,10 @@ ipcMain.handle('buscar-funcionarios', async () => {
 ipcMain.handle('atualizar-status-funcionario', async (event, dados) => {
   try {
     const { cpf, status } = dados;
-    await api.apiPatch(`/api/funcionarios/${cpf}/status`, { status });
+    await db.promise().query(
+      'UPDATE funcFarma SET status = ? WHERE CPF = ?',
+      [status, cpf]
+    );
     console.log(`Status do funcionário ${cpf} atualizado para ${status}`);
     return { sucesso: true };
   } catch (err) {
@@ -604,37 +595,44 @@ ipcMain.handle('salvar-venda', async (_event, venda) => {
     totalNum = parseFloat(totalNum.replace('R$', '').replace(',', '.').trim());
   }
 
-  await api.apiPost('/api/vendas', {
-    id: venda.id,
-    cliente: venda.cliente || 'Cliente não informado',
-    total: totalNum,
-    quantidade: venda.quantidade || (venda.produtos ? venda.produtos.length : 0),
-    metodoPago: venda.metodoPago,
-    troco: venda.troco || 0,
-    dataVenda: venda.dataVenda,
-    produtos: JSON.stringify(venda.produtos || []),
-  });
+  await db.promise().query(
+    `INSERT INTO vendas_concluidas
+       (id, cliente, total, quantidade, metodo_pago, troco, data_venda, produtos)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+     ON DUPLICATE KEY UPDATE
+       total = VALUES(total), metodo_pago = VALUES(metodo_pago)`,
+    [
+      venda.id,
+      venda.cliente || 'Cliente não informado',
+      totalNum,
+      venda.quantidade || (venda.produtos ? venda.produtos.length : 0),
+      venda.metodoPago,
+      venda.troco || 0,
+      venda.dataVenda,
+      JSON.stringify(venda.produtos || [])
+    ]
+  );
   return { ok: true };
 });
 
 // ==== Buscar vendas por período =======
 
 ipcMain.handle('buscar-vendas', async (_event, { dataInicio, dataFim }) => {
-  const rows = await api.apiGet('/api/vendas');
+  const [rows] = await db.promise().query('SELECT * FROM vendas_concluidas');
 
   console.log('=== DEBUG BUSCAR VENDAS ===');
   console.log('Total de linhas no banco:', rows.length);
   console.log('dataInicio recebido:', dataInicio);
   console.log('dataFim recebido:', dataFim);
   if (rows.length > 0) {
-    console.log('Exemplo data_venda do banco:', rows[0].dataVenda);
+    console.log('Exemplo data_venda do banco:', rows[0].data_venda);
   }
 
   const inicio = dataInicio ? new Date(dataInicio + 'T00:00:00') : null;
   const fim    = dataFim    ? new Date(dataFim    + 'T23:59:59') : null;
 
   const filtradas = rows.filter(v => {
-      const partes = (v.dataVenda || '').split('/');
+      const partes = v.data_venda.split('/');
       if (partes.length !== 3) return false;
       const dataV = new Date(`${partes[2]}-${partes[1]}-${partes[0]}T12:00:00`);
       if (inicio && dataV < inicio) return false;
@@ -644,17 +642,24 @@ ipcMain.handle('buscar-vendas', async (_event, { dataInicio, dataFim }) => {
 
   console.log('Vendas após filtro:', filtradas.length);
 
-  return filtradas.map(mapVenda);
+  return filtradas.map(v => ({
+      ...v,
+      produtos: JSON.parse(v.produtos || '[]')
+    }));
 });
 
 // === CADASTRAR CLIENTE ===
 ipcMain.handle('cadastrar-cliente', async (_event, cliente) => {
   try {
     const { cpf, nome, telefone, email } = cliente;
-    await api.apiPost('/api/clientes', { cpf, nome, telefone: telefone || null, email: email || null });
+    await db.promise().query(
+      `INSERT INTO clienteFarma (CPF, nome, telefone, email)
+       VALUES (?, ?, ?, ?)`,
+      [cpf, nome, telefone || null, email || null]
+    );
     return { sucesso: true };
   } catch (err) {
-    if (String(err.message).includes('CPF já cadastrado')) {
+    if (err.code === 'ER_DUP_ENTRY') {
       return { sucesso: false, erro: 'CPF já cadastrado.' };
     }
     console.error('Erro ao cadastrar cliente:', err);
@@ -665,8 +670,11 @@ ipcMain.handle('cadastrar-cliente', async (_event, cliente) => {
 // === BUSCAR CLIENTE POR CPF ===
 ipcMain.handle('buscar-cliente', async (_event, cpf) => {
   try {
-    const cliente = await api.apiGet(`/api/clientes/${cpf}`);
-    return mapCliente(cliente);
+    const [rows] = await db.promise().query(
+      'SELECT * FROM clienteFarma WHERE CPF = ? LIMIT 1',
+      [cpf]
+    );
+    return rows.length > 0 ? rows[0] : null;
   } catch (err) {
     console.error('Erro ao buscar cliente:', err);
     return null;
@@ -676,16 +684,22 @@ ipcMain.handle('buscar-cliente', async (_event, cpf) => {
 // === SALVAR TELECONSULTAS ===
 ipcMain.handle("salvarConsulta", async (event, consulta) => {
   try {
-    const resultado = await api.apiPost('/api/consultas', {
-      pacienteId: consulta.paciente_id,
-      data: consulta.data,
-      horario: consulta.horario,
-      tipo: consulta.tipo,
-      duracao: consulta.duracao,
-    });
+    const sql = `
+      INSERT INTO teleconsulta (id_medico, id_paciente, nome_paciente, data, horario, tipo, duracao, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'Pendente')
+    `;
+    const [result] = await db.promise().query(sql, [
+      consulta.id_medico,
+      consulta.paciente_id,
+      consulta.nome_paciente,
+      consulta.data,
+      consulta.horario,
+      consulta.tipo,
+      consulta.duracao
+    ]);
 
-    console.log("Consulta salva com sucesso! ID:", resultado.id);
-    return { sucesso: true, id: resultado.id };
+    console.log("Consulta salva com sucesso! ID:", result.insertId);
+    return { sucesso: true, id: result.insertId };
 
   } catch (err) {
     console.error("Erro ao salvar consulta:", err);
@@ -698,7 +712,13 @@ ipcMain.handle("reagendarConsulta", async (event, dados) => {
   try {
     const { id, novaData, novoHorario, novaDuracao } = dados;
 
-    await api.apiPatch(`/api/consultas/${id}/reagendar`, { novaData, novoHorario, novaDuracao });
+    const sql = `
+      UPDATE teleconsulta
+      SET data = ?, horario = ?, duracao = ?
+      WHERE id = ?
+    `;
+
+    await db.promise().query(sql, [novaData, novoHorario, novaDuracao, id]);
 
     console.log(`Consulta ${id} reagendada com sucesso!`);
     return { sucesso: true };
@@ -711,7 +731,8 @@ ipcMain.handle("reagendarConsulta", async (event, dados) => {
 // === BUSCAR PACIENTES PARA TELECONSULTA ===
 ipcMain.handle('buscar-pacientes', async () => {
   try {
-    return await api.apiGet('/api/farma-pacientes');
+    const [rows] = await db.promise().query('SELECT * FROM FarmaPacientes');
+    return rows;
   } catch (error) {
     console.error('Erro ao buscar pacientes:', error);
     throw error;
@@ -736,13 +757,17 @@ ipcMain.handle('selecionar-pdf', async () => {
 // === ABRIR PDF DO BANCO ===
 ipcMain.handle('abrir-pdf', async (event, idRelatorio) => {
     try {
-        const buffer = await api.apiGetBuffer(`/api/relatorios/${idRelatorio}/arquivo`);
+        const [rows] = await db.promise().query(
+            `SELECT arquivo, titulo FROM relatorios WHERE id = ?`,
+            [idRelatorio]
+        );
+        if (rows.length === 0) return;
 
         const pasta = path.join(__dirname, 'src/relatorios');
         if (!fs.existsSync(pasta)) fs.mkdirSync(pasta, { recursive: true });
 
         const tempPath = path.join(pasta, `temp_${idRelatorio}.pdf`);
-        fs.writeFileSync(tempPath, buffer);
+        fs.writeFileSync(tempPath, rows[0].arquivo);
         await shell.openPath(tempPath);
     } catch (err) {
         console.error('Erro no abrir-pdf:', err);
@@ -753,14 +778,11 @@ ipcMain.handle('abrir-pdf', async (event, idRelatorio) => {
 ipcMain.handle('salvar-relatorio', async (event, { pacienteId, nome, data, caminho }) => {
     try {
         const arquivoBuffer = fs.readFileSync(caminho);
-        const resultado = await api.apiPostMultipart('/api/relatorios', {
-            idPaciente: pacienteId,
-            titulo: nome,
-            data,
-            arquivo: arquivoBuffer,
-            nomeArquivo: path.basename(caminho),
-        });
-        return resultado.id;
+        const [result] = await db.promise().query(
+            `INSERT INTO relatorios (id_paciente, titulo, data, arquivo) VALUES (?, ?, ?, ?)`,
+            [pacienteId, nome, data, arquivoBuffer]
+        );
+        return result.insertId;
     } catch (err) {
         console.error('Erro no salvar-relatorio:', err);
         throw err;
@@ -770,8 +792,11 @@ ipcMain.handle('salvar-relatorio', async (event, { pacienteId, nome, data, camin
 // === BUSCAR RELATORIOS DO BANCO ===
 ipcMain.handle('buscar-relatorios', async (event, pacienteId) => {
     try {
-        const rows = await api.apiGet(`/api/relatorios/paciente/${pacienteId}`);
-        return rows.map(mapRelatorio);
+        const [rows] = await db.promise().query(
+            `SELECT id, id_paciente, titulo, tipo, data FROM relatorios WHERE id_paciente = ?`,
+            [pacienteId]
+        );
+        return rows;
     } catch (err) {
         console.error('Erro no buscar-relatorios:', err);
         throw err;
@@ -781,7 +806,7 @@ ipcMain.handle('buscar-relatorios', async (event, pacienteId) => {
 // === DELETAR RELATORIO ===
 ipcMain.handle('deletar-relatorio', async (event, id) => {
     try {
-        await api.apiDelete(`/api/relatorios/${id}`);
+        await db.promise().query(`DELETE FROM relatorios WHERE id = ?`, [id]);
         return { sucesso: true };
     } catch (err) {
         console.error('Erro ao deletar relatório:', err);
@@ -792,8 +817,22 @@ ipcMain.handle('deletar-relatorio', async (event, id) => {
 // === BUSCAR DADOS DO MÉDICO (CONFIGURAÇÕES) ===
 ipcMain.handle('buscar-dados-medico', async (event, idMedico) => {
   try {
-    const medico = await api.apiGet(`/api/medicos/${idMedico}/config`);
-    return mapMedicoConfig(medico);
+    const [rows] = await db.promise().query(`
+      SELECT m.*, mc.nome_clinica, mc.endereco_clinica, mc.tempo_consulta, mc.valor_consulta
+      FROM medico m
+      LEFT JOIN medico_clinica mc ON mc.id_medico = m.id
+      WHERE m.id = ?
+    `, [idMedico]);
+
+    if (rows.length === 0) return null;
+
+    const medico = rows[0];
+
+    if (medico.foto_perfil) {
+      medico.foto_perfil = medico.foto_perfil.toString('base64');
+    }
+
+    return medico;
   } catch (err) {
     console.error('Erro ao buscar dados do médico:', err);
     throw err;
@@ -803,15 +842,29 @@ ipcMain.handle('buscar-dados-medico', async (event, idMedico) => {
 // === SALVAR ALTERAÇÕES DE CONFIGURAÇÕES DO MEDICO ===
 ipcMain.handle('atualizar-dados-medico', async (event, dados) => {
   try {
-    await api.apiPut(`/api/medicos/${dados.id}`, {
-      nome: dados.nome,
-      sobrenome: dados.sobrenome,
-      email: dados.email,
-      telefone: dados.telefone,
-      dataNascimento: dados.data_nascimento,
-      endereco: dados.endereco,
-    });
+
+    await db.promise().query(`
+      UPDATE medico
+      SET
+        nome = ?,
+        sobrenome = ?,
+        email = ?,
+        telefone = ?,
+        data_nascimento = ?,
+        endereco = ?
+      WHERE id = ?
+    `, [
+      dados.nome,
+      dados.sobrenome,
+      dados.email,
+      dados.telefone,
+      dados.data_nascimento,
+      dados.endereco,
+      dados.id
+    ]);
+
     return { sucesso: true };
+
   } catch (err) {
     console.error(err);
     return { sucesso: false };
@@ -821,17 +874,41 @@ ipcMain.handle('atualizar-dados-medico', async (event, dados) => {
 // === SALVAR ALTERAÇÕES PROFISSIONAIS DO MEDICO ===
 ipcMain.handle('atualizar-dados-profissionais', async (event, dados) => {
   try {
-    await api.apiPut(`/api/medicos/${dados.id}/profissional`, {
-      crm: dados.crm,
-      rqe: dados.rqe,
-      especialidade: dados.especialidade,
-      subespecialidades: dados.subespecialidades,
-      nomeClinica: dados.nome_clinica,
-      enderecoClinica: dados.endereco_clinica,
-      tempoConsulta: dados.tempo_consulta,
-      valorConsulta: dados.valor_consulta,
-    });
+
+    await db.promise().query(`
+      UPDATE medico
+      SET
+        crm = ?,
+        rqe = ?,
+        especialidade = ?,
+        subespecialidades = ?
+      WHERE id = ?
+    `, [
+      dados.crm,
+      dados.rqe,
+      dados.especialidade,
+      dados.subespecialidades,
+      dados.id
+    ]);
+
+    await db.promise().query(`
+      UPDATE medico_clinica
+      SET
+        nome_clinica = ?,
+        endereco_clinica = ?,
+        tempo_consulta = ?,
+        valor_consulta = ?
+      WHERE id_medico = ?
+    `, [
+      dados.nome_clinica,
+      dados.endereco_clinica,
+      dados.tempo_consulta,
+      dados.valor_consulta,
+      dados.id
+    ]);
+
     return { sucesso: true };
+
   } catch (err) {
     console.error(err);
     return { sucesso: false };
@@ -841,11 +918,21 @@ ipcMain.handle('atualizar-dados-profissionais', async (event, dados) => {
 // === SALVAR PREFERÊNCIAS DO MÉDICO ===
 ipcMain.handle('atualizar-preferencias', async (event, dados) => {
   try {
-    await api.apiPut(`/api/medicos/${dados.id}/preferencias`, {
-      horarioInicio: dados.horario_inicio,
-      horarioTermino: dados.horario_termino,
-    });
+
+    await db.promise().query(`
+      UPDATE medico
+      SET
+        horario_inicio = ?,
+        horario_termino = ?
+      WHERE id = ?
+    `, [
+      dados.horario_inicio,
+      dados.horario_termino,
+      dados.id
+    ]);
+
     return { sucesso: true };
+
   } catch (err) {
     console.error(err);
     return { sucesso: false };
@@ -854,15 +941,25 @@ ipcMain.handle('atualizar-preferencias', async (event, dados) => {
 
 // === SALVAR FOTO DE PERFIL NO BANCO ===
 ipcMain.handle('salvar-foto-perfil', async (event, data) => {
-    const base64 = Buffer.from(data.foto).toString('base64');
-    await api.apiPut(`/api/medicos/${data.id}/foto`, { foto: base64 });
+    const buffer = Buffer.from(data.foto);
+
+    await db.promise().query(
+        "UPDATE medico SET foto_perfil = ? WHERE id = ?",
+        [buffer, data.id]
+    );
 });
 
 // === BUSCAR TODOS OS PRODUTOS ===
 ipcMain.handle('buscar-produtos', async () => {
   try {
-    const rows = await api.apiGet('/api/produtos');
-    return rows.map(mapProduto);
+    const [rows] = await db.promise().query(`
+      SELECT p.*, 
+        (SELECT MIN(l.data_validade) FROM lotes l WHERE l.id_produto = p.id) AS proxima_validade,
+        (SELECT SUM(l.quantidade) FROM lotes l WHERE l.id_produto = p.id) AS total_lotes
+      FROM produtos p
+      ORDER BY p.nome ASC
+    `);
+    return rows;
   } catch (err) {
     console.error('Erro ao buscar produtos:', err);
     throw err;
@@ -872,8 +969,11 @@ ipcMain.handle('buscar-produtos', async () => {
 // === BUSCAR LOTES DE UM PRODUTO ===
 ipcMain.handle('buscar-lotes', async (event, idProduto) => {
   try {
-    const rows = await api.apiGet(`/api/lotes/produto/${idProduto}`);
-    return rows.map(mapLote);
+    const [rows] = await db.promise().query(
+      'SELECT * FROM lotes WHERE id_produto = ? ORDER BY data_validade ASC',
+      [idProduto]
+    );
+    return rows;
   } catch (err) {
     console.error('Erro ao buscar lotes:', err);
     throw err;
@@ -884,14 +984,15 @@ ipcMain.handle('buscar-lotes', async (event, idProduto) => {
 ipcMain.handle('cadastrar-produto', async (event, dados) => {
   try {
     const { nome, categoria, quantidade, estoque_min, preco, fornecedor, codigo_barras, tarja_preta } = dados;
-    const resultado = await api.apiPost('/api/produtos', {
-      nome, categoria, quantidade, estoqueMin: estoque_min, preco, fornecedor,
-      codigoBarras: codigo_barras || null, tarjaPreta: !!tarja_preta,
-    });
-    return { sucesso: true, id: resultado.id };
+    const [result] = await db.promise().query(
+      `INSERT INTO produtos (nome, categoria, quantidade, estoque_min, preco, fornecedor, codigo_barras, tarja_preta)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [nome, categoria, quantidade, estoque_min, preco, fornecedor, codigo_barras || null, tarja_preta ? 1 : 0]
+    );
+    return { sucesso: true, id: result.insertId };
   } catch (err) {
     console.error('Erro ao cadastrar produto:', err);
-    if (String(err.message).includes('Código de barras')) {
+    if (err.code === 'ER_DUP_ENTRY') {
       return { sucesso: false, erro: 'Código de barras já cadastrado.' };
     }
     return { sucesso: false, erro: err.message };
@@ -902,14 +1003,15 @@ ipcMain.handle('cadastrar-produto', async (event, dados) => {
 ipcMain.handle('editar-produto', async (event, dados) => {
   try {
     const { id, nome, categoria, estoque_min, preco, fornecedor, codigo_barras, tarja_preta } = dados;
-    await api.apiPut(`/api/produtos/${id}`, {
-      nome, categoria, estoqueMin: estoque_min, preco, fornecedor,
-      codigoBarras: codigo_barras || null, tarjaPreta: !!tarja_preta,
-    });
+    await db.promise().query(
+      `UPDATE produtos SET nome = ?, categoria = ?, estoque_min = ?, preco = ?, fornecedor = ?, codigo_barras = ?, tarja_preta = ?
+       WHERE id = ?`,
+      [nome, categoria, estoque_min, preco, fornecedor, codigo_barras || null, tarja_preta ? 1 : 0, id]
+    );
     return { sucesso: true };
   } catch (err) {
     console.error('Erro ao editar produto:', err);
-    if (String(err.message).includes('Código de barras')) {
+    if (err.code === 'ER_DUP_ENTRY') {
       return { sucesso: false, erro: 'Código de barras já cadastrado.' };
     }
     return { sucesso: false, erro: err.message };
@@ -920,14 +1022,21 @@ ipcMain.handle('editar-produto', async (event, dados) => {
 ipcMain.handle('atualizar-estoque', async (event, dados) => {
   try {
     const { id_produto, tipo, quantidade, numero_lote, data_validade, prateleira } = dados;
-    await api.apiPost('/api/lotes', {
-      idProduto: id_produto,
-      tipo,
-      quantidade,
-      numeroLote: numero_lote || null,
-      dataValidade: data_validade || null,
-      prateleira: prateleira || null,
-    });
+    const qtd = tipo === 'entrada' ? quantidade : -quantidade;
+
+    await db.promise().query(
+      'UPDATE produtos SET quantidade = quantidade + ? WHERE id = ?',
+      [qtd, id_produto]
+    );
+
+    if (numero_lote || data_validade) {
+      await db.promise().query(
+        `INSERT INTO lotes (id_produto, numero_lote, quantidade, data_validade, prateleira)
+         VALUES (?, ?, ?, ?, ?)`,
+        [id_produto, numero_lote || null, quantidade, data_validade || null, prateleira || null]
+      );
+    }
+
     return { sucesso: true };
   } catch (err) {
     console.error('Erro ao atualizar estoque:', err);
@@ -938,7 +1047,7 @@ ipcMain.handle('atualizar-estoque', async (event, dados) => {
 // === DELETAR PRODUTO ===
 ipcMain.handle('deletar-produto', async (event, id) => {
   try {
-    await api.apiDelete(`/api/produtos/${id}`);
+    await db.promise().query('DELETE FROM produtos WHERE id = ?', [id]);
     return { sucesso: true };
   } catch (err) {
     console.error('Erro ao deletar produto:', err);
@@ -946,14 +1055,18 @@ ipcMain.handle('deletar-produto', async (event, id) => {
   }
 });
 
-// === BUSCAR LOTES COM VALIDADE PRÓXIMA (a partir de hoje) ===
+// === BUSCAR LOTES COM VALIDADE PRÓXIMA (até 30 dias) ===
 ipcMain.handle('buscar-alertas-validade', async () => {
   try {
-    const hoje = hojeISO();
-    const rows = await api.apiGet('/api/lotes');
-    return rows
-      .filter(l => l.dataValidade && l.dataValidade >= hoje)
-      .map(mapLoteComProduto);
+    const [rows] = await db.promise().query(`
+      SELECT l.*, p.nome AS nome_produto
+      FROM lotes l
+      JOIN produtos p ON p.id = l.id_produto
+      WHERE l.data_validade IS NOT NULL
+        AND l.data_validade >= CURDATE()
+      ORDER BY l.data_validade ASC
+    `);
+    return rows;
   } catch (err) {
     console.error('Erro ao buscar alertas de validade:', err);
     throw err;
@@ -963,7 +1076,7 @@ ipcMain.handle('buscar-alertas-validade', async () => {
 // === REMOVER LOTE (MARCAR COMO RESOLVIDO) ===
 ipcMain.handle('remover-lote', async (event, id) => {
   try {
-    await api.apiDelete(`/api/lotes/${id}`);
+    await db.promise().query('DELETE FROM lotes WHERE id = ?', [id]);
     return { sucesso: true };
   } catch (err) {
     console.error('Erro ao remover lote:', err);
@@ -974,8 +1087,19 @@ ipcMain.handle('remover-lote', async (event, id) => {
 // === BUSCAR CUPONS ===
 ipcMain.handle('buscar-cupons', async () => {
   try {
-    const rows = await api.apiGet('/api/cupons');
-    return rows.map(mapCupom);
+    // Expira automaticamente por data ou limite de uso
+    await db.promise().query(`
+      UPDATE cupons
+      SET status = 'expirado'
+      WHERE status = 'ativo'
+        AND (
+          (validade IS NOT NULL AND validade < CURDATE())
+          OR (limite_uso > 0 AND usos_atuais >= limite_uso)
+        )
+    `);
+
+    const [rows] = await db.promise().query('SELECT * FROM cupons ORDER BY status ASC, codigo ASC');
+    return rows;
   } catch (err) {
     console.error('Erro ao buscar cupons:', err);
     throw err;
@@ -986,10 +1110,14 @@ ipcMain.handle('buscar-cupons', async () => {
 ipcMain.handle('cadastrar-cupom', async (event, dados) => {
   try {
     const { codigo, descricao, tipo, valor, limite_uso, validade } = dados;
-    await api.apiPost('/api/cupons', { codigo, descricao, tipo, valor, limiteUso: limite_uso, validade: validade || null });
+    await db.promise().query(
+      `INSERT INTO cupons (codigo, descricao, tipo, valor, limite_uso, usos_atuais, validade, status)
+       VALUES (?, ?, ?, ?, ?, 0, ?, 'ativo')`,
+      [codigo, descricao, tipo, valor, limite_uso, validade || null]
+    );
     return { sucesso: true };
   } catch (err) {
-    if (String(err.message).includes('Código já existe')) return { sucesso: false, erro: 'Código já existe.' };
+    if (err.code === 'ER_DUP_ENTRY') return { sucesso: false, erro: 'Código já existe.' };
     return { sucesso: false, erro: err.message };
   }
 });
@@ -998,7 +1126,11 @@ ipcMain.handle('cadastrar-cupom', async (event, dados) => {
 ipcMain.handle('editar-cupom', async (event, dados) => {
   try {
     const { id, descricao, tipo, valor, limite_uso, validade, status } = dados;
-    await api.apiPut(`/api/cupons/${id}`, { descricao, tipo, valor, limiteUso: limite_uso, validade: validade || null, status });
+    await db.promise().query(
+      `UPDATE cupons SET descricao = ?, tipo = ?, valor = ?, limite_uso = ?, validade = ?, status = ?
+       WHERE id = ?`,
+      [descricao, tipo, valor, limite_uso, validade || null, status, id]
+    );
     return { sucesso: true };
   } catch (err) {
     return { sucesso: false, erro: err.message };
@@ -1008,7 +1140,7 @@ ipcMain.handle('editar-cupom', async (event, dados) => {
 // === DELETAR CUPOM ===
 ipcMain.handle('deletar-cupom', async (event, id) => {
   try {
-    await api.apiDelete(`/api/cupons/${id}`);
+    await db.promise().query('DELETE FROM cupons WHERE id = ?', [id]);
     return { sucesso: true };
   } catch (err) {
     return { sucesso: false, erro: err.message };
@@ -1018,39 +1150,47 @@ ipcMain.handle('deletar-cupom', async (event, id) => {
 // === DADOS DO DASHBOARD ===
 ipcMain.handle('buscar-dashboard', async () => {
   try {
-    const [produtos, lotes, estoqueBaixo, vendasRows] = await Promise.all([
-      api.apiGet('/api/produtos'),
-      api.apiGet('/api/lotes'),
-      api.apiGet('/api/produtos/estoque-baixo'),
-      api.apiGet('/api/vendas'),
-    ]);
+    const [[estoqueRow]] = await db.promise().query(
+      'SELECT COALESCE(SUM(quantidade), 0) AS total FROM produtos'
+    );
 
-    const totalEstoque = produtos.reduce((soma, p) => soma + (p.quantidade || 0), 0);
+    const [alertasRows] = await db.promise().query(`
+      SELECT l.*, p.nome AS nome_produto
+      FROM lotes l
+      JOIN produtos p ON p.id = l.id_produto
+      WHERE l.data_validade IS NOT NULL
+        AND l.data_validade BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+      ORDER BY l.data_validade ASC
+    `);
 
-    const hoje = hojeISO();
-    const limite = somarDiasISO(30);
-    const alertasRows = lotes
-      .filter(l => l.dataValidade && l.dataValidade >= hoje && l.dataValidade <= limite)
-      .map(mapLoteComProduto);
+    const [estoqueBaixoRows] = await db.promise().query(`
+      SELECT * FROM produtos
+      WHERE quantidade < estoque_min
+      ORDER BY quantidade ASC
+    `);
 
-    const hojeDate = new Date();
-    const mesAtual = hojeDate.getMonth();
-    const anoAtual = hojeDate.getFullYear();
+    const [vendasRows] = await db.promise().query(
+      'SELECT total, data_venda FROM vendas_concluidas'
+    );
+
+    const hoje = new Date();
+    const mesAtual = hoje.getMonth();
+    const anoAtual = hoje.getFullYear();
 
     const vendasDoMes = vendasRows
       .filter(v => {
-        const partes = (v.dataVenda || '').split('/');
+        const partes = (v.data_venda || '').split('/');
         if (partes.length !== 3) return false;
         return (parseInt(partes[1]) - 1) === mesAtual && parseInt(partes[2]) === anoAtual;
       })
       .reduce((soma, v) => soma + parseFloat(v.total), 0);
 
     return {
-      totalEstoque,
+      totalEstoque: estoqueRow.total,
       totalAlertasValidade: alertasRows.length,
       vendasDoMes,
       proximosVencimento: alertasRows.slice(0, 3),
-      estoqueBaixo: estoqueBaixo.slice(0, 5).map(mapProduto),
+      estoqueBaixo: estoqueBaixoRows.slice(0, 5)
     };
   } catch (err) {
     console.error('Erro ao buscar dados do dashboard:', err);
@@ -1085,36 +1225,33 @@ function calcularPeriodoRelatorio(tipo, periodo) {
 
 async function buscarDadosRelatorio(tipo, periodo) {
   if (tipo === 'estoque') {
-    const produtos = await api.apiGet('/api/produtos');
-    return produtos
-      .slice()
-      .sort((a, b) => a.nome.localeCompare(b.nome))
-      .map(p => ({
-        nome: p.nome, categoria: p.categoria, quantidade: p.quantidade,
-        estoque_min: p.estoqueMin, preco: p.preco, fornecedor: p.fornecedor,
-      }));
+    const [rows] = await db.promise().query(
+      'SELECT nome, categoria, quantidade, estoque_min, preco, fornecedor FROM produtos ORDER BY nome ASC'
+    );
+    return rows;
   }
 
   if (tipo === 'validade') {
     const { inicio, fim } = calcularPeriodoRelatorio('validade', periodo);
-    const lotes = await api.apiGet('/api/lotes');
-    let filtrados = lotes.filter(l => l.dataValidade);
+    let sql = `
+      SELECT p.nome, l.numero_lote, l.quantidade, l.data_validade, l.prateleira
+      FROM lotes l JOIN produtos p ON p.id = l.id_produto
+      WHERE l.data_validade IS NOT NULL
+    `;
+    const params = [];
     if (inicio && fim) {
-      const inicioISO = inicio.toISOString().split('T')[0];
-      const fimISO = fim.toISOString().split('T')[0];
-      filtrados = filtrados.filter(l => l.dataValidade >= inicioISO && l.dataValidade <= fimISO);
+      sql += ' AND l.data_validade BETWEEN ? AND ?';
+      params.push(inicio.toISOString().split('T')[0], fim.toISOString().split('T')[0]);
     }
-    return filtrados.map(l => ({
-      nome: l.nomeProduto, numero_lote: l.numeroLote, quantidade: l.quantidade,
-      data_validade: l.dataValidade, prateleira: l.prateleira,
-    }));
+    sql += ' ORDER BY l.data_validade ASC';
+    const [rows] = await db.promise().query(sql, params);
+    return rows;
   }
 
   if (tipo === 'vendas') {
-    const rows = (await api.apiGet('/api/vendas')).map(v => ({
-      cliente: v.cliente, total: v.total, quantidade: v.quantidade,
-      metodo_pago: v.metodoPago, data_venda: v.dataVenda,
-    }));
+    const [rows] = await db.promise().query(
+      'SELECT cliente, total, quantidade, metodo_pago, data_venda FROM vendas_concluidas'
+    );
     const { inicio, fim } = calcularPeriodoRelatorio('vendas', periodo);
     if (!inicio) return rows;
 
@@ -1190,9 +1327,11 @@ ipcMain.handle('gerar-relatorio-farmacia', async (event, { tipo, periodo, format
 
     const tamanhoKb = Math.round(fs.statSync(caminho).size / 1024);
 
-    await api.apiPost('/api/relatorios-farmacia', {
-      tipo, periodo, formato, nomeArquivo, caminho, tamanhoKb,
-    });
+    await db.promise().query(
+      `INSERT INTO relatorios_farmacia (tipo, periodo, formato, nome_arquivo, caminho, tamanho_kb)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [tipo, periodo, formato, nomeArquivo, caminho, tamanhoKb]
+    );
 
     return { sucesso: true };
   } catch (err) {
@@ -1203,8 +1342,10 @@ ipcMain.handle('gerar-relatorio-farmacia', async (event, { tipo, periodo, format
 
 ipcMain.handle('buscar-relatorios-farmacia', async () => {
   try {
-    const rows = await api.apiGet('/api/relatorios-farmacia');
-    return rows.map(mapRelatorioFarmacia);
+    const [rows] = await db.promise().query(
+      'SELECT * FROM relatorios_farmacia ORDER BY gerado_em DESC LIMIT 10'
+    );
+    return rows;
   } catch (err) {
     console.error('Erro ao buscar relatórios:', err);
     throw err;
@@ -1213,9 +1354,9 @@ ipcMain.handle('buscar-relatorios-farmacia', async () => {
 
 ipcMain.handle('baixar-relatorio-farmacia', async (event, id) => {
   try {
-    const relatorio = await api.apiGet(`/api/relatorios-farmacia/${id}`);
-    if (!relatorio) return { sucesso: false };
-    await shell.openPath(relatorio.caminho);
+    const [rows] = await db.promise().query('SELECT caminho FROM relatorios_farmacia WHERE id = ?', [id]);
+    if (rows.length === 0) return { sucesso: false };
+    await shell.openPath(rows[0].caminho);
     return { sucesso: true };
   } catch (err) {
     console.error('Erro ao abrir relatório:', err);
@@ -1225,29 +1366,27 @@ ipcMain.handle('baixar-relatorio-farmacia', async (event, id) => {
 
 ipcMain.handle('buscar-resumo-relatorios', async () => {
   try {
-    const [produtos, lotes, vendasRows] = await Promise.all([
-      api.apiGet('/api/produtos'),
-      api.apiGet('/api/lotes'),
-      api.apiGet('/api/vendas'),
-    ]);
+    const [[estoqueRow]] = await db.promise().query('SELECT COALESCE(SUM(quantidade), 0) AS total FROM produtos');
 
-    const totalEstoque = produtos.reduce((soma, p) => soma + (p.quantidade || 0), 0);
+    const [[alertasRow]] = await db.promise().query(`
+      SELECT COUNT(*) AS total FROM lotes
+      WHERE data_validade IS NOT NULL
+        AND data_validade BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
+    `);
 
-    const hoje = hojeISO();
-    const limite = somarDiasISO(30);
-    const totalAlertas = lotes.filter(l => l.dataValidade && l.dataValidade >= hoje && l.dataValidade <= limite).length;
+    const [vendasRows] = await db.promise().query('SELECT total, data_venda FROM vendas_concluidas');
 
     const somarMes = (mes, ano) => vendasRows
       .filter(v => {
-        const partes = (v.dataVenda || '').split('/');
+        const partes = (v.data_venda || '').split('/');
         if (partes.length !== 3) return false;
         return (parseInt(partes[1]) - 1) === mes && parseInt(partes[2]) === ano;
       })
       .reduce((soma, v) => soma + parseFloat(v.total), 0);
 
-    const hojeDate = new Date();
-    const mesAtual = hojeDate.getMonth();
-    const anoAtual = hojeDate.getFullYear();
+    const hoje = new Date();
+    const mesAtual = hoje.getMonth();
+    const anoAtual = hoje.getFullYear();
     const mesAnterior = new Date(anoAtual, mesAtual - 1, 1);
 
     const vendasMesAtual = somarMes(mesAtual, anoAtual);
@@ -1258,10 +1397,10 @@ ipcMain.handle('buscar-resumo-relatorios', async () => {
       : null;
 
     return {
-      totalEstoque,
+      totalEstoque: estoqueRow.total,
       vendasMesAtual,
       variacaoVendas,
-      totalAlertas,
+      totalAlertas: alertasRow.total
     };
   } catch (err) {
     console.error('Erro ao buscar resumo de relatórios:', err);
@@ -1287,7 +1426,239 @@ ipcMain.handle('atualizar-funcionario', async (event, dados) => {
   }
 });
 
+// === ATUALIZAR STATUS DO PARCEIRO ===
+ipcMain.handle('atualizar-status-parceiro', async (event, dados) => {
+  try {
+    const { id, status } = dados;
+    await db.promise().query(
+      'UPDATE parceiros SET status = ? WHERE id = ?',
+      [status, id]
+    );
+    console.log(`Status do parceiro ${id} atualizado para ${status}`);
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao atualizar status do parceiro:', err);
+    return { sucesso: false, erro: err.message };
+  }
+});
+
+// === ATUALIZAR DESCONTO DO PARCEIRO ===
+ipcMain.handle('atualizar-desconto-parceiro', async (event, dados) => {
+  try {
+    const { id, desconto } = dados;
+    await db.promise().query(
+      'UPDATE parceiros SET desconto = ? WHERE id = ?',
+      [desconto, id]
+    );
+    console.log(`Desconto do parceiro ${id} atualizado para ${desconto}`);
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao atualizar desconto do parceiro:', err);
+    return { sucesso: false, erro: err.message };
+  }
+});
+
+// === ADICIONAR SERVIÇO AO PARCEIRO ===
+ipcMain.handle('adicionar-servico-parceiro', async (event, dados) => {
+  try {
+    const { idParceiro, nomeServico, categoria, descricao } = dados;
+    const [result] = await db.promise().query(
+      'INSERT INTO parceiro_servicos (id_parceiro, nome_servico, categoria, descricao) VALUES (?, ?, ?, ?)',
+      [idParceiro, nomeServico, categoria || null, descricao || null]
+    );
+    console.log('Serviço adicionado ao parceiro:', nomeServico);
+    return { sucesso: true, id: result.insertId };
+  } catch (err) {
+    console.error('Erro ao adicionar serviço:', err);
+    return { sucesso: false, erro: err.message };
+  }
+});
+
+// === BUSCAR PACIENTES (para o modal de encaminhamento) ===
+ipcMain.handle('buscar-pacientes-medico', async () => {
+  try {
+    const [rows] = await db.promise().query(
+      'SELECT id, nome, data_nascimento FROM paciente ORDER BY nome'
+    );
+    return rows;
+  } catch (err) {
+    console.error('Erro ao buscar pacientes:', err);
+    throw err;
+  }
+});
+
+// === ENCAMINHAR PACIENTE PARA PARCEIRO ===
+ipcMain.handle('encaminhar-paciente-parceiro', async (event, dados) => {
+  try {
+    const { idParceiro, idPaciente } = dados;
+    await db.promise().query(
+      'INSERT INTO parceiro_encaminhamentos (id_parceiro, id_paciente) VALUES (?, ?)',
+      [idParceiro, idPaciente || null]
+    );
+    console.log(`Encaminhamento registrado para o parceiro ${idParceiro}`);
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao registrar encaminhamento:', err);
+    return { sucesso: false, erro: err.message };
+  }
+});
+
+// === BUSCAR PRONTUÁRIO MAIS RECENTE DE UM PACIENTE ===
+ipcMain.handle('buscar-prontuario-recente', async (event, idPaciente) => {
+  try {
+    const [rows] = await db.promise().query(
+      'SELECT * FROM prontuario WHERE id_paciente = ? ORDER BY id DESC LIMIT 1',
+      [idPaciente]
+    );
+    return rows.length > 0 ? rows[0] : null;
+  } catch (err) {
+    console.error('Erro ao buscar prontuário recente:', err);
+    throw err;
+  }
+});
+
+// === BUSCAR LISTA DE PACIENTES (para sidebar, com CPF real) ===
+ipcMain.handle('buscar-pacientes-prontuario', async () => {
+  try {
+    const [rows] = await db.promise().query(`
+      SELECT 
+        pac.id,
+        pac.nome AS nome_paciente,
+        pac.idade,
+        pac.CPF,
+        (SELECT pr.condicao FROM prontuario pr WHERE pr.id_paciente = pac.id ORDER BY pr.id DESC LIMIT 1) AS condicao,
+        (SELECT pr.ultima_visita FROM prontuario pr WHERE pr.id_paciente = pac.id ORDER BY pr.id DESC LIMIT 1) AS ultima_visita,
+        (SELECT pr.status FROM prontuario pr WHERE pr.id_paciente = pac.id ORDER BY pr.id DESC LIMIT 1) AS status
+      FROM paciente pac
+      ORDER BY pac.nome
+    `);
+    return rows;
+  } catch (err) {
+    console.error('Erro ao buscar pacientes:', err);
+    throw err;
+  }
+});
+
+// === BUSCAR TODOS OS PRONTUÁRIOS DE UM PACIENTE ===
+ipcMain.handle('buscar-prontuarios-paciente', async (event, idPaciente) => {
+  try {
+    const [rows] = await db.promise().query(
+      'SELECT * FROM prontuario WHERE id_paciente = ? ORDER BY id DESC',
+      [idPaciente]
+    );
+    return rows;
+  } catch (err) {
+    console.error('Erro ao buscar prontuários do paciente:', err);
+    throw err;
+  }
+});
+
+// === CADASTRAR RECEITA ===
+ipcMain.handle('cadastrar-receita', async (event, dados) => {
+  try {
+    const {
+      idMedico, idPaciente, medicamento, concentracao,
+      dosagem, frequencia, duracao, viaAdministracao,
+      instrucoes, observacoes
+    } = dados;
+
+    const hoje = new Date();
+    const dataPrescricao = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+
+    const [result] = await db.promise().query(
+      `INSERT INTO receita
+        (id_medico, id_paciente, medicamento, concentracao, dosagem, frequencia, duracao, via_administracao, instrucoes, observacoes, status, data_prescricao)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Ativa', ?)`,
+      [
+        idMedico, idPaciente, medicamento, concentracao || null,
+        dosagem, frequencia || null, duracao || null, viaAdministracao || null,
+        instrucoes || null, observacoes || null, dataPrescricao
+      ]
+    );
+
+    console.log('Receita cadastrada com sucesso!');
+    return { sucesso: true, id: result.insertId };
+  } catch (err) {
+    console.error('Erro ao cadastrar receita:', err);
+    return { sucesso: false, erro: err.message };
+  }
+});
+
+// === ATUALIZAR SENHA DO MÉDICO ===
+ipcMain.handle('atualizar-senha', async (event, dados) => {
+  try {
+    const { idLogin, senhaAtual, novaSenha } = dados;
+
+    const [rows] = await db.promise().query(
+      'SELECT senha FROM login WHERE id = ? LIMIT 1',
+      [idLogin]
+    );
+
+    if (rows.length === 0) {
+      return { sucesso: false, erro: 'Usuário não encontrado.' };
+    }
+
+    const senhaCorreta = await bcrypt.compare(senhaAtual, rows[0].senha);
+    if (!senhaCorreta) {
+      return { sucesso: false, erro: 'Senha atual incorreta.' };
+    }
+
+    const novaSenhaHash = await bcrypt.hash(novaSenha, 10);
+
+    await db.promise().query(
+      'UPDATE login SET senha = ? WHERE id = ?',
+      [novaSenhaHash, idLogin]
+    );
+
+    console.log(`Senha do login ${idLogin} atualizada com sucesso`);
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao atualizar senha:', err);
+    return { sucesso: false, erro: err.message };
+  }
+});
+
+// === VERIFICAR E-MAIL PARA RECUPERAÇÃO DE SENHA ===
+ipcMain.handle('verificar-email-recuperacao', async (event, email) => {
+  try {
+    const [rows] = await db.promise().query(
+      'SELECT id FROM login WHERE email = ? LIMIT 1',
+      [email]
+    );
+
+    if (rows.length === 0) {
+      return { existe: false };
+    }
+
+    return { existe: true, idLogin: rows[0].id };
+  } catch (err) {
+    console.error('Erro ao verificar e-mail:', err);
+    return { existe: false, erro: err.message };
+  }
+});
+
+// === REDEFINIR SENHA (via "esqueci minha senha") ===
+ipcMain.handle('redefinir-senha', async (event, dados) => {
+  try {
+    const { idLogin, novaSenha } = dados;
+
+    const novaSenhaHash = await bcrypt.hash(novaSenha, 10);
+
+    await db.promise().query(
+      'UPDATE login SET senha = ? WHERE id = ?',
+      [novaSenhaHash, idLogin]
+    );
+
+    console.log(`Senha do login ${idLogin} redefinida com sucesso`);
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao redefinir senha:', err);
+    return { sucesso: false, erro: err.message };
+  }
+});
+
 // === CHATBOT API ===
+require('dotenv').config();
 const { GoogleGenAI } = require("@google/genai");
 const genAI = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 

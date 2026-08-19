@@ -926,6 +926,385 @@
           margin-left: -1px;
       }
 
+      .modal-encaminhar {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 10001;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .encaminhar-box {
+        background: #ffffff;
+        border-radius: 12px;
+        width: 480px;
+        max-width: 92vw;
+        padding: 25px 28px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        position: relative;
+        color: #234e2d;
+      }
+
+      .encaminhar-fechar {
+        position: absolute;
+        top: 14px;
+        right: 16px;
+        background: none;
+        border: none;
+        font-size: 22px;
+        color: #6b7d6f;
+        cursor: pointer;
+      }
+
+      .encaminhar-titulo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 19px;
+        font-weight: 700;
+        color: #234e2d;
+      }
+
+      .encaminhar-subtitulo {
+        color: #59aa53;
+        font-size: 13px;
+        margin-top: 3px;
+        margin-bottom: 18px;
+      }
+
+      .encaminhar-etapas {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .etapa {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #a9b8ac;
+        font-weight: 600;
+        font-size: 14px;
+        white-space: nowrap;
+      }
+
+      .etapa .circulo {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: #dbe4dc;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        flex-shrink: 0;
+      }
+
+      .etapa.ativa {
+        color: #234e2d;
+      }
+
+      .etapa.ativa .circulo {
+        background: #234e2d;
+      }
+
+      .etapa-linha {
+        flex: 1;
+        height: 1px;
+        background: #dbe4dc;
+        margin: 0 10px;
+      }
+
+      .encaminhar-label {
+        font-size: 13px;
+        font-weight: 600;
+        color: #234e2d;
+        margin-bottom: 6px;
+      }
+
+      #buscarPacienteInput {
+        width: 100%;
+        padding: 9px 12px;
+        border: 1px solid #d9e3da;
+        border-radius: 8px;
+        margin-bottom: 12px;
+        outline-color: #4ba94b;
+      }
+
+      .lista-pacientes {
+        max-height: 220px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 18px;
+      }
+
+      .paciente-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border: 1px solid #e2e8e3;
+        border-radius: 8px;
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+
+      .paciente-item:hover {
+        background: #f4faf5;
+      }
+
+      .paciente-item.selecionado {
+        border-color: #4ba94b;
+        background: #eef8ee;
+      }
+
+      .paciente-info-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .paciente-avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: #dff4df;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #234e2d;
+        font-weight: 600;
+        flex-shrink: 0;
+      }
+
+      .paciente-nome-item {
+        font-size: 14px;
+        font-weight: 600;
+        color: #234e2d;
+      }
+
+      .paciente-sub-item {
+        font-size: 12px;
+        color: #7a8c7d;
+      }
+
+      .check-selecionado {
+        color: #4ba94b;
+        font-size: 16px;
+        display: none;
+      }
+
+      .paciente-item.selecionado .check-selecionado {
+        display: inline;
+      }
+
+      .btn-continuar {
+        width: 100%;
+        padding: 10px;
+        background: #234e2d;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+      }
+
+      .btn-continuar:disabled {
+        background: #b7c4b9;
+        cursor: not-allowed;
+      }
+
+      .paciente-chip {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: #eef8ee;
+        border-radius: 8px;
+        padding: 8px 12px;
+        margin-bottom: 16px;
+      }
+
+      .link-alterar {
+        color: #4ba94b;
+        font-size: 13px;
+        cursor: pointer;
+        text-decoration: underline;
+      }
+
+      .opcoes-servico, .opcoes-prioridade {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      .opcao-servico, .opcao-prioridade {
+        flex: 1;
+        min-width: 100px;
+        text-align: center;
+        padding: 8px;
+        border: 1px solid #d9e3da;
+        border-radius: 8px;
+        background: #ffffff;
+        color: #5b6b5e;
+        font-size: 13px;
+        cursor: pointer;
+      }
+
+      .opcao-servico.selecionada {
+        border-color: #4ba94b;
+        color: #234e2d;
+        background: #eef8ee;
+        font-weight: 600;
+      }
+
+      .opcao-prioridade.selecionada {
+        border-color: #6f8fe0;
+        color: #3a5bc7;
+        background: #ecf0fd;
+        font-weight: 600;
+      }
+
+      #observacoesClinicas {
+        width: 100%;
+        min-height: 70px;
+        padding: 10px;
+        border: 1px solid #d9e3da;
+        border-radius: 8px;
+        resize: vertical;
+        outline-color: #4ba94b;
+        font-size: 13px;
+        margin-bottom: 18px;
+        font-family: 'Poppins', sans-serif;
+      }
+
+      .botoes-etapa2 {
+        display: flex;
+        gap: 10px;
+      }
+
+      .btn-voltar-encaminhar {
+        flex: 1;
+        padding: 10px;
+        background: #ffffff;
+        border: 1px solid #d9e3da;
+        color: #234e2d;
+        border-radius: 8px;
+        font-weight: 600;
+      }
+
+      .btn-confirmar-encaminhamento {
+        flex: 1;
+        padding: 10px;
+        background: #234e2d;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+      }
+
+      .encaminhar-sucesso {
+        text-align: center;
+        padding: 10px 0 5px 0;
+      }
+
+      .icone-sucesso {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #dff4df;
+        color: #4ba94b;
+        font-size: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 16px auto;
+      }
+
+      .encaminhar-sucesso h4 {
+        color: #234e2d;
+        margin-bottom: 10px;
+      }
+
+      .encaminhar-sucesso p {
+        font-size: 14px;
+        margin-bottom: 4px;
+        color: #4a5c4d;
+      }
+
+      .aviso-email {
+        background: #eef8ee;
+        color: #234e2d;
+        font-size: 13px;
+        padding: 10px;
+        border-radius: 8px;
+        margin: 16px 0;
+      }
+
+      .btn-fechar-sucesso {
+        width: 100%;
+        padding: 10px;
+        background: #234e2d;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+      }
+
+      .opcoes-categoria {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 4px;
+      }
+
+      .opcao-categoria {
+        padding: 7px 14px;
+        border: 1px solid #d9e3da;
+        border-radius: 20px;
+        background: #ffffff;
+        color: #5b6b5e;
+        font-size: 13px;
+        cursor: pointer;
+      }
+
+      .opcao-categoria.selecionada {
+        background: #4ba94b;
+        border-color: #4ba94b;
+        color: #ffffff;
+        font-weight: 600;
+      }
+
+      .servicos-cadastrados {
+        background: #eef8ee;
+        border-radius: 8px;
+        padding: 12px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 4px;
+        min-height: 20px;
+      }
+
+      #nomeServicoInput, #descricaoServicoInput {
+        width: 100%;
+        padding: 9px 12px;
+        border: 1px solid #d9e3da;
+        border-radius: 8px;
+        outline-color: #4ba94b;
+        font-family: 'Poppins', sans-serif;
+        font-size: 13px;
+      }
+
+      #descricaoServicoInput {
+        min-height: 60px;
+        resize: vertical;
+        margin-bottom: 4px;
+      }
+
     </style>
 
    
@@ -1007,55 +1386,23 @@
 
   </div>
 
-  <!-- POP-UP de Nova Parceria -->
-<div class="popup-fundo" id="popupFundo">
-  <div class="popup">
-    <form id="formNovaParceria">
-      <span class="tituloPopup">Nova Parceria</span>
-
-      <label for="nomeParceria">Nome:</label>
-      <input type="text" id="nomeParceria" placeholder="Nome do Parceiro">
-
-      <label for="tipoParceria">Tipo:</label>
-      <input type="text" id="tipoParceria" placeholder="Ex: Laboratório, Clínica...">
-
-      <label for="emailParceria">Email:</label>
-      <input type="text" id="emailParceria" placeholder="Email para contato">
-
-      <label for="telefoneParceria">Telefone:</label>
-      <input type="text" id="telefoneParceria" placeholder="Ex: (19)99390-1111">
-
-      <label for="descontoParceria">Desconto:</label>
-      <input type="number" min="0" id="descontoParceria" placeholder="Desconto que o parceiro oferece">
-
-      <label for="dataParceria">Data:</label>
-      <input type="text" id="dataParceria" readonly>
-
-      <div style="display: flex; gap: 10px; margin-top: 20px;">
-        <button type="submit" id="cadastrarBtn" class="btn-salvar">Cadastrar Parceiro</button>
-        <button type="button" id="fecharPopup" class="btn-cancelar">Cancelar</button>
-      </div>
-    </form>
-  </div>
-</div>
-
   <!-- Início do Conteúdo da Página de Parcerias -->
 
   <div class="cardsResumo">
     <div class="cardResumo">
       <span class="tituloCard">Total de Parceiros</span>
-      <h2>4</h2>
+      <h2 id="totalParceiros">0</h2>
     </div>
     <div class="cardResumo">
       <span class="tituloCard">Encaminhamentos (mês)</span>
-      <h2>193</h2>
+      <h2 id="totalEncaminhamentosMes">0</h2>
     </div>
   </div>
 
   <div class="tabela-parceiros">
     <div class="headerTabela">
       <h5>Parceiros Cadastrados</h5>
-      <span class="subinfo">4 parceiros na rede</span>
+      <span class="subinfo" id="subinfoParceiros">0 parceiros na rede</span>
     </div>
     <table class="tabelaCustom">
       <thead>
@@ -1069,86 +1416,7 @@
           <th>Ações</th>
         </tr>
       </thead>
-      <tbody>
-        <tr>
-          <td>
-            <div class="parceiro-info">
-              <span class="nomeParceiro">Laboratório Diagnóstica</span>
-              <span class="desde">Desde 14/01/2024</span>
-            </div>
-          </td>
-          <td><span class="tipo tipo-lab">Laboratório</span></td>
-          <td>
-            <div class="contato">
-              <span>📧 contato@diagnostica.com</span><br>
-              <span>📞 (11) 3456-7890</span>
-            </div>
-          </td>
-          <td>15%</td>
-          <td>45</td>
-          <td><span class="status-badge ativo">Ativo</span></td>
-          <td><button class="btn-detalhes">Ver Detalhes</button></td>
-        </tr>
-
-        <tr>
-          <td>
-            <div class="parceiro-info">
-              <span class="nomeParceiro">Clínica Cardio+</span>
-              <span class="desde">Desde 19/03/2024</span>
-            </div>
-          </td>
-          <td><span class="tipo tipo-clin">Clínica Especializada</span></td>
-          <td>
-            <div class="contato">
-              <span>📧 parceria@cardioplus.com</span><br>
-              <span>📞 (11) 4567-8901</span>
-            </div>
-          </td>
-          <td>20%</td>
-          <td>28</td>
-          <td><span class="status-badge ativo">Ativo</span></td>
-          <td><button class="btn-detalhes">Ver Detalhes</button></td>
-        </tr>
-
-        <tr>
-          <td>
-            <div class="parceiro-info">
-              <span class="nomeParceiro">Farmácia Vida Saudável</span>
-              <span class="desde">Desde 09/11/2023</span>
-            </div>
-          </td>
-          <td><span class="tipo tipo-farm">Farmácia</span></td>
-          <td>
-            <div class="contato">
-              <span>📧 parcerias@vidasaudavel.com</span><br>
-              <span>📞 (11) 5678-9012</span>
-            </div>
-          </td>
-          <td>10%</td>
-          <td>120</td>
-          <td><span class="status-badge ativo">Ativo</span></td>
-          <td><button class="btn-detalhes">Ver Detalhes</button></td>
-        </tr>
-
-        <tr>
-          <td>
-            <div class="parceiro-info">
-              <span class="nomeParceiro">Centro de Imagem Avançada</span>
-              <span class="desde">Desde 30/09/2025</span>
-            </div>
-          </td>
-          <td><span class="tipo tipo-img">Centro de Imagem</span></td>
-          <td>
-            <div class="contato">
-              <span>📧 comercial@imagemavancada.com</span><br>
-              <span>📞 (11) 6789-0123</span>
-            </div>
-          </td>
-          <td>18%</td>
-          <td>0</td>
-          <td><span class="status-badge pendente">Inativo</span></td>
-          <td><button class="btn-detalhes">Ver Detalhes</button></td>
-        </tr>
+      <tbody id="corpoTabelaParceiros">
       </tbody>
     </table>
   </div>
@@ -1194,7 +1462,110 @@
   </div>
 </div>
 
-    <!-- MODAL NOVA PARCERIA-->
+    <!-- MODAL ADICIONAR SERVIÇO -->
+    <div class="modal-encaminhar" id="modalServico">
+      <div class="encaminhar-box">
+        <button class="encaminhar-fechar" id="fecharServico">&times;</button>
+
+        <div class="encaminhar-titulo">🩺 Adicionar Serviço</div>
+        <div class="encaminhar-subtitulo">Novo serviço em <strong id="servicoParceiroNome"></strong></div>
+
+        <div class="encaminhar-label" style="margin-top: 6px;">Nome do serviço <span style="color:#d9534f;">*</span></div>
+        <input type="text" id="nomeServicoInput" placeholder="Ex: Eletrocardiograma, Colonoscopia...">
+
+        <div class="encaminhar-label" style="margin-top: 16px;">Categoria</div>
+        <div class="opcoes-categoria" id="opcoesCategoria">
+          <div class="opcao-categoria selecionada" data-categoria="Diagnóstico">Diagnóstico</div>
+          <div class="opcao-categoria" data-categoria="Terapêutico">Terapêutico</div>
+          <div class="opcao-categoria" data-categoria="Preventivo">Preventivo</div>
+          <div class="opcao-categoria" data-categoria="Reabilitação">Reabilitação</div>
+          <div class="opcao-categoria" data-categoria="Cirúrgico">Cirúrgico</div>
+          <div class="opcao-categoria" data-categoria="Outro">Outro</div>
+        </div>
+
+        <div class="encaminhar-label" style="margin-top: 16px;">Descrição <span style="font-weight:400; color:#7a8c7d;">(opcional)</span></div>
+        <textarea id="descricaoServicoInput" placeholder="Detalhes sobre o serviço, preparo necessário, duração estimada..."></textarea>
+
+        <div class="encaminhar-label" style="margin-top: 10px;">Serviços já cadastrados</div>
+        <div class="servicos-cadastrados" id="servicosCadastrados"></div>
+
+        <div class="botoes-etapa2" style="margin-top: 20px;">
+          <button class="btn-voltar-encaminhar" id="btnCancelarServico">Cancelar</button>
+          <button class="btn-confirmar-encaminhamento" id="btnAdicionarServicoConfirmar">+ Adicionar</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL ENCAMINHAR PACIENTE -->
+    <div class="modal-encaminhar" id="modalEncaminhar">
+      <div class="encaminhar-box">
+        <button class="encaminhar-fechar" id="fecharEncaminhar">&times;</button>
+
+        <div class="encaminhar-titulo"><span id="encaminharTitulo">Encaminhar para Parceiro</span></div>
+        <div class="encaminhar-subtitulo" id="encaminharSubtitulo">Tipo · Desconto de 0%</div>
+
+        <div class="encaminhar-etapas">
+          <div class="etapa ativa" id="etapaIndicador1"><span class="circulo">1</span> Paciente</div>
+          <div class="etapa-linha"></div>
+          <div class="etapa" id="etapaIndicador2"><span class="circulo">2</span> Detalhes</div>
+        </div>
+
+        <!-- ETAPA 1: PACIENTE -->
+        <div id="etapaPaciente">
+          <div class="encaminhar-label">Buscar Paciente</div>
+          <input type="text" id="buscarPacienteInput" placeholder="Nome do paciente...">
+          <div class="lista-pacientes" id="listaPacientesEncaminhar"></div>
+          <button class="btn-continuar" id="btnContinuarEncaminhar" disabled>Continuar</button>
+        </div>
+
+        <!-- ETAPA 2: DETALHES -->
+        <div id="etapaDetalhes" style="display:none;">
+          <div class="paciente-chip">
+            <div class="paciente-info-item">
+              <div class="paciente-avatar">👤</div>
+              <div>
+                <div class="paciente-nome-item" id="pacienteSelecionadoNome"></div>
+                <div class="paciente-sub-item" id="pacienteSelecionadoSub"></div>
+              </div>
+            </div>
+            <span class="link-alterar" id="alterarPaciente">Alterar</span>
+          </div>
+
+          <div class="encaminhar-label">Serviço</div>
+          <div class="opcoes-servico" id="opcoesServico"></div>
+
+          <div class="encaminhar-label">Prioridade</div>
+          <div class="opcoes-prioridade">
+            <div class="opcao-prioridade" data-prioridade="Eletivo">Eletivo</div>
+            <div class="opcao-prioridade selecionada" data-prioridade="Normal">Normal</div>
+            <div class="opcao-prioridade" data-prioridade="Urgente">Urgente</div>
+          </div>
+
+          <div class="encaminhar-label">Observações clínicas (opcional)</div>
+          <textarea id="observacoesClinicas" placeholder="Hipótese diagnóstica, medicações em uso, alergias relevantes..."></textarea>
+
+          <div class="botoes-etapa2">
+            <button class="btn-voltar-encaminhar" id="btnVoltarEncaminhar">Voltar</button>
+            <button class="btn-confirmar-encaminhamento" id="btnConfirmarEncaminhar">Confirmar Encaminhamento</button>
+          </div>
+        </div>
+
+        <!-- ETAPA 3: SUCESSO -->
+        <div id="etapaSucesso" style="display:none;">
+          <div class="encaminhar-sucesso">
+            <div class="icone-sucesso">✓</div>
+            <h4>Encaminhamento Realizado!</h4>
+            <p id="sucessoResumo1"></p>
+            <p id="sucessoResumo2"></p>
+            <div class="aviso-email" id="avisoEmail"></div>
+            <button class="btn-fechar-sucesso" id="btnFecharSucesso">Fechar</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+<!-- MODAL NOVA PARCERIA-->
     <div id="myModal" class="modal">
       <div class="modal-content">
         <span id="closeModalBtn" class="close">&times;</span>
@@ -1203,28 +1574,28 @@
 
         <div style="margin-top: 10px;">
           <p style="margin-top: 6px; color: #59aa53; font-size: 14px;"><b>Nome do Parceiro</b></p>
-          <input type="text" class="form-control mb-3 busca"
+          <input type="text" id="nomeParceria" class="form-control mb-3 busca"
           placeholder="Nome da clínica/laborátorio">
 
           <p style="margin-top: 6px; color: #59aa53; font-size: 14px;"><b>Tipo</b></p>
-          <input type="text" class="form-control mb-3 busca"
+          <input type="text" id="tipoParceria" class="form-control mb-3 busca"
           placeholder="Ex: Laboratório, Clínica, Farmácia">
 
           <p style="margin-top: 6px; color: #59aa53; font-size: 14px;"><b>Email de contato</b></p>
-          <input type="email" class="form-control mb-3 busca"
+          <input type="email" id="emailParceria" class="form-control mb-3 busca"
           placeholder="contato@parceiro.com">
 
           <p style="margin-top: 6px; color: #59aa53; font-size: 14px;"><b>Telefone</b></p>
-          <input type="text" class="form-control mb-3 busca"
+          <input type="text" id="telefoneParceria" class="form-control mb-3 busca"
           placeholder="(19) 99390-1111">
 
           <p style="margin-top: 6px; color: #59aa53; font-size: 14px;"><b>Descontos Oferecidos (%)</b></p>
-          <input type="number" class="form-control mb-3 busca" min="0" placeholder="0%">
+          <input type="number" id="descontoParceria" class="form-control mb-3 busca" min="0" placeholder="0%">
 
           <p style="margin-top: 6px; color: #59aa53; font-size: 14px;"><b>Inicio da Parceria</b></p>
-          <input type="text" class="form-control mb-3 busca"  id="dataDeInicio" readonly>
+          <input type="text" class="form-control mb-3 busca" id="dataDeInicio" readonly>
 
-          <button class="registrar">Cadastrar Parceiro</button>
+          <button id="cadastrarBtn" class="registrar">Cadastrar Parceiro</button>
         </div>
        
       </div>
@@ -1268,6 +1639,8 @@
     });
 
      document.getElementById('conf').addEventListener('click', () => window.electronAPI.abrirJanelaConfig());
+
+     carregarParceiros();
   });
 
       //DATA
@@ -1306,7 +1679,7 @@
 
     const modal = document.getElementById("myModal");
     const openModalBtn = document.getElementById("openModalBtn");
-    const closeModalBtn = document.getElementById("closeModalBtn"); 
+    const closeModalBtn = document.getElementById("closeModalBtn");
     const dataDeInicio = document.getElementById("dataDeInicio");
     const hoje = new Date();
     const dia = String(hoje.getDate()).padStart(2, '0');
@@ -1314,38 +1687,50 @@
     const ano = hoje.getFullYear();
     dataDeInicio.value = `${dia}/${mes}/${ano}`;
 
-    openModalBtn.addEventListener('click', async function() {
+    openModalBtn.addEventListener('click', function() {
       modal.style.display = "flex";
     });
 
-    closeModalBtn.addEventListener('click', function() { 
-      modal.style.display = "none"; 
+    closeModalBtn.addEventListener('click', function() {
+      modal.style.display = "none";
     });
 
     window.addEventListener('click', function(event) {
       if (event.target === modal) modal.style.display = "none";
     });
 
-
     // --- CADASTRAR PARCEIRO --- //
-    const formulario = document.getElementById('formNovaParceria'); // id do form
-    formulario.addEventListener('submit', async (e) => {
-      e.preventDefault();
+    document.getElementById('cadastrarBtn').addEventListener('click', async () => {
+      const medicoLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
 
       const novoParceiro = {
+        idMedico: medicoLogado ? medicoLogado.id : null,
         parceiro: document.getElementById('nomeParceria').value,
         tipo: document.getElementById('tipoParceria').value,
         email: document.getElementById('emailParceria').value,
         telefone: document.getElementById('telefoneParceria').value,
         desconto: document.getElementById('descontoParceria').value,
-        dataInicio: document.getElementById('dataParceria').value
+        dataInicio: dataDeInicio.value
       };
+
+      if (!novoParceiro.parceiro || !novoParceiro.tipo) {
+        alert('Preencha ao menos o nome e o tipo do parceiro.');
+        return;
+      }
 
       try {
         await window.electronAPI.cadastrarParceiro(novoParceiro);
         alert('Parceiro cadastrado com sucesso!');
-        popupFundo.style.display = 'none';
-        formulario.reset();
+        modal.style.display = 'none';
+
+        document.getElementById('nomeParceria').value = '';
+        document.getElementById('tipoParceria').value = '';
+        document.getElementById('emailParceria').value = '';
+        document.getElementById('telefoneParceria').value = '';
+        document.getElementById('descontoParceria').value = '';
+        dataDeInicio.value = `${dia}/${mes}/${ano}`;
+
+        carregarParceiros();
       } catch (error) {
         console.error('Erro ao cadastrar parceiro:', error);
         alert('Erro ao cadastrar parceiro.');
@@ -1356,13 +1741,12 @@
      // Seletores do popup de detalhes
     const popupDetalhesFundo = document.getElementById('popupDetalhesFundo');
     const fecharDetalhes = document.getElementById('fecharDetalhes');
-    const botoesDetalhes = document.querySelectorAll('.btn-detalhes');
 
     // Abertura do popup
-    botoesDetalhes.forEach(botao => {
-      botao.addEventListener('click', () => {
-        popupDetalhesFundo.style.display = 'flex';
-      });
+    document.getElementById('corpoTabelaParceiros').addEventListener('click', (e) => {
+      if (!e.target.classList.contains('btn-detalhes')) return;
+      const tr = e.target.closest('tr');
+      abrirDetalhesParceiro(tr.dataset.id);
     });
 
     // Fechamento
@@ -1397,13 +1781,87 @@
     const btnAdicionarServico = document.getElementById('btnAdicionarServico');
     const listaServicos = document.getElementById('listaServicos');
 
+    let idParceiroServicoAtual = null;
+    let categoriaSelecionadaServico = 'Diagnóstico';
+    const modalServico = document.getElementById('modalServico');
+
     btnAdicionarServico.addEventListener('click', () => {
-      const novoServico = prompt('Digite o nome do novo serviço:');
-      if (novoServico && novoServico.trim() !== '') {
+      const nomeParceiro = document.querySelector('#popupDetalhesFundo h3').textContent.trim();
+      idParceiroServicoAtual = document.querySelector('#popupDetalhesFundo .popup-detalhes').dataset.idParceiro;
+
+      document.getElementById('servicoParceiroNome').textContent = nomeParceiro;
+      document.getElementById('nomeServicoInput').value = '';
+      document.getElementById('descricaoServicoInput').value = '';
+
+      document.querySelectorAll('.opcao-categoria').forEach(el => el.classList.remove('selecionada'));
+      document.querySelector('.opcao-categoria[data-categoria="Diagnóstico"]').classList.add('selecionada');
+      categoriaSelecionadaServico = 'Diagnóstico';
+
+      renderizarServicosCadastrados();
+      modalServico.style.display = 'flex';
+    });
+
+    function renderizarServicosCadastrados() {
+      const container = document.getElementById('servicosCadastrados');
+      container.innerHTML = '';
+      const servicosAtuais = document.querySelectorAll('#listaServicos .tag-servico');
+      servicosAtuais.forEach(tag => {
         const span = document.createElement('span');
         span.className = 'tag-servico';
-        span.textContent = novoServico.trim();
+        span.textContent = tag.textContent.trim();
+        container.appendChild(span);
+      });
+    }
+
+    document.getElementById('fecharServico').addEventListener('click', () => {
+      modalServico.style.display = 'none';
+    });
+
+    document.getElementById('btnCancelarServico').addEventListener('click', () => {
+      modalServico.style.display = 'none';
+    });
+
+    modalServico.addEventListener('click', (e) => {
+      if (e.target === modalServico) modalServico.style.display = 'none';
+    });
+
+    document.querySelectorAll('.opcao-categoria').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.opcao-categoria').forEach(el => el.classList.remove('selecionada'));
+        btn.classList.add('selecionada');
+        categoriaSelecionadaServico = btn.dataset.categoria;
+      });
+    });
+
+    document.getElementById('btnAdicionarServicoConfirmar').addEventListener('click', async () => {
+      const nomeServico = document.getElementById('nomeServicoInput').value.trim();
+      if (!nomeServico) {
+        alert('Digite o nome do serviço.');
+        return;
+      }
+
+      const descricaoServico = document.getElementById('descricaoServicoInput').value.trim();
+
+      try {
+        await window.electronAPI.adicionarServicoParceiro({
+          idParceiro: idParceiroServicoAtual,
+          nomeServico: nomeServico,
+          categoria: categoriaSelecionadaServico,
+          descricao: descricaoServico
+        });
+
+        const span = document.createElement('span');
+        span.className = 'tag-servico';
+        span.textContent = nomeServico;
         listaServicos.appendChild(span);
+
+        renderizarServicosCadastrados();
+        document.getElementById('nomeServicoInput').value = '';
+        document.getElementById('descricaoServicoInput').value = '';
+
+      } catch (error) {
+        console.error('Erro ao adicionar serviço:', error);
+        alert('Erro ao adicionar serviço.');
       }
     });
 
@@ -1418,7 +1876,7 @@
       const linha = celula.parentElement;
       const colIndex = celula.cellIndex;
 
-      // Permitir edição apenas das colunas Desconto (3) e Status (5)
+      // Permitir edição apenas das colunas Desconto e Status
       if (colIndex === 3) {
         editarDesconto(celula);
       } else if (colIndex === 5) {
@@ -1427,28 +1885,38 @@
     });
 
     function editarDesconto(celula) {
+      const idParceiro = celula.parentElement.dataset.id;
       const valorAtual = celula.innerText.replace('%', '').trim();
       celula.innerHTML = `<input type="number" min="0" class="form-control form-control-sm" value="${valorAtual}" style="width:70px;">`;
       const input = celula.querySelector("input");
+      let cancelado = false;
 
       input.focus();
       input.select();
 
-      input.addEventListener("blur", () => {
-        const novoValor = input.value ? input.value + "%" : valorAtual + "%";
-        celula.textContent = novoValor;
+      input.addEventListener("blur", async () => {
+        if (cancelado) return;
+        const novoValor = input.value ? input.value : valorAtual;
+        celula.textContent = novoValor + "%";
+        try {
+          await window.electronAPI.atualizarDescontoParceiro({ id: idParceiro, desconto: novoValor });
+        } catch (error) {
+          console.error('Erro ao atualizar desconto:', error);
+        }
       });
 
       input.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
           input.blur();
         } else if (event.key === "Escape") {
+          cancelado = true;
           celula.textContent = valorAtual + "%";
         }
       });
     }
 
     function editarStatus(celula) {
+      const idParceiro = celula.parentElement.dataset.id;
       const span = celula.querySelector(".status-badge");
       const statusAtual = span ? span.innerText.trim().toLowerCase() : "ativo";
 
@@ -1462,21 +1930,312 @@
       const select = celula.querySelector("select");
       select.focus();
 
-      select.addEventListener("blur", () => {
-        atualizarStatus(celula, select.value);
-      });
-
-      select.addEventListener("change", () => {
-        atualizarStatus(celula, select.value);
-      });
+      const salvar = () => atualizarStatus(celula, select.value, idParceiro);
+      select.addEventListener("blur", salvar);
+      select.addEventListener("change", salvar);
     }
 
-    function atualizarStatus(celula, novoStatus) {
+    async function atualizarStatus(celula, novoStatus, idParceiro) {
       const texto = novoStatus.charAt(0).toUpperCase() + novoStatus.slice(1);
       const corClasse = novoStatus === "ativo" ? "ativo" : "pendente";
       celula.innerHTML = `<span class="status-badge ${corClasse}">${texto}</span>`;
+      try {
+        await window.electronAPI.atualizarStatusParceiro({ id: idParceiro, status: novoStatus });
+      } catch (error) {
+        console.error('Erro ao atualizar status:', error);
+      }
     }
   });
+
+    // === MODAL ENCAMINHAR PACIENTE ===
+    let parceiroAtualEncaminhar = null;
+    let pacienteSelecionadoEncaminhar = null;
+    let servicoSelecionadoEncaminhar = null;
+    let prioridadeSelecionadaEncaminhar = 'Normal';
+    let todosPacientesEncaminhar = [];
+
+    const modalEncaminhar = document.getElementById('modalEncaminhar');
+    const btnEncaminharPaciente = document.querySelector('.btn-encaminhar');
+
+    btnEncaminharPaciente.addEventListener('click', async () => {
+      // Captura os dados do parceiro que está aberto no popup de detalhes
+      const nomeParceiro = document.querySelector('#popupDetalhesFundo h3').textContent.trim();
+      const tipoParceiro = document.querySelector('.subtituloDetalhes').textContent.trim();
+      const paragrafos = document.querySelectorAll('#conteudoInfo p');
+      const emailParceiro = paragrafos[2] ? paragrafos[2].textContent.trim() : '';
+      const descontoTexto = paragrafos[4] ? paragrafos[4].textContent : '';
+      const descontoMatch = descontoTexto.match(/(\d+)%/);
+      const descontoParceiro = descontoMatch ? descontoMatch[1] : '0';
+      const idParceiro = document.querySelector('#popupDetalhesFundo .popup-detalhes').dataset.idParceiro;
+
+      const servicosEls = document.querySelectorAll('#listaServicos .tag-servico');
+      const servicosParceiro = Array.from(servicosEls).map(s => s.textContent.trim());
+
+      parceiroAtualEncaminhar = {
+        id: idParceiro,
+        nome: nomeParceiro,
+        tipo: tipoParceiro,
+        desconto: descontoParceiro,
+        email: emailParceiro
+      };
+
+      document.getElementById('encaminharTitulo').textContent = `Encaminhar para ${nomeParceiro}`;
+      document.getElementById('encaminharSubtitulo').textContent = `${tipoParceiro} · Desconto de ${descontoParceiro}%`;
+
+      // Monta as opções de serviço a partir dos serviços do parceiro
+      const opcoesServicoDiv = document.getElementById('opcoesServico');
+      opcoesServicoDiv.innerHTML = '';
+      servicoSelecionadoEncaminhar = null;
+      servicosParceiro.forEach((servico, index) => {
+        const div = document.createElement('div');
+        div.className = 'opcao-servico';
+        div.textContent = servico;
+        div.addEventListener('click', () => {
+          document.querySelectorAll('.opcao-servico').forEach(el => el.classList.remove('selecionada'));
+          div.classList.add('selecionada');
+          servicoSelecionadoEncaminhar = servico;
+        });
+        opcoesServicoDiv.appendChild(div);
+        if (index === 0) {
+          div.classList.add('selecionada');
+          servicoSelecionadoEncaminhar = servico;
+        }
+      });
+
+      // Reseta prioridade para "Normal"
+      document.querySelectorAll('.opcao-prioridade').forEach(el => el.classList.remove('selecionada'));
+      document.querySelector('.opcao-prioridade[data-prioridade="Normal"]').classList.add('selecionada');
+      prioridadeSelecionadaEncaminhar = 'Normal';
+      document.getElementById('observacoesClinicas').value = '';
+
+      pacienteSelecionadoEncaminhar = null;
+      irParaEtapaPaciente();
+
+      // Busca os pacientes do médico
+      try {
+        todosPacientesEncaminhar = await window.electronAPI.buscarPacientesMedico();
+      } catch (error) {
+        console.error('Erro ao buscar pacientes:', error);
+        todosPacientesEncaminhar = [];
+      }
+      renderizarListaPacientes(todosPacientesEncaminhar);
+
+      modalEncaminhar.style.display = 'flex';
+    });
+
+    document.getElementById('fecharEncaminhar').addEventListener('click', () => {
+      modalEncaminhar.style.display = 'none';
+    });
+
+    modalEncaminhar.addEventListener('click', (e) => {
+      if (e.target === modalEncaminhar) modalEncaminhar.style.display = 'none';
+    });
+
+    function calcularIdade(dataNascimento) {
+      if (!dataNascimento) return '';
+      const nascimento = new Date(dataNascimento);
+      if (isNaN(nascimento)) return '';
+      const hoje = new Date();
+      let idade = hoje.getFullYear() - nascimento.getFullYear();
+      const m = hoje.getMonth() - nascimento.getMonth();
+      if (m < 0 || (m === 0 && hoje.getDate() < nascimento.getDate())) idade--;
+      return idade;
+    }
+
+    function renderizarListaPacientes(lista) {
+      const container = document.getElementById('listaPacientesEncaminhar');
+      container.innerHTML = '';
+
+      if (lista.length === 0) {
+        container.innerHTML = '<p style="font-size:13px; color:#7a8c7d; text-align:center;">Nenhum paciente encontrado.</p>';
+        return;
+      }
+
+      lista.forEach(p => {
+        const idade = calcularIdade(p.data_nascimento);
+        const item = document.createElement('div');
+        item.className = 'paciente-item';
+        if (pacienteSelecionadoEncaminhar && pacienteSelecionadoEncaminhar.id === p.id) {
+          item.classList.add('selecionado');
+        }
+        item.innerHTML = `
+          <div class="paciente-info-item">
+            <div class="paciente-avatar">👤</div>
+            <div>
+              <div class="paciente-nome-item">${p.nome}</div>
+              <div class="paciente-sub-item">${idade !== '' ? idade + ' anos' : ''}</div>
+            </div>
+          </div>
+          <span class="check-selecionado">✓</span>
+        `;
+        item.addEventListener('click', () => {
+          pacienteSelecionadoEncaminhar = p;
+          document.querySelectorAll('.paciente-item').forEach(el => el.classList.remove('selecionado'));
+          item.classList.add('selecionado');
+          document.getElementById('btnContinuarEncaminhar').disabled = false;
+        });
+        container.appendChild(item);
+      });
+    }
+
+    document.getElementById('buscarPacienteInput').addEventListener('input', (e) => {
+      const termo = e.target.value.toLowerCase();
+      const filtrados = todosPacientesEncaminhar.filter(p => p.nome.toLowerCase().includes(termo));
+      renderizarListaPacientes(filtrados);
+    });
+
+    function irParaEtapaPaciente() {
+      document.getElementById('etapaPaciente').style.display = 'block';
+      document.getElementById('etapaDetalhes').style.display = 'none';
+      document.getElementById('etapaSucesso').style.display = 'none';
+      document.getElementById('etapaIndicador1').classList.add('ativa');
+      document.getElementById('etapaIndicador2').classList.remove('ativa');
+      document.getElementById('btnContinuarEncaminhar').disabled = !pacienteSelecionadoEncaminhar;
+    }
+
+    function irParaEtapaDetalhes() {
+      document.getElementById('etapaPaciente').style.display = 'none';
+      document.getElementById('etapaDetalhes').style.display = 'block';
+      document.getElementById('etapaSucesso').style.display = 'none';
+      document.getElementById('etapaIndicador1').classList.remove('ativa');
+      document.getElementById('etapaIndicador2').classList.add('ativa');
+
+      document.getElementById('pacienteSelecionadoNome').textContent = pacienteSelecionadoEncaminhar.nome;
+      const idade = calcularIdade(pacienteSelecionadoEncaminhar.data_nascimento);
+      document.getElementById('pacienteSelecionadoSub').textContent = idade !== '' ? `${idade} anos` : '';
+    }
+
+    document.getElementById('btnContinuarEncaminhar').addEventListener('click', () => {
+      if (!pacienteSelecionadoEncaminhar) return;
+      irParaEtapaDetalhes();
+    });
+
+    document.getElementById('alterarPaciente').addEventListener('click', irParaEtapaPaciente);
+    document.getElementById('btnVoltarEncaminhar').addEventListener('click', irParaEtapaPaciente);
+
+    document.querySelectorAll('.opcao-prioridade').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.opcao-prioridade').forEach(el => el.classList.remove('selecionada'));
+        btn.classList.add('selecionada');
+        prioridadeSelecionadaEncaminhar = btn.dataset.prioridade;
+      });
+    });
+
+    document.getElementById('btnConfirmarEncaminhar').addEventListener('click', async () => {
+      if (!pacienteSelecionadoEncaminhar || !parceiroAtualEncaminhar) return;
+
+      try {
+        await window.electronAPI.encaminharPacienteParceiro({
+          idParceiro: parceiroAtualEncaminhar.id,
+          idPaciente: pacienteSelecionadoEncaminhar.id
+        });
+
+        document.getElementById('etapaPaciente').style.display = 'none';
+        document.getElementById('etapaDetalhes').style.display = 'none';
+        document.getElementById('etapaSucesso').style.display = 'block';
+
+        document.getElementById('sucessoResumo1').innerHTML =
+          `${pacienteSelecionadoEncaminhar.nome} foi encaminhado(a) para <strong>${parceiroAtualEncaminhar.nome}</strong>`;
+        document.getElementById('sucessoResumo2').innerHTML =
+          `Serviço: <strong>${servicoSelecionadoEncaminhar || '-'}</strong> · Prioridade: <strong>${prioridadeSelecionadaEncaminhar}</strong>`;
+
+        document.getElementById('avisoEmail').textContent = parceiroAtualEncaminhar.email
+          ? `Um e-mail de confirmação foi enviado para ${parceiroAtualEncaminhar.email}`
+          : '';
+
+      } catch (error) {
+        console.error('Erro ao encaminhar paciente:', error);
+        alert('Erro ao encaminhar paciente.');
+      }
+    });
+
+    document.getElementById('btnFecharSucesso').addEventListener('click', () => {
+      modalEncaminhar.style.display = 'none';
+    });
+
+    // === CARREGAR PARCEIROS DO BANCO ===
+    let listaParceirosAtual = [];
+
+    async function carregarParceiros() {
+      const medico = JSON.parse(localStorage.getItem('usuarioLogado'));
+      if (!medico) return;
+      try {
+        listaParceirosAtual = await window.electronAPI.buscarParceiros(medico.id);
+        renderizarTabelaParceiros(listaParceirosAtual);
+      } catch (error) {
+        console.error('Erro ao carregar parceiros:', error);
+      }
+    }
+
+    function renderizarTabelaParceiros(lista) {
+      const tbody = document.getElementById('corpoTabelaParceiros');
+      tbody.innerHTML = '';
+
+      lista.forEach(p => {
+        const tr = document.createElement('tr');
+        tr.dataset.id = p.id;
+        tr.innerHTML = `
+          <td>
+            <div class="parceiro-info">
+              <span class="nomeParceiro">${p.nome}</span>
+              <span class="desde">Desde ${p.dataInicio}</span>
+            </div>
+          </td>
+          <td><span class="tipo">${p.tipo}</span></td>
+          <td>
+            <div class="contato">
+              <span>📧 ${p.email || '-'}</span><br>
+              <span>📞 ${p.telefone || '-'}</span>
+            </div>
+          </td>
+          <td>${Number(p.desconto).toFixed(0)}%</td>
+          <td>${p.encaminhamentosMes}</td>
+          <td><span class="status-badge ${p.status === 'ativo' ? 'ativo' : 'pendente'}">${p.status === 'ativo' ? 'Ativo' : 'Inativo'}</span></td>
+          <td><button class="btn-detalhes">Ver Detalhes</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('totalParceiros').textContent = lista.length;
+      document.getElementById('subinfoParceiros').textContent =
+        `${lista.length} parceiro${lista.length === 1 ? '' : 's'} na rede`;
+
+      const totalEncaminhamentos = lista.reduce((soma, p) => soma + Number(p.encaminhamentosMes), 0);
+      document.getElementById('totalEncaminhamentosMes').textContent = totalEncaminhamentos;
+    }
+
+    function abrirDetalhesParceiro(id) {
+      const p = listaParceirosAtual.find(x => String(x.id) === String(id));
+      if (!p) return;
+
+      document.querySelector('#popupDetalhesFundo .popup-detalhes').dataset.idParceiro = p.id;
+      document.querySelector('#popupDetalhesFundo h3').textContent = p.nome;
+      document.querySelector('.subtituloDetalhes').textContent = p.tipo;
+
+      const paragrafos = document.querySelectorAll('#conteudoInfo p');
+      const statusEl = document.querySelector('#conteudoInfo .statusExibirMais');
+      statusEl.textContent = p.status === 'ativo' ? 'Ativo' : 'Inativo';
+      statusEl.style.backgroundColor = p.status === 'ativo' ? '#4ba94b' : '#c7c60a';
+      paragrafos[1].textContent = p.dataInicio;
+      paragrafos[2].textContent = p.email || '-';
+      paragrafos[3].textContent = p.telefone || '-';
+      paragrafos[4].textContent = `${Number(p.desconto).toFixed(0)}% para pacientes referenciados`;
+
+      listaServicos.innerHTML = '';
+      (p.servicos || []).forEach(servico => {
+        const span = document.createElement('span');
+        span.className = 'tag-servico';
+        span.textContent = servico;
+        listaServicos.appendChild(span);
+      });
+
+      abaInfo.classList.add('ativa');
+      abaServicos.classList.remove('ativa');
+      conteudoInfo.style.display = 'block';
+      conteudoServicos.style.display = 'none';
+
+      popupDetalhesFundo.style.display = 'flex';
+    }
   </script>
 
 </body>
