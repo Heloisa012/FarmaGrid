@@ -34,6 +34,9 @@ public class Medico {
     @Column(length = 150)
     private String email;
 
+    @Column(nullable = false, length = 100)
+    private String senha;
+
     @Column(length = 20)
     private String telefone;
 

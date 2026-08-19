@@ -4,6 +4,7 @@ class UsuarioLogado {
   final String email;
   final int tipo;
   final String perfil;
+
   final int? idMedico;
   final int? idPaciente;
   final int? idFarmacia;
@@ -25,16 +26,16 @@ class UsuarioLogado {
 
   factory UsuarioLogado.fromJson(Map<String, dynamic> json) {
     return UsuarioLogado(
-      token: json['token'],
-      id: json['id'],
-      email: json['email'],
-      tipo: json['tipo'],
-      perfil: json['perfil'],
-      idMedico: json['idMedico'],
-      idPaciente: json['idPaciente'],
-      idFarmacia: json['idFarmacia'],
-      idBalconista: json['idBalconista'],
-      idCaixa: json['idCaixa'],
+      token: json['token']?.toString() ?? '',
+      id: json['id'] as int,
+      email: json['email']?.toString() ?? '',
+      tipo: json['tipo'] as int,
+      perfil: json['perfil']?.toString() ?? '',
+      idMedico: json['idMedico'] as int?,
+      idPaciente: json['idPaciente'] as int?,
+      idFarmacia: json['idFarmacia'] as int?,
+      idBalconista: json['idBalconista'] as int?,
+      idCaixa: json['idCaixa'] as int?,
     );
   }
 
@@ -53,7 +54,3 @@ class UsuarioLogado {
     };
   }
 }
-
-UsuarioLogado? usuarioLogado;
-EOF
-echo done

@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:farmagridd/app_theme.dart';
-import 'package:farmagridd/telas/telasMedico/medico.dart';
-import 'package:farmagridd/telas/cadastroMedico.dart';
+import '../../services/auth_service.dart';
 
-const Color _verde      = Color(0xFF59AA53);
-const Color _oliva      = Color(0xFF136A48);
-const Color _teal       = Color(0xFF7FC6BB);
-const Color _fundo      = Color(0xFFF5F5F5);
-const Color _fundoCard  = Colors.white;
+const Color _verde = Color(0xFF59AA53);
+const Color _oliva = Color(0xFF136A48);
+const Color _teal = Color(0xFF7FC6BB);
+const Color _fundo = Color(0xFFF5F5F5);
+const Color _fundoCard = Colors.white;
 const Color _bordaCampo = Color(0xFFDDDDDD);
 
 class TelaConfiguracoesMedico extends StatefulWidget {
@@ -16,44 +15,45 @@ class TelaConfiguracoesMedico extends StatefulWidget {
   const TelaConfiguracoesMedico({super.key, this.abaInicial = 0});
 
   @override
-  State<TelaConfiguracoesMedico> createState() => _TelaConfiguracoesMedicoState();
+  State<TelaConfiguracoesMedico> createState() =>
+      _TelaConfiguracoesMedicoState();
 }
 
 class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
   int _abaSelecionada = 0;
   final _themeCtrl = AppThemeController();
 
-  final _nomeCtrl          = TextEditingController();
-  final _sobrenomeCtrl     = TextEditingController();
-  final _emailCtrl         = TextEditingController();
-  final _telefoneCtrl      = TextEditingController();
-  final _nascimentoCtrl    = TextEditingController(text: 'dd/mm/aaaa');
+  final _nomeCtrl = TextEditingController();
+  final _sobrenomeCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _telefoneCtrl = TextEditingController();
+  final _nascimentoCtrl = TextEditingController(text: 'dd/mm/aaaa');
 
-  final _crmCtrl           = TextEditingController();
+  final _crmCtrl = TextEditingController();
   final _especialidadeCtrl = TextEditingController();
-  final _clinicaNomeCtrl   = TextEditingController();
+  final _clinicaNomeCtrl = TextEditingController();
 
-  final _senhaAtualCtrl    = TextEditingController();
-  final _novaSenhaCtrl     = TextEditingController();
-  final _confirmSenhaCtrl  = TextEditingController();
+  final _senhaAtualCtrl = TextEditingController();
+  final _novaSenhaCtrl = TextEditingController();
+  final _confirmSenhaCtrl = TextEditingController();
 
-  bool _editandoPerfil       = false;
+  bool _editandoPerfil = false;
   bool _editandoProfissional = false;
 
-  bool _verSenhaAtual  = false;
-  bool _verNovaSenha   = false;
-  bool _verConfirm     = false;
+  bool _verSenhaAtual = false;
+  bool _verNovaSenha = false;
+  bool _verConfirm = false;
   bool _notifConsultas = true;
   bool _notifMensagens = true;
   bool _notifLembretes = false;
-  bool _temaEscuro     = false;
-  String _idioma       = 'Português (BR)';
+  bool _temaEscuro = false;
+  String _idioma = 'Português (BR)';
 
   final List<Map<String, dynamic>> _abas = [
-    {'titulo': 'Perfil Pessoal',      'icone': Icons.person_outline},
+    {'titulo': 'Perfil Pessoal', 'icone': Icons.person_outline},
     {'titulo': 'Info. Profissionais', 'icone': Icons.work_outline},
-    {'titulo': 'Segurança',           'icone': Icons.shield_outlined},
-    {'titulo': 'Preferências',        'icone': Icons.settings_outlined},
+    {'titulo': 'Segurança', 'icone': Icons.shield_outlined},
+    {'titulo': 'Preferências', 'icone': Icons.settings_outlined},
   ];
 
   @override
@@ -61,56 +61,44 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
     super.initState();
     _abaSelecionada = widget.abaInicial;
     _temaEscuro = _themeCtrl.darkMode;
-    _themeCtrl.addListener(() => setState(() => _temaEscuro = _themeCtrl.darkMode));
+    _themeCtrl.addListener(
+      () => setState(() => _temaEscuro = _themeCtrl.darkMode),
+    );
     _preencherDados();
   }
 
   void _preencherDados() {
-    final m = medicoLogado;
-    if (m == null) return;
+    final usuario = AuthService.usuarioLogado;
+    if (usuario == null) return;
 
-    final partes = m.nome.trim().split(' ');
-    _nomeCtrl.text      = partes.first;
-    _sobrenomeCtrl.text = partes.length > 1 ? partes.sublist(1).join(' ') : '';
-
-    _emailCtrl.text        = m.email;
-    _telefoneCtrl.text     = m.telefone;
-    _especialidadeCtrl.text = m.especialidade;
-    _clinicaNomeCtrl.text  = m.clinica;
-    _crmCtrl.text          = m.crm;
+    _emailCtrl.text = usuario.email;
   }
 
   @override
   void dispose() {
     for (final c in [
-      _nomeCtrl, _sobrenomeCtrl, _emailCtrl, _telefoneCtrl,
-      _nascimentoCtrl, _crmCtrl,
-      _especialidadeCtrl, _clinicaNomeCtrl,
-      _senhaAtualCtrl, _novaSenhaCtrl, _confirmSenhaCtrl,
-    ]) c.dispose();
+      _nomeCtrl,
+      _sobrenomeCtrl,
+      _emailCtrl,
+      _telefoneCtrl,
+      _nascimentoCtrl,
+      _crmCtrl,
+      _especialidadeCtrl,
+      _clinicaNomeCtrl,
+      _senhaAtualCtrl,
+      _novaSenhaCtrl,
+      _confirmSenhaCtrl,
+    ])
+      c.dispose();
     super.dispose();
   }
 
   void _salvarPerfil() {
-    final m = medicoLogado;
-    if (m != null) {
-      final nomeCompleto =
-          '${_nomeCtrl.text.trim()} ${_sobrenomeCtrl.text.trim()}'.trim();
-      m.setNome = nomeCompleto;
-      m.setEmail = _emailCtrl.text.trim();
-      m.setTelefone = _telefoneCtrl.text.trim();
-    }
     setState(() => _editandoPerfil = false);
     _snack('Perfil atualizado com sucesso!');
   }
 
   void _salvarProfissional() {
-    final m = medicoLogado;
-    if (m != null) {
-      m.setCrm = _crmCtrl.text.trim();
-      m.setEspecialidade = _especialidadeCtrl.text.trim();
-      m.setClinica = _clinicaNomeCtrl.text.trim();
-    }
     setState(() => _editandoProfissional = false);
     _snack('Informações profissionais atualizadas!');
   }
@@ -132,9 +120,9 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
   Widget _cabecalho(BuildContext context) {
     final iniciais = _nomeCtrl.text.isNotEmpty
         ? _nomeCtrl.text.substring(0, 1).toUpperCase() +
-            (_sobrenomeCtrl.text.isNotEmpty
-                ? _sobrenomeCtrl.text.substring(0, 1).toUpperCase()
-                : '')
+              (_sobrenomeCtrl.text.isNotEmpty
+                  ? _sobrenomeCtrl.text.substring(0, 1).toUpperCase()
+                  : '')
         : 'DR';
 
     return Container(
@@ -161,18 +149,32 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
           const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Configurações',
-                  style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-              Text('Gerencie seu perfil',
-                  style: TextStyle(color: Colors.white70, fontSize: 12)),
+              Text(
+                'Configurações',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                'Gerencie seu perfil',
+                style: TextStyle(color: Colors.white70, fontSize: 12),
+              ),
             ],
           ),
           const Spacer(),
           CircleAvatar(
             radius: 22,
             backgroundColor: Colors.white.withValues(alpha: 0.25),
-            child: Text(iniciais,
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+            child: Text(
+              iniciais,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 13,
+              ),
+            ),
           ),
         ],
       ),
@@ -185,7 +187,11 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
       decoration: const BoxDecoration(
         color: _fundoCard,
         boxShadow: [
-          BoxShadow(color: Color(0x0D000000), blurRadius: 8, offset: Offset(0, 2)),
+          BoxShadow(
+            color: Color(0x0D000000),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
         ],
       ),
       child: ScrollConfiguration(
@@ -215,8 +221,11 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(_abas[index]['icone'] as IconData,
-                color: sel ? Colors.white : Colors.grey[500], size: 17),
+            Icon(
+              _abas[index]['icone'] as IconData,
+              color: sel ? Colors.white : Colors.grey[500],
+              size: 17,
+            ),
             const SizedBox(width: 7),
             Text(
               _abas[index]['titulo'] as String,
@@ -234,11 +243,16 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
 
   Widget _conteudoAba() {
     switch (_abaSelecionada) {
-      case 0:  return _abaPerfil();
-      case 1:  return _abaInfoProfissional();
-      case 2:  return _abaSeguranca();
-      case 3:  return _abaPreferencias();
-      default: return _abaPerfil();
+      case 0:
+        return _abaPerfil();
+      case 1:
+        return _abaInfoProfissional();
+      case 2:
+        return _abaSeguranca();
+      case 3:
+        return _abaPreferencias();
+      default:
+        return _abaPerfil();
     }
   }
 
@@ -263,25 +277,46 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(titulo,
-                        style: const TextStyle(
-                            color: _oliva, fontSize: 19, fontWeight: FontWeight.bold)),
+                    Text(
+                      titulo,
+                      style: const TextStyle(
+                        color: _oliva,
+                        fontSize: 19,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 2),
-                    Text(subtitulo,
-                        style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                    Text(
+                      subtitulo,
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
                   ],
                 ),
               ),
               if (mostrarBotaoEditar && !editando)
                 ElevatedButton.icon(
                   onPressed: onEditar,
-                  icon: const Icon(Icons.edit_outlined, size: 16, color: Colors.white),
-                  label: const Text('Editar',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  icon: const Icon(
+                    Icons.edit_outlined,
+                    size: 16,
+                    color: Colors.white,
+                  ),
+                  label: const Text(
+                    'Editar',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _oliva,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 )
               else if (mostrarBotaoEditar)
@@ -291,22 +326,46 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
                       onPressed: onCancelar,
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Colors.grey),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 10,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
-                      child: const Text('Cancelar',
-                          style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold)),
+                      child: const Text(
+                        'Cancelar',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     ElevatedButton.icon(
                       onPressed: onSalvar,
-                      icon: const Icon(Icons.check, size: 16, color: Colors.white),
-                      label: const Text('Salvar',
-                          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      icon: const Icon(
+                        Icons.check,
+                        size: 16,
+                        color: Colors.white,
+                      ),
+                      label: const Text(
+                        'Salvar',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: _verde,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                       ),
                     ),
                   ],
@@ -317,7 +376,10 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
             Padding(
               padding: const EdgeInsets.only(top: 8),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: _verde.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
@@ -327,8 +389,10 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
                   children: [
                     Icon(Icons.edit, color: _verde, size: 14),
                     SizedBox(width: 6),
-                    Text('Modo de edição ativo — altere os campos e salve.',
-                        style: TextStyle(color: _oliva, fontSize: 11.5)),
+                    Text(
+                      'Modo de edição ativo — altere os campos e salve.',
+                      style: TextStyle(color: _oliva, fontSize: 11.5),
+                    ),
                   ],
                 ),
               ),
@@ -364,30 +428,50 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
                   child: Text(
                     _nomeCtrl.text.isNotEmpty
                         ? _nomeCtrl.text.substring(0, 1).toUpperCase() +
-                            (_sobrenomeCtrl.text.isNotEmpty
-                                ? _sobrenomeCtrl.text.substring(0, 1).toUpperCase()
-                                : '')
+                              (_sobrenomeCtrl.text.isNotEmpty
+                                  ? _sobrenomeCtrl.text
+                                        .substring(0, 1)
+                                        .toUpperCase()
+                                  : '')
                         : 'DR',
-                    style: const TextStyle(color: _oliva, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      color: _oliva,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16),
                 OutlinedButton.icon(
                   onPressed: _editandoPerfil ? () {} : null,
-                  icon: Icon(Icons.camera_alt_outlined,
-                      size: 16, color: _editandoPerfil ? _oliva : Colors.grey),
-                  label: Text('Alterar Foto',
-                      style: TextStyle(
-                          color: _editandoPerfil ? _oliva : Colors.grey, fontSize: 13)),
+                  icon: Icon(
+                    Icons.camera_alt_outlined,
+                    size: 16,
+                    color: _editandoPerfil ? _oliva : Colors.grey,
+                  ),
+                  label: Text(
+                    'Alterar Foto',
+                    style: TextStyle(
+                      color: _editandoPerfil ? _oliva : Colors.grey,
+                      fontSize: 13,
+                    ),
+                  ),
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: _editandoPerfil ? _bordaCampo : Colors.grey.shade300),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    side: BorderSide(
+                      color: _editandoPerfil
+                          ? _bordaCampo
+                          : Colors.grey.shade300,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 10),
                 const Flexible(
-                  child: Text('JPG, PNG ou GIF. Máximo 5MB.',
-                      style: TextStyle(color: Colors.grey, fontSize: 11)),
+                  child: Text(
+                    'JPG, PNG ou GIF. Máximo 5MB.',
+                    style: TextStyle(color: Colors.grey, fontSize: 11),
+                  ),
                 ),
               ],
             ),
@@ -398,17 +482,35 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
             subtitulo: 'Mantenha suas informações pessoais atualizadas',
             child: Column(
               children: [
-                Row(children: [
-                  Expanded(child: _campo('Nome:', _nomeCtrl, habilitado: _editandoPerfil)),
-                  const SizedBox(width: 12),
-                  Expanded(child: _campo('Sobrenome:', _sobrenomeCtrl, habilitado: _editandoPerfil)),
-                ]),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _campo(
+                        'Nome:',
+                        _nomeCtrl,
+                        habilitado: _editandoPerfil,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: _campo(
+                        'Sobrenome:',
+                        _sobrenomeCtrl,
+                        habilitado: _editandoPerfil,
+                      ),
+                    ),
+                  ],
+                ),
                 const SizedBox(height: 12),
                 _campo('E-mail:', _emailCtrl, habilitado: _editandoPerfil),
                 const SizedBox(height: 12),
                 _campo('Telefone:', _telefoneCtrl, habilitado: _editandoPerfil),
                 const SizedBox(height: 12),
-                _campo('Data de Nascimento:', _nascimentoCtrl, habilitado: _editandoPerfil),
+                _campo(
+                  'Data de Nascimento:',
+                  _nascimentoCtrl,
+                  habilitado: _editandoPerfil,
+                ),
               ],
             ),
           ),
@@ -435,13 +537,24 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
             subtitulo: 'Informações sobre seu registro e especialidades',
             child: Column(
               children: [
-                Row(children: [
-                  Expanded(child: _campo('CRM:', _crmCtrl, habilitado: _editandoProfissional)),
-                  const SizedBox(width: 12),
-                ]),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _campo(
+                        'CRM:',
+                        _crmCtrl,
+                        habilitado: _editandoProfissional,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+                ),
                 const SizedBox(height: 12),
-                _campo('Especialidade:', _especialidadeCtrl, habilitado: _editandoProfissional),
-      
+                _campo(
+                  'Especialidade:',
+                  _especialidadeCtrl,
+                  habilitado: _editandoProfissional,
+                ),
               ],
             ),
           ),
@@ -451,7 +564,11 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
             subtitulo: 'Local de atendimento',
             child: Column(
               children: [
-                _campo('Nome da Clínica/Hospital:', _clinicaNomeCtrl, habilitado: _editandoProfissional),
+                _campo(
+                  'Nome da Clínica/Hospital:',
+                  _clinicaNomeCtrl,
+                  habilitado: _editandoProfissional,
+                ),
               ],
             ),
           ),
@@ -477,24 +594,46 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _campoSenha('Senha Atual:', _senhaAtualCtrl, _verSenhaAtual,
-                    () => setState(() => _verSenhaAtual = !_verSenhaAtual)),
+                _campoSenha(
+                  'Senha Atual:',
+                  _senhaAtualCtrl,
+                  _verSenhaAtual,
+                  () => setState(() => _verSenhaAtual = !_verSenhaAtual),
+                ),
                 const SizedBox(height: 12),
-                _campoSenha('Nova Senha:', _novaSenhaCtrl, _verNovaSenha,
-                    () => setState(() => _verNovaSenha = !_verNovaSenha)),
+                _campoSenha(
+                  'Nova Senha:',
+                  _novaSenhaCtrl,
+                  _verNovaSenha,
+                  () => setState(() => _verNovaSenha = !_verNovaSenha),
+                ),
                 const SizedBox(height: 12),
-                _campoSenha('Confirmar Nova Senha:', _confirmSenhaCtrl, _verConfirm,
-                    () => setState(() => _verConfirm = !_verConfirm)),
+                _campoSenha(
+                  'Confirmar Nova Senha:',
+                  _confirmSenhaCtrl,
+                  _verConfirm,
+                  () => setState(() => _verConfirm = !_verConfirm),
+                ),
                 const SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () => _snack('Senha atualizada com sucesso!'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _oliva,
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 14,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
-                  child: const Text('Atualizar Senha',
-                      style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  child: const Text(
+                    'Atualizar Senha',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -516,7 +655,6 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
       onCancelar: () {},
       child: Column(
         children: [
-          
           const SizedBox(height: 14),
           _cardSecao(
             titulo: 'Aparência',
@@ -533,8 +671,6 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
                     setState(() => _temaEscuro = v);
                   },
                 ),
-               
-                
               ],
             ),
           ),
@@ -558,20 +694,28 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
         border: Border.all(color: const Color(0xFFEEEEEE)),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 3)),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(titulo,
-              style: const TextStyle(
-                  color: _oliva, fontSize: 15, fontWeight: FontWeight.bold)),
+          Text(
+            titulo,
+            style: const TextStyle(
+              color: _oliva,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 2),
-          Text(subtitulo,
-              style: const TextStyle(color: Colors.grey, fontSize: 11)),
+          Text(
+            subtitulo,
+            style: const TextStyle(color: Colors.grey, fontSize: 11),
+          ),
           const SizedBox(height: 16),
           child,
         ],
@@ -579,54 +723,73 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
     );
   }
 
-  Widget _campo(String label, TextEditingController ctrl,
-      {bool habilitado = true}) {
+  Widget _campo(
+    String label,
+    TextEditingController ctrl, {
+    bool habilitado = true,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 13, color: Color(0xFF444444))),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 13, color: Color(0xFF444444)),
+        ),
         const SizedBox(height: 5),
         TextField(
           controller: ctrl,
           enabled: habilitado,
           style: TextStyle(
-              fontSize: 14,
-              color: habilitado ? Colors.black87 : Colors.black54),
+            fontSize: 14,
+            color: habilitado ? Colors.black87 : Colors.black54,
+          ),
           decoration: InputDecoration(
             filled: true,
             fillColor: habilitado
                 ? const Color(0xFFF9F9F9)
                 : const Color(0xFFEFEFEF),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 12,
+            ),
             suffixIcon: !habilitado && ctrl.text.isNotEmpty
                 ? const Icon(Icons.lock_outline, size: 16, color: Colors.grey)
                 : null,
             border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: _bordaCampo)),
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: _bordaCampo),
+            ),
             enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: _bordaCampo)),
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: _bordaCampo),
+            ),
             disabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide:
-                    BorderSide(color: Colors.grey.shade200)),
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide(color: Colors.grey.shade200),
+            ),
             focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: _verde, width: 2)),
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: _verde, width: 2),
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _campoSenha(String label, TextEditingController ctrl,
-      bool visivel, VoidCallback onToggle) {
+  Widget _campoSenha(
+    String label,
+    TextEditingController ctrl,
+    bool visivel,
+    VoidCallback onToggle,
+  ) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: const TextStyle(fontSize: 13, color: Color(0xFF444444))),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 13, color: Color(0xFF444444)),
+        ),
         const SizedBox(height: 5),
         TextField(
           controller: ctrl,
@@ -635,41 +798,53 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
           decoration: InputDecoration(
             filled: true,
             fillColor: const Color(0xFFF9F9F9),
-            contentPadding:
-                const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 14,
+              vertical: 12,
+            ),
             suffixIcon: IconButton(
               icon: Icon(
-                  visivel
-                      ? Icons.visibility_off_outlined
-                      : Icons.visibility_outlined,
-                  color: Colors.grey,
-                  size: 20),
+                visivel
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined,
+                color: Colors.grey,
+                size: 20,
+              ),
               onPressed: onToggle,
             ),
             border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: _bordaCampo)),
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: _bordaCampo),
+            ),
             enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: _bordaCampo)),
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: _bordaCampo),
+            ),
             focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: const BorderSide(color: _verde, width: 2)),
+              borderRadius: BorderRadius.circular(10),
+              borderSide: const BorderSide(color: _verde, width: 2),
+            ),
           ),
         ),
       ],
     );
   }
 
-  Widget _switchItem(IconData icone, String titulo, String sub,
-      bool valor, ValueChanged<bool> onChange) {
+  Widget _switchItem(
+    IconData icone,
+    String titulo,
+    String sub,
+    bool valor,
+    ValueChanged<bool> onChange,
+  ) {
     return Row(
       children: [
         Container(
           padding: const EdgeInsets.all(9),
           decoration: BoxDecoration(
-              color: _verde.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10)),
+            color: _verde.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(10),
+          ),
           child: Icon(icone, color: _verde, size: 20),
         ),
         const SizedBox(width: 12),
@@ -677,11 +852,17 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(titulo,
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 14)),
-              Text(sub,
-                  style: const TextStyle(color: Colors.grey, fontSize: 12)),
+              Text(
+                titulo,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
+              Text(
+                sub,
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
+              ),
             ],
           ),
         ),
@@ -697,14 +878,15 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
             ),
             child: AnimatedAlign(
               duration: const Duration(milliseconds: 200),
-              alignment:
-                  valor ? Alignment.centerRight : Alignment.centerLeft,
+              alignment: valor ? Alignment.centerRight : Alignment.centerLeft,
               child: Container(
                 margin: const EdgeInsets.all(3),
                 width: 20,
                 height: 20,
                 decoration: const BoxDecoration(
-                    color: Colors.white, shape: BoxShape.circle),
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
           ),
@@ -714,26 +896,31 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
   }
 
   void _snack(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(msg),
-      backgroundColor: _verde,
-      behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-    ));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: _verde,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
   }
 }
 
 class _SemGlowScroll extends ScrollBehavior {
   @override
   Widget buildOverscrollIndicator(
-      BuildContext context, Widget child, ScrollableDetails details) {
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
     return child;
   }
 
   @override
   Set<PointerDeviceKind> get dragDevices => {
-        PointerDeviceKind.touch,
-        PointerDeviceKind.mouse,
-        PointerDeviceKind.stylus,
-      };
+    PointerDeviceKind.touch,
+    PointerDeviceKind.mouse,
+    PointerDeviceKind.stylus,
+  };
 }
