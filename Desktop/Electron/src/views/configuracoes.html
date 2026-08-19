@@ -840,6 +840,8 @@
                 }
             });
 
+            
+
             document.getElementById('conteudo').addEventListener('change', async (e) => {
             if (e.target.id === 'input-selecionar-foto') {
                 const arquivo = e.target.files[0];
@@ -877,6 +879,48 @@
                 }
             }
         });
+
+             document.getElementById('conteudo').addEventListener('click', async (e) => {
+                if (e.target.id === 'atualizarSenha') {
+                    const senhaAtual = document.getElementById('senhaAtual').value;
+                    const novaSenha = document.getElementById('novaSenha').value;
+                    const confNovaSenha = document.getElementById('confNovaSenha').value;
+
+                    if (!senhaAtual || !novaSenha || !confNovaSenha) {
+                        mostrarNotificacao('❌ Preencha todos os campos.');
+                        return;
+                    }
+
+                    if (novaSenha.length < 6) {
+                        mostrarNotificacao('❌ A nova senha deve ter ao menos 6 caracteres.');
+                        return;
+                    }
+
+                    if (novaSenha !== confNovaSenha) {
+                        mostrarNotificacao('❌ As senhas não coincidem.');
+                        return;
+                    }
+
+                    const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
+
+                    const resultado = await window.electronAPI.atualizarSenha({
+                        idLogin: usuarioLogado.id,
+                        senhaAtual: senhaAtual,
+                        novaSenha: novaSenha
+                    });
+
+                    if (!resultado.sucesso) {
+                        mostrarNotificacao('❌ ' + (resultado.erro || 'Erro ao atualizar senha.'));
+                        return;
+                    }
+
+                    document.getElementById('senhaAtual').value = '';
+                    document.getElementById('novaSenha').value = '';
+                    document.getElementById('confNovaSenha').value = '';
+
+                    mostrarNotificacao('✓ Senha atualizada com sucesso!');
+                }
+            });
 
             document.getElementById('conteudo').addEventListener('input', (e) => {
                 if (e.target.id === 'crm') {

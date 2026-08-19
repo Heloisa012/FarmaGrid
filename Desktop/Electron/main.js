@@ -405,6 +405,34 @@ ipcMain.handle('buscar-prontuarios', async () => {
   }
 });
 
+// === CADASTRAR PRONTUÁRIO ===
+ipcMain.handle('cadastrar-prontuario', async (event, dados) => {
+  try {
+    const {
+      idPaciente, nomePaciente, idade, tipo, dataAtendimento,
+      pa, temperatura, peso, spo2,
+      diagnostico, cid10, anamnese, exameFisico, conduta, dataRetorno
+    } = dados;
+
+    const [result] = await db.promise().query(
+      `INSERT INTO prontuario
+        (id_paciente, nome_paciente, idade, condicao, ultima_visita, status, tipo, cid10, anamnese, exame_fisico, conduta, data_retorno, pa, temperatura, peso, spo2)
+       VALUES (?, ?, ?, ?, ?, 'Ativo', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        idPaciente, nomePaciente, idade, diagnostico, dataAtendimento, tipo,
+        cid10 || null, anamnese, exameFisico || null, conduta || null,
+        dataRetorno || null, pa || null, temperatura || null, peso || null, spo2 || null
+      ]
+    );
+
+    console.log('Prontuário cadastrado com sucesso!');
+    return { sucesso: true, id: result.insertId };
+  } catch (err) {
+    console.error('Erro ao cadastrar prontuário:', err);
+    return { sucesso: false, erro: err.message };
+  }
+});
+
 // === BUSCAR RECEITAS ===
 ipcMain.handle('buscar-receitas', async (event, idPaciente) => {
   try {
@@ -423,18 +451,60 @@ ipcMain.handle('buscar-receitas', async (event, idPaciente) => {
 // === CADASTRAR PARCEIRO ===
 ipcMain.handle('cadastrar-parceiro', async (event, novoParceiro) => {
   try {
-    const { parceiro, tipo, email, telefone, desconto, dataInicio } = novoParceiro;
+    const { idMedico, parceiro, tipo, email, telefone, desconto, dataInicio } = novoParceiro;
     const sql = `
-      INSERT INTO parceiros (parceiro, tipo, email, telefone, desconto, encaminhamentos, status, dataInicio)
-      VALUES (?, ?, ?, ?, ?, DEFAULT, DEFAULT, ?)
+      INSERT INTO parceiros (id_medico, nome, tipo, email, telefone, desconto, status, data_inicio)
+      VALUES (?, ?, ?, ?, ?, ?, 'ativo', STR_TO_DATE(?, '%d/%m/%Y'))
     `;
     const [result] = await db.promise().query(sql, [
-      parceiro, tipo, email, telefone, desconto, dataInicio,
+      idMedico, parceiro, tipo, email, telefone, desconto, dataInicio,
     ]);
     console.log('Parceiro cadastrado com sucesso!');
     return result;
   } catch (err) {
     console.error('Erro ao cadastrar parceiro:', err);
+    throw err;
+  }
+});
+
+// === BUSCAR PARCEIROS (do médico logado) ===
+ipcMain.handle('buscar-parceiros', async (event, idMedico) => {
+  try {
+    const [parceiros] = await db.promise().query(`
+      SELECT
+        p.id,
+        p.nome,
+        p.tipo,
+        p.email,
+        p.telefone,
+        p.desconto,
+        p.status,
+        DATE_FORMAT(p.data_inicio, '%d/%m/%Y') AS dataInicio,
+        (SELECT COUNT(*) FROM parceiro_encaminhamentos pe
+         WHERE pe.id_parceiro = p.id
+         AND MONTH(pe.data_encaminhamento) = MONTH(CURDATE())
+         AND YEAR(pe.data_encaminhamento) = YEAR(CURDATE())
+        ) AS encaminhamentosMes
+      FROM parceiros p
+      WHERE p.id_medico = ?
+      ORDER BY p.nome
+    `, [idMedico]);
+
+    const [servicos] = await db.promise().query(`
+      SELECT ps.id_parceiro, ps.nome_servico
+      FROM parceiro_servicos ps
+      INNER JOIN parceiros p ON p.id = ps.id_parceiro
+      WHERE p.id_medico = ?
+    `, [idMedico]);
+
+    const parceirosComServicos = parceiros.map(p => ({
+      ...p,
+      servicos: servicos.filter(s => s.id_parceiro === p.id).map(s => s.nome_servico)
+    }));
+
+    return parceirosComServicos;
+  } catch (err) {
+    console.error('Erro ao buscar parceiros:', err);
     throw err;
   }
 });
@@ -450,9 +520,8 @@ ipcMain.handle('buscar-consultas-medico', async (event, idMedico) => {
         t.status,
         t.duracao,
         t.tipo,
-        p.nomePaciente
+        t.nome_paciente AS nomePaciente
       FROM teleconsulta t
-      JOIN paciente p ON t.id_paciente = p.id
       WHERE t.id_medico = ?
       ORDER BY STR_TO_DATE(t.data, '%d/%m/%Y') ASC, t.horario ASC
     `, [idMedico]);
@@ -616,11 +685,13 @@ ipcMain.handle('buscar-cliente', async (_event, cpf) => {
 ipcMain.handle("salvarConsulta", async (event, consulta) => {
   try {
     const sql = `
-      INSERT INTO consultas (paciente_id, data, horario, tipo, duracao)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO teleconsulta (id_medico, id_paciente, nome_paciente, data, horario, tipo, duracao, status)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'Pendente')
     `;
     const [result] = await db.promise().query(sql, [
+      consulta.id_medico,
       consulta.paciente_id,
+      consulta.nome_paciente,
       consulta.data,
       consulta.horario,
       consulta.tipo,
@@ -642,7 +713,7 @@ ipcMain.handle("reagendarConsulta", async (event, dados) => {
     const { id, novaData, novoHorario, novaDuracao } = dados;
 
     const sql = `
-      UPDATE consultas
+      UPDATE teleconsulta
       SET data = ?, horario = ?, duracao = ?
       WHERE id = ?
     `;
@@ -1351,6 +1422,237 @@ ipcMain.handle('atualizar-funcionario', async (event, dados) => {
     return { sucesso: true };
   } catch (err) {
     console.error('Erro ao atualizar funcionário:', err);
+    return { sucesso: false, erro: err.message };
+  }
+});
+
+// === ATUALIZAR STATUS DO PARCEIRO ===
+ipcMain.handle('atualizar-status-parceiro', async (event, dados) => {
+  try {
+    const { id, status } = dados;
+    await db.promise().query(
+      'UPDATE parceiros SET status = ? WHERE id = ?',
+      [status, id]
+    );
+    console.log(`Status do parceiro ${id} atualizado para ${status}`);
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao atualizar status do parceiro:', err);
+    return { sucesso: false, erro: err.message };
+  }
+});
+
+// === ATUALIZAR DESCONTO DO PARCEIRO ===
+ipcMain.handle('atualizar-desconto-parceiro', async (event, dados) => {
+  try {
+    const { id, desconto } = dados;
+    await db.promise().query(
+      'UPDATE parceiros SET desconto = ? WHERE id = ?',
+      [desconto, id]
+    );
+    console.log(`Desconto do parceiro ${id} atualizado para ${desconto}`);
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao atualizar desconto do parceiro:', err);
+    return { sucesso: false, erro: err.message };
+  }
+});
+
+// === ADICIONAR SERVIÇO AO PARCEIRO ===
+ipcMain.handle('adicionar-servico-parceiro', async (event, dados) => {
+  try {
+    const { idParceiro, nomeServico, categoria, descricao } = dados;
+    const [result] = await db.promise().query(
+      'INSERT INTO parceiro_servicos (id_parceiro, nome_servico, categoria, descricao) VALUES (?, ?, ?, ?)',
+      [idParceiro, nomeServico, categoria || null, descricao || null]
+    );
+    console.log('Serviço adicionado ao parceiro:', nomeServico);
+    return { sucesso: true, id: result.insertId };
+  } catch (err) {
+    console.error('Erro ao adicionar serviço:', err);
+    return { sucesso: false, erro: err.message };
+  }
+});
+
+// === BUSCAR PACIENTES (para o modal de encaminhamento) ===
+ipcMain.handle('buscar-pacientes-medico', async () => {
+  try {
+    const [rows] = await db.promise().query(
+      'SELECT id, nome, data_nascimento FROM paciente ORDER BY nome'
+    );
+    return rows;
+  } catch (err) {
+    console.error('Erro ao buscar pacientes:', err);
+    throw err;
+  }
+});
+
+// === ENCAMINHAR PACIENTE PARA PARCEIRO ===
+ipcMain.handle('encaminhar-paciente-parceiro', async (event, dados) => {
+  try {
+    const { idParceiro, idPaciente } = dados;
+    await db.promise().query(
+      'INSERT INTO parceiro_encaminhamentos (id_parceiro, id_paciente) VALUES (?, ?)',
+      [idParceiro, idPaciente || null]
+    );
+    console.log(`Encaminhamento registrado para o parceiro ${idParceiro}`);
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao registrar encaminhamento:', err);
+    return { sucesso: false, erro: err.message };
+  }
+});
+
+// === BUSCAR PRONTUÁRIO MAIS RECENTE DE UM PACIENTE ===
+ipcMain.handle('buscar-prontuario-recente', async (event, idPaciente) => {
+  try {
+    const [rows] = await db.promise().query(
+      'SELECT * FROM prontuario WHERE id_paciente = ? ORDER BY id DESC LIMIT 1',
+      [idPaciente]
+    );
+    return rows.length > 0 ? rows[0] : null;
+  } catch (err) {
+    console.error('Erro ao buscar prontuário recente:', err);
+    throw err;
+  }
+});
+
+// === BUSCAR LISTA DE PACIENTES (para sidebar, com CPF real) ===
+ipcMain.handle('buscar-pacientes-prontuario', async () => {
+  try {
+    const [rows] = await db.promise().query(`
+      SELECT 
+        pac.id,
+        pac.nome AS nome_paciente,
+        pac.idade,
+        pac.CPF,
+        (SELECT pr.condicao FROM prontuario pr WHERE pr.id_paciente = pac.id ORDER BY pr.id DESC LIMIT 1) AS condicao,
+        (SELECT pr.ultima_visita FROM prontuario pr WHERE pr.id_paciente = pac.id ORDER BY pr.id DESC LIMIT 1) AS ultima_visita,
+        (SELECT pr.status FROM prontuario pr WHERE pr.id_paciente = pac.id ORDER BY pr.id DESC LIMIT 1) AS status
+      FROM paciente pac
+      ORDER BY pac.nome
+    `);
+    return rows;
+  } catch (err) {
+    console.error('Erro ao buscar pacientes:', err);
+    throw err;
+  }
+});
+
+// === BUSCAR TODOS OS PRONTUÁRIOS DE UM PACIENTE ===
+ipcMain.handle('buscar-prontuarios-paciente', async (event, idPaciente) => {
+  try {
+    const [rows] = await db.promise().query(
+      'SELECT * FROM prontuario WHERE id_paciente = ? ORDER BY id DESC',
+      [idPaciente]
+    );
+    return rows;
+  } catch (err) {
+    console.error('Erro ao buscar prontuários do paciente:', err);
+    throw err;
+  }
+});
+
+// === CADASTRAR RECEITA ===
+ipcMain.handle('cadastrar-receita', async (event, dados) => {
+  try {
+    const {
+      idMedico, idPaciente, medicamento, concentracao,
+      dosagem, frequencia, duracao, viaAdministracao,
+      instrucoes, observacoes
+    } = dados;
+
+    const hoje = new Date();
+    const dataPrescricao = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
+
+    const [result] = await db.promise().query(
+      `INSERT INTO receita
+        (id_medico, id_paciente, medicamento, concentracao, dosagem, frequencia, duracao, via_administracao, instrucoes, observacoes, status, data_prescricao)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Ativa', ?)`,
+      [
+        idMedico, idPaciente, medicamento, concentracao || null,
+        dosagem, frequencia || null, duracao || null, viaAdministracao || null,
+        instrucoes || null, observacoes || null, dataPrescricao
+      ]
+    );
+
+    console.log('Receita cadastrada com sucesso!');
+    return { sucesso: true, id: result.insertId };
+  } catch (err) {
+    console.error('Erro ao cadastrar receita:', err);
+    return { sucesso: false, erro: err.message };
+  }
+});
+
+// === ATUALIZAR SENHA DO MÉDICO ===
+ipcMain.handle('atualizar-senha', async (event, dados) => {
+  try {
+    const { idLogin, senhaAtual, novaSenha } = dados;
+
+    const [rows] = await db.promise().query(
+      'SELECT senha FROM login WHERE id = ? LIMIT 1',
+      [idLogin]
+    );
+
+    if (rows.length === 0) {
+      return { sucesso: false, erro: 'Usuário não encontrado.' };
+    }
+
+    const senhaCorreta = await bcrypt.compare(senhaAtual, rows[0].senha);
+    if (!senhaCorreta) {
+      return { sucesso: false, erro: 'Senha atual incorreta.' };
+    }
+
+    const novaSenhaHash = await bcrypt.hash(novaSenha, 10);
+
+    await db.promise().query(
+      'UPDATE login SET senha = ? WHERE id = ?',
+      [novaSenhaHash, idLogin]
+    );
+
+    console.log(`Senha do login ${idLogin} atualizada com sucesso`);
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao atualizar senha:', err);
+    return { sucesso: false, erro: err.message };
+  }
+});
+
+// === VERIFICAR E-MAIL PARA RECUPERAÇÃO DE SENHA ===
+ipcMain.handle('verificar-email-recuperacao', async (event, email) => {
+  try {
+    const [rows] = await db.promise().query(
+      'SELECT id FROM login WHERE email = ? LIMIT 1',
+      [email]
+    );
+
+    if (rows.length === 0) {
+      return { existe: false };
+    }
+
+    return { existe: true, idLogin: rows[0].id };
+  } catch (err) {
+    console.error('Erro ao verificar e-mail:', err);
+    return { existe: false, erro: err.message };
+  }
+});
+
+// === REDEFINIR SENHA (via "esqueci minha senha") ===
+ipcMain.handle('redefinir-senha', async (event, dados) => {
+  try {
+    const { idLogin, novaSenha } = dados;
+
+    const novaSenhaHash = await bcrypt.hash(novaSenha, 10);
+
+    await db.promise().query(
+      'UPDATE login SET senha = ? WHERE id = ?',
+      [novaSenhaHash, idLogin]
+    );
+
+    console.log(`Senha do login ${idLogin} redefinida com sucesso`);
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao redefinir senha:', err);
     return { sucesso: false, erro: err.message };
   }
 });
