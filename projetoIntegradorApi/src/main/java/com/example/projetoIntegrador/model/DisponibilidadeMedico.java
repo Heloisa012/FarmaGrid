@@ -1,6 +1,5 @@
 package com.example.projetoIntegrador.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,13 +16,10 @@ public class DisponibilidadeMedico {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "id_medico", nullable = false)
-    @JsonIgnore
-    private Medico medico;
+    @Column(name = "id_medico", nullable = false)
+    private Long idMedico;
 
-    // Ex: SEGUNDA, TERCA, QUARTA, QUINTA, SEXTA, SABADO, DOMINGO
-    @Column(name = "dia_semana", nullable = false, length = 10)
+    @Column(name = "dia_semana", nullable = false, length = 20)
     private String diaSemana;
 
     @Column(name = "hora_inicio", nullable = false)

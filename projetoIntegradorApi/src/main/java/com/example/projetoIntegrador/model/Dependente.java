@@ -1,11 +1,8 @@
 package com.example.projetoIntegrador.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "dependente")
@@ -17,10 +14,8 @@ public class Dependente {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "id_paciente", nullable = false)
-    @JsonIgnore
-    private Paciente paciente;
+    @Column(name = "id_paciente", nullable = false)
+    private Long idPaciente;
 
     @Column(nullable = false, length = 100)
     private String nome;
@@ -28,9 +23,6 @@ public class Dependente {
     @Column(length = 14)
     private String cpf;
 
-    @Column(name = "data_nascimento")
-    private LocalDate dataNascimento;
-
-    @Column(nullable = false, length = 50)
+    @Column(length = 50)
     private String parentesco;
 }

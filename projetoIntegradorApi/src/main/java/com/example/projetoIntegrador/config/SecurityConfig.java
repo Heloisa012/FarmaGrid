@@ -27,16 +27,8 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/login", "/auth/cadastro", "/auth/db-status", "/auth/db-processlist", "/auth/db-kill/**").permitAll()
-                        .requestMatchers("/api/teleconsultas/**").hasAnyRole("PACIENTE", "MEDICO", "ADMIN")
-                        .requestMatchers("/api/receitas/**").hasAnyRole("PACIENTE", "MEDICO", "ADMIN")
-                        .requestMatchers("/api/vendas/**").hasAnyRole("PACIENTE", "CLIENTE_FARMACIA", "FUNCIONARIO", "ADMIN")
-                        .requestMatchers("/api/descontos/**").hasAnyRole("PACIENTE", "CLIENTE_FARMACIA", "FUNCIONARIO", "ADMIN")
-                        .requestMatchers("/api/estoques/**").hasAnyRole("MEDICO", "CLIENTE_FARMACIA", "FUNCIONARIO", "ADMIN")
-                        .requestMatchers("/api/medicamentos/**").authenticated()
-                        .requestMatchers("/api/pacientes/**").hasAnyRole("PACIENTE", "MEDICO", "ADMIN")
-                        .requestMatchers("/api/medicos/**").hasAnyRole("PACIENTE", "MEDICO", "ADMIN")
-                        .requestMatchers("/api/parcerias/**").hasAnyRole("ADMIN", "MEDICO")
+                        .requestMatchers("/auth/login", "/auth/db-status", "/auth/db-processlist", "/auth/db-kill/**").permitAll()
+                        .requestMatchers("/api/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

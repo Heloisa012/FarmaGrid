@@ -14,20 +14,26 @@ public class Prontuario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "id_paciente")
-    private Paciente paciente;
+    @Column(name = "id_paciente", nullable = false)
+    private Long idPaciente;
 
-    @Column(name = "historico_medico", columnDefinition = "TEXT")
-    private String historicoMedico;
+    @Column(name = "nome_paciente", nullable = false, length = 100)
+    private String nomePaciente;
 
-    @ManyToOne
-    @JoinColumn(name = "id_medicamento_uso")
-    private Medicamento medicamentoUso;
+    private Integer idade;
+
+    @Column(length = 255)
+    private String condicao;
+
+    @Column(name = "ultima_visita", length = 50)
+    private String ultimaVisita;
+
+    @Column(length = 50)
+    private String status;
+
+    @Column(length = 100)
+    private String tipo;
 
     @Column(columnDefinition = "TEXT")
-    private String alergias;
-
-    @Column(columnDefinition = "TEXT")
-    private String observacoes;
+    private String notas;
 }

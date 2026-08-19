@@ -5,18 +5,27 @@ import lombok.Getter;
 import lombok.Setter;
 
 @Entity
-@Table(name = "funcionario")
+@Table(name = "`funcFarma`")
 @Getter
 @Setter
 public class Funcionario {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false, length = 14, unique = true)
+    @Column(name = "CPF", length = 14)
     private String cpf;
 
-    @Column(length = 50)
-    private String turno;
+    @Column(nullable = false, length = 80)
+    private String nome;
+
+    @Column(nullable = false, length = 45)
+    private String email;
+
+    @Column(nullable = false, length = 45)
+    private String telefone;
+
+    @Column(nullable = false, length = 45)
+    private String funcao;
+
+    @Column(nullable = false, length = 45)
+    private String status;
 }

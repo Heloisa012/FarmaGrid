@@ -21,7 +21,11 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
     'email':       'ana.lanzoni@email.com',
     'telefone':    '(11) 99999-0000',
     'nascimento':  '15/03/2000',
-    'endereco':    'Av. Paulista, 1000 – São Paulo, SP',
+    'rua':         'Av. Paulista',
+    'numero':      '1000',
+    'bairro':      'Bela Vista',
+    'cidade':      'São Paulo',
+    'cep':         '01310-100',
   };
 
   late final TextEditingController _nomeCtrl;
@@ -29,17 +33,22 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
   late final TextEditingController _emailCtrl;
   late final TextEditingController _telefoneCtrl;
   late final TextEditingController _nascimentoCtrl;
-  late final TextEditingController _enderecoCtrl;
+  late final TextEditingController _ruaCtrl;
+  late final TextEditingController _numeroCtrl;
+  late final TextEditingController _bairroCtrl;
+  late final TextEditingController _cidadeCtrl;
+  late final TextEditingController _cepCtrl;
   final _planoCtrl        = TextEditingController(text: 'Unimed');
-  final _carteirinhaCtrl  = TextEditingController(text: '0123456789');
-  final _alergiaCtrl      = TextEditingController(text: 'Dipirona');
-  final _contatoEmerCtrl  = TextEditingController(text: 'Maria Lanzoni – (11) 98888-0000');
+  final _contatoEmerNomeCtrl = TextEditingController(text: 'Maria Lanzoni');
+  final _contatoEmerTelCtrl  = TextEditingController(text: '(11) 98888-0000');
   final _senhaAtualCtrl   = TextEditingController();
   final _novaSenhaCtrl    = TextEditingController();
   final _confirmSenhaCtrl = TextEditingController();
   final _numeroCartaoCtrl = TextEditingController();
   final _titularCtrl      = TextEditingController();
   final _validadeCtrl     = TextEditingController();
+
+  final List<String> _alergias = ['Dipirona'];
 
   bool _verSenhaAtual  = false;
   bool _verNovaSenha   = false;
@@ -91,15 +100,19 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
     _emailCtrl      = TextEditingController(text: _dadosUsuario['email']);
     _telefoneCtrl   = TextEditingController(text: _dadosUsuario['telefone']);
     _nascimentoCtrl = TextEditingController(text: _dadosUsuario['nascimento']);
-    _enderecoCtrl   = TextEditingController(text: _dadosUsuario['endereco']);
+    _ruaCtrl        = TextEditingController(text: _dadosUsuario['rua']);
+    _numeroCtrl     = TextEditingController(text: _dadosUsuario['numero']);
+    _bairroCtrl     = TextEditingController(text: _dadosUsuario['bairro']);
+    _cidadeCtrl     = TextEditingController(text: _dadosUsuario['cidade']);
+    _cepCtrl        = TextEditingController(text: _dadosUsuario['cep']);
   }
 
   @override
   void dispose() {
     for (final c in [
       _nomeCtrl, _sobrenomeCtrl, _emailCtrl, _telefoneCtrl,
-      _nascimentoCtrl, _enderecoCtrl, _planoCtrl, _carteirinhaCtrl,
-      _alergiaCtrl, _contatoEmerCtrl, _senhaAtualCtrl, _novaSenhaCtrl,
+      _nascimentoCtrl, _ruaCtrl, _numeroCtrl, _bairroCtrl, _cidadeCtrl, _cepCtrl,
+      _planoCtrl, _contatoEmerNomeCtrl, _contatoEmerTelCtrl, _senhaAtualCtrl, _novaSenhaCtrl,
       _confirmSenhaCtrl, _numeroCartaoCtrl, _titularCtrl, _validadeCtrl,
     ]) c.dispose();
     super.dispose();
@@ -326,7 +339,19 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                 const SizedBox(height: 12),
                 _campo('Data de Nascimento:', _nascimentoCtrl, _modoEdicao),
                 const SizedBox(height: 12),
-                _campo('Endereço:', _enderecoCtrl, _modoEdicao),
+                Row(children: [
+                  Expanded(flex: 3, child: _campo('Rua:', _ruaCtrl, _modoEdicao)),
+                  const SizedBox(width: 12),
+                  Expanded(flex: 1, child: _campo('Número:', _numeroCtrl, _modoEdicao)),
+                ]),
+                const SizedBox(height: 12),
+                _campo('Bairro:', _bairroCtrl, _modoEdicao),
+                const SizedBox(height: 12),
+                Row(children: [
+                  Expanded(flex: 2, child: _campo('Cidade:', _cidadeCtrl, _modoEdicao)),
+                  const SizedBox(width: 12),
+                  Expanded(flex: 1, child: _campo('CEP:', _cepCtrl, _modoEdicao)),
+                ]),
               ],
             ),
           ),
@@ -371,8 +396,6 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
             child: Column(
               children: [
                 _campo('Nome do Plano:', _planoCtrl, _modoEdicao),
-                const SizedBox(height: 12),
-                _campo('Número da Carteirinha:', _carteirinhaCtrl, _modoEdicao),
               ],
             ),
           ),
@@ -407,9 +430,34 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                   onChanged: _modoEdicao ? (v) => setState(() => _tipoSanguineo = v!) : null,
                 ),
                 const SizedBox(height: 12),
-                _campo('Alergias conhecidas:', _alergiaCtrl, _modoEdicao),
+                Text('Alergias conhecidas:',
+                    style: TextStyle(fontSize: 13, color: _isDark ? Colors.white70 : const Color(0xFF444444))),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    ..._alergias.map((a) => Chip(
+                          label: Text(a, style: const TextStyle(fontSize: 12, color: Colors.white)),
+                          backgroundColor: _verde,
+                          deleteIcon: _modoEdicao ? const Icon(Icons.close, size: 16, color: Colors.white) : null,
+                          onDeleted: _modoEdicao ? () => setState(() => _alergias.remove(a)) : null,
+                        )),
+                    if (_modoEdicao)
+                      ActionChip(
+                        avatar: const Icon(Icons.add, size: 16, color: _oliva),
+                        label: const Text('Adicionar', style: TextStyle(fontSize: 12, color: _oliva)),
+                        backgroundColor: _oliva.withValues(alpha: 0.1),
+                        onPressed: _dialogoAdicionarAlergia,
+                      ),
+                  ],
+                ),
                 const SizedBox(height: 12),
-                _campo('Contato de Emergência:', _contatoEmerCtrl, _modoEdicao),
+                Row(children: [
+                  Expanded(child: _campo('Contato de Emergência:', _contatoEmerNomeCtrl, _modoEdicao)),
+                  const SizedBox(width: 12),
+                  Expanded(child: _campo('Telefone:', _contatoEmerTelCtrl, _modoEdicao)),
+                ]),
               ],
             ),
           ),
@@ -828,6 +876,71 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  void _dialogoAdicionarAlergia() {
+    final alergiaCtrl = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: _corCard,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                  color: _verde.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10)),
+              child: const Icon(Icons.warning_amber_outlined, color: _verde, size: 22),
+            ),
+            const SizedBox(width: 12),
+            Text('Nova Alergia', style: TextStyle(color: _corTexto, fontWeight: FontWeight.bold, fontSize: 17)),
+          ],
+        ),
+        content: TextField(
+          controller: alergiaCtrl,
+          autofocus: true,
+          style: TextStyle(color: _corTexto),
+          decoration: InputDecoration(
+            hintText: 'Ex: Dipirona',
+            hintStyle: TextStyle(color: _corSubtexto),
+            filled: true,
+            fillColor: _corCampo,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: _corBordaCampo)),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10),
+                borderSide: BorderSide(color: _corBordaCampo)),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10),
+                borderSide: const BorderSide(color: _verde, width: 2)),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text('Cancelar', style: TextStyle(color: _corSubtexto)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _verde,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            ),
+            onPressed: () {
+              final nome = alergiaCtrl.text.trim();
+              if (nome.isEmpty) {
+                _snack('Digite o nome da alergia.');
+                return;
+              }
+              setState(() => _alergias.add(nome));
+              Navigator.pop(ctx);
+            },
+            child: const Text('Adicionar', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
       ),
     );
   }

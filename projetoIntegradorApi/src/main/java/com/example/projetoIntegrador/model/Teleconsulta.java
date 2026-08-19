@@ -4,9 +4,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-
 @Entity
 @Table(name = "teleconsulta")
 @Getter
@@ -17,30 +14,27 @@ public class Teleconsulta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "id_medico")
-    private Medico medico;
+    @Column(name = "id_medico", nullable = false)
+    private Long idMedico;
 
-    @ManyToOne
-    @JoinColumn(name = "id_paciente")
-    private Paciente paciente;
+    @Column(name = "id_paciente", nullable = false)
+    private Long idPaciente;
 
-    @Column(nullable = false)
-    private LocalDate data;
+    @Column(nullable = false, length = 20)
+    private String data;
 
-    @Column(nullable = false)
-    private LocalTime horario;
+    @Column(nullable = false, length = 20)
+    private String horario;
 
-    @Column(name = "duracao_minutos")
-    private Integer duracaoMinutos;
+    @Column(length = 50)
+    private String status;
+
+    @Column(length = 20)
+    private String duracao;
 
     @Column(length = 50)
     private String tipo;
 
-    @ManyToOne
-    @JoinColumn(name = "id_status")
-    private Status status;
-
-    @Column(columnDefinition = "TEXT")
-    private String relatorio;
+    @Column(name = "nome_paciente", length = 255)
+    private String nomePaciente;
 }

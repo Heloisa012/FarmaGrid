@@ -4,4 +4,5 @@ package com.example.projetoIntegrador.dto;
 public class LoginRequest {
     public String email;
     public String senha;
+    public Integer tipo;
 }
