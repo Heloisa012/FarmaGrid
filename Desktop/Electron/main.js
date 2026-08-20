@@ -1657,6 +1657,40 @@ ipcMain.handle('redefinir-senha', async (event, dados) => {
   }
 });
 
+// === CADASTRAR RECEITA DE MEDICAMENTO CONTROLADO (BALCONISTA) ===
+ipcMain.handle('cadastrar-receita-controlada', async (event, dados) => {
+  try {
+    const {
+      cpfCliente, nomeCliente, produtoNome,
+      nomeMedico, crm, ufCrm,
+      nomePaciente, cpfPaciente,
+      tipoReceita, numeroReceita, dataReceita,
+      originalConferida, documentoVerificado, observacoes
+    } = dados;
+
+    const [result] = await db.promise().query(
+      `INSERT INTO receitas_controladas
+        (cpf_cliente, nome_cliente, produto_nome, nome_medico, crm, uf_crm,
+         nome_paciente, cpf_paciente, tipo_receita, numero_receita, data_receita,
+         original_conferida, documento_verificado, observacoes)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        cpfCliente || null, nomeCliente || null, produtoNome,
+        nomeMedico, crm, ufCrm,
+        nomePaciente, cpfPaciente || null,
+        tipoReceita, numeroReceita || null, dataReceita || null,
+        originalConferida ? 1 : 0, documentoVerificado ? 1 : 0, observacoes || null
+      ]
+    );
+
+    console.log('Receita controlada registrada com sucesso!');
+    return { sucesso: true, id: result.insertId };
+  } catch (err) {
+    console.error('Erro ao registrar receita controlada:', err);
+    return { sucesso: false, erro: err.message };
+  }
+});
+
 // === CHATBOT API ===
 require('dotenv').config();
 const { GoogleGenAI } = require("@google/genai");

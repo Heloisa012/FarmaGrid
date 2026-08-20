@@ -77,5 +77,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   atualizarSenha: (dados) => ipcRenderer.invoke('atualizar-senha', dados),
   verificarEmailRecuperacao: (email) => ipcRenderer.invoke('verificar-email-recuperacao', email),
   redefinirSenha: (dados) => ipcRenderer.invoke('redefinir-senha', dados),
+    cadastrarReceitaControlada: (dados) => ipcRenderer.invoke('cadastrar-receita-controlada', dados),
 });
 

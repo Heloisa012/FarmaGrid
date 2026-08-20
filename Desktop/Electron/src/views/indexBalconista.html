@@ -1615,18 +1615,79 @@
     });
 
     // Confirmar registro da receita
-    document.getElementById('confirmarReceita').addEventListener('click', () => {
+    document.getElementById('confirmarReceita').addEventListener('click', async () => {
       const tipoSelecionado = document.querySelector('.btnTipoReceita.ativo');
 
-      if (!document.getElementById('receitaNomeMedico').value.trim() ||
-          !document.getElementById('receitaCRM').value.trim() ||
-          !tipoSelecionado) {
-        alert("Preencha o nome do médico, CRM e selecione o tipo de receita.");
+      const nomeMedico = document.getElementById('receitaNomeMedico').value.trim();
+      const crm = document.getElementById('receitaCRM').value.trim();
+      const ufCrm = document.getElementById('receitaUF').value;
+      const nomePaciente = document.getElementById('receitaNomePaciente').value.trim();
+      const cpfPaciente = document.getElementById('receitaCPFPaciente').value.trim();
+      const numeroReceita = document.getElementById('receitaNumero').value.trim();
+      const dataReceita = document.getElementById('receitaData').value;
+      const conf1 = document.getElementById('receitaConf1').checked;
+      const conf2 = document.getElementById('receitaConf2').checked;
+      const observacoes = document.getElementById('receitaObs').value.trim();
+
+      // Validações básicas
+      if (!nomeMedico || !crm || !ufCrm || !tipoSelecionado) {
+        alert("Preencha o nome do médico, CRM, UF e selecione o tipo de receita.");
         return;
       }
 
-      if (itemReceitaAtual && botaoReceitaAtual) {
+      if (!/^\d{4,6}$/.test(crm)) {
+        alert("CRM inválido. Digite apenas os números (ex: 123456).");
+        return;
+      }
+
+      if (!nomePaciente) {
+        alert("Informe o nome do paciente.");
+        return;
+      }
+
+      if (!conf1 || !conf2) {
+        alert("Confirme a conferência da receita original e do documento de identificação do paciente.");
+        return;
+      }
+
+      if (!itemReceitaAtual || !botaoReceitaAtual) {
+        alert("Nenhum item selecionado para registrar receita.");
+        return;
+      }
+
+      const produtoNome = itemReceitaAtual.querySelector('p').textContent;
+
+      const dadosReceita = {
+        cpfCliente: clienteSelecionado ? clienteSelecionado.CPF : null,
+        nomeCliente: clienteSelecionado ? clienteSelecionado.nome : null,
+        produtoNome: produtoNome,
+        nomeMedico: nomeMedico,
+        crm: crm,
+        ufCrm: ufCrm,
+        nomePaciente: nomePaciente,
+        cpfPaciente: cpfPaciente || null,
+        tipoReceita: tipoSelecionado.dataset.tipo,
+        numeroReceita: numeroReceita || null,
+        dataReceita: dataReceita || null,
+        originalConferida: conf1,
+        documentoVerificado: conf2,
+        observacoes: observacoes || null
+      };
+
+      const botaoConfirmar = document.getElementById('confirmarReceita');
+      botaoConfirmar.disabled = true;
+      botaoConfirmar.textContent = "Registrando...";
+
+      try {
+        const resultado = await window.electronAPI.cadastrarReceitaControlada(dadosReceita);
+
+        if (!resultado.sucesso) {
+          alert("Erro ao registrar receita: " + resultado.erro);
+          return;
+        }
+
         itemReceitaAtual.dataset.receita = "true";
+        itemReceitaAtual.dataset.idReceita = resultado.id;
 
         botaoReceitaAtual.textContent = "✔ Receita Registrada";
         botaoReceitaAtual.disabled = true;
@@ -1635,9 +1696,15 @@
         botaoReceitaAtual.style = "margin-left: -100px;"
 
         atualizarAlertaControlado();
-      }
+        document.getElementById('modalReceita').style.display = 'none';
 
-      document.getElementById('modalReceita').style.display = 'none';
+      } catch (error) {
+        console.error('Erro ao registrar receita:', error);
+        alert("Erro ao registrar receita.");
+      } finally {
+        botaoConfirmar.disabled = false;
+        botaoConfirmar.textContent = "Registrar Receita";
+      }
     });
      
 
