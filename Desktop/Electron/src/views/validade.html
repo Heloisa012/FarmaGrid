@@ -702,18 +702,49 @@
         await carregarAlertas();
       });
 
+      function calcularDiasRestantes(dataValidade) {
+        if (!dataValidade) return 0;
+
+        const [ano, mes, dia] = dataValidade
+          .split('-')
+          .map(Number);
+
+        const hoje = new Date();
+
+        // Usamos UTC somente depois de extrair as partes da data,
+        // evitando alteração pelo fuso horário.
+        const hojeUTC = Date.UTC(
+          hoje.getFullYear(),
+          hoje.getMonth(),
+          hoje.getDate()
+        );
+
+        const validadeUTC = Date.UTC(
+          ano,
+          mes - 1,
+          dia
+        );
+
+        return Math.round(
+          (validadeUTC - hojeUTC) / (1000 * 60 * 60 * 24)
+        );
+      }
+
+      function formatarDataBrasileira(dataValidade) {
+        if (!dataValidade) return '—';
+
+        const [ano, mes, dia] = dataValidade.split('-');
+
+        return `${dia}/${mes}/${ano}`;
+      }
+
       async function carregarAlertas() {
         const lotes = await window.electronAPI.buscarAlertasValidade();
-        const hoje = new Date();
-        hoje.setHours(0, 0, 0, 0);
 
-        // calcula dias restantes para cada lote
-        const comDias = lotes.map(l => {
-          const validade = new Date(l.data_validade);
-          validade.setHours(0, 0, 0, 0);
-          const dias = Math.round((validade - hoje) / (1000 * 60 * 60 * 24));
-          return { ...l, dias };
-        });
+        const comDias = lotes.map(l => ({
+          ...l,
+          dias: calcularDiasRestantes(l.data_validade)
+        }));
 
         const criticos  = comDias.filter(l => l.dias <= 7);
         const atencao   = comDias.filter(l => l.dias > 7 && l.dias <= 30);
@@ -766,7 +797,7 @@
 
       function renderizarDetalhes(l) {
         const { tipo, cor, icone } = classificar(l.dias);
-        const dataFormatada = new Date(l.data_validade).toLocaleDateString('pt-BR');
+        const dataFormatada = formatarDataBrasileira( l.data_validade);
         const painel = document.querySelector('.painel-detalhes');
 
         painel.innerHTML = `
@@ -818,13 +849,16 @@
       document.querySelector('.buscar input').addEventListener('input', async (e) => {
         const termo = e.target.value.toLowerCase();
         const lotes = await window.electronAPI.buscarAlertasValidade();
-        const hoje = new Date();
-        hoje.setHours(0, 0, 0, 0);
-        const comDias = lotes.map(l => {
-          const dias = Math.round((new Date(l.data_validade) - hoje) / (1000 * 60 * 60 * 24));
-          return { ...l, dias };
-        }).filter(l => l.nome_produto.toLowerCase().includes(termo));
-        renderizarLista(comDias);
+        const comDias = lotes.map(l => ({
+            ...l,
+            dias: calcularDiasRestantes(l.data_validade)
+          }))
+          .filter(l =>
+            l.nome_produto
+              .toLowerCase()
+              .includes(termo)
+          );
+          renderizarLista(comDias);
       });
     </script>
 

@@ -999,7 +999,13 @@
       const medico = JSON.parse(localStorage.getItem('usuarioLogado'));
       if (!medico) return;
 
-      const consultas = await window.electronAPI.buscarConsultasMedico (medico.id);
+      const idMedico =
+        medico.id_medico ||
+        medico.idMedico ||
+        medico.id;
+
+      const consultas =
+        await window.electronAPI.buscarConsultasMedico(idMedico);
 
       consultas.forEach(c => {
         const data = c.data;
@@ -1074,15 +1080,18 @@
           return;
         }
 
+      const idMedico =
+        medico.id_medico ||
+        medico.idMedico ||
+        medico.id;
+
       try {
         const resultado = await window.electronAPI.salvarConsulta({
-          id_medico: medico.id,
+          id_medico: idMedico,
           paciente_id: pacienteId,
           nome_paciente: nomePaciente,
           data: dataFormatada,
-          horario: hora,
-          tipo: tipo,
-          duracao: duracao
+          horario: hora, tipo, duracao
         });
 
         if (!resultado.sucesso) {
