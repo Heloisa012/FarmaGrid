@@ -112,7 +112,7 @@ class _TelaFarmaciasProximasState extends State<TelaFarmaciasProximas> {
                         ? 'Aberta agora'
                         : f['aberto'] == false
                         ? 'Fechada agora'
-                        : 'Horário não informado'}',
+                        : f['horario'] ?? 'Horário não informado'}',
                   ),
                   isThreeLine: true,
                   trailing: Icon(
@@ -122,12 +122,14 @@ class _TelaFarmaciasProximasState extends State<TelaFarmaciasProximas> {
                 ),
               ),
             ),
-          const Padding(
-            padding: EdgeInsets.only(top: 12),
+          Padding(
+            padding: const EdgeInsets.only(top: 12),
             child: Text(
-              'Dados e horários fornecidos pelo Google Places.',
+              farmacias.any((f) => f['fonte'] == 'OpenStreetMap')
+                  ? 'Farmácias fornecidas pelo OpenStreetMap. Configure Google Places para horários em tempo real.'
+                  : 'Dados e horários fornecidos pelo Google Places.',
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey, fontSize: 11),
+              style: const TextStyle(color: Colors.grey, fontSize: 11),
             ),
           ),
         ],

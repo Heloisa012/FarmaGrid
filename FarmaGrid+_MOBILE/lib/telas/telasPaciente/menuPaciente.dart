@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:farmagridd/telas/telasPaciente/configuracoesPaciente.dart';
 import 'package:farmagridd/telas/sobreNos.dart';
 import '../../services/perfil_service.dart';
+import '../../services/auth_service.dart';
+import '../login.dart';
 
 class DrawerPaciente extends StatelessWidget {
   final AppThemeController themeCtrl;
@@ -219,9 +221,14 @@ class DrawerPaciente extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.popUntil(context, (r) => r.isFirst);
+              onTap: () async {
+                await AuthService.logout();
+                PerfilService.limpar();
+                if (!context.mounted) return;
+                Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => TelaLogin()),
+                  (_) => false,
+                );
               },
               child: Container(
                 width: double.infinity,

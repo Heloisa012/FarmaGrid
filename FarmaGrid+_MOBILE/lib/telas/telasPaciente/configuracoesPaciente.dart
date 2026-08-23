@@ -56,6 +56,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
   final _validadeCtrl = TextEditingController();
 
   final List<String> _alergias = [];
+  List<Map<String, dynamic>> _cartoes = [];
 
   bool _verSenhaAtual = false;
   bool _verNovaSenha = false;
@@ -128,6 +129,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
         PerfilService.carregar(atualizar: true),
         PacienteService.listarDependentes(),
         PacienteService.listarAlergias(),
+        PacienteService.listarCartoes(),
       ]);
       if (!mounted) return;
       _perfil = resultados[0] as Map<String, dynamic>;
@@ -170,6 +172,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
               .map((a) => '${a['alergia'] ?? a['nome'] ?? ''}')
               .where((a) => a.isNotEmpty),
         );
+      _cartoes = resultados[3] as List<Map<String, dynamic>>;
       setState(() {});
     } catch (e) {
       if (mounted) _snack('$e');
@@ -224,6 +227,71 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
     _novaSenhaCtrl.clear();
     _confirmSenhaCtrl.clear();
     _snack('Senha atualizada no banco de dados!');
+  }
+
+  Future<bool> _salvarCartao() async {
+    final numero = _numeroCartaoCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (numero.length < 13 ||
+        _titularCtrl.text.trim().isEmpty ||
+        _validadeCtrl.text.trim().isEmpty) {
+      _snack('Preencha número, titular e validade do cartão.');
+      return false;
+    }
+    await PacienteService.adicionarCartao({
+      'numero': numero,
+      'nomeTitular': _titularCtrl.text.trim(),
+      'validade': _validadeCtrl.text.trim(),
+      'bandeira': numero.startsWith('4') ? 'Visa' : 'Cartão',
+    });
+    _numeroCartaoCtrl.clear();
+    _titularCtrl.clear();
+    _validadeCtrl.clear();
+    _cartoes = await PacienteService.listarCartoes();
+    if (mounted) setState(() {});
+    _snack('Cartão salvo no banco de dados!');
+    return true;
+  }
+
+  Future<void> _alterarPlano(bool premium) async {
+    if (premium && _cartoes.isEmpty) {
+      _snack('Cadastre um cartão abaixo antes de assinar o Premium.');
+      return;
+    }
+    final numero = premium ? '${_cartoes.last['numero'] ?? ''}' : '';
+    final finalCartao = numero.length >= 4
+        ? numero.substring(numero.length - 4)
+        : numero;
+    final confirmar = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(premium ? 'Confirmar assinatura' : 'Cancelar Premium'),
+        content: Text(
+          premium
+              ? 'Assinar o Clube FarmaGrid+ por R\$ 19,90/mês usando o cartão final $finalCartao?'
+              : 'Você perderá os benefícios Premium ao confirmar o cancelamento.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Voltar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Confirmar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmar != true) return;
+    await PacienteService.alterarAssinatura(premium);
+    final atualizado = await PerfilService.carregar(atualizar: true);
+    if (mounted) {
+      setState(() {
+        _perfil = atualizado;
+        _planoAssinatura = premium ? 'Clube FarmaGrid+' : 'Plano Básico';
+      });
+    }
+    _snack(premium ? 'Assinatura Premium ativada!' : 'Assinatura cancelada.');
   }
 
   @override
@@ -926,9 +994,8 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                   return GestureDetector(
                     onTap: () async {
                       final premium = plano == 'Clube FarmaGrid+';
-                      await PacienteService.alterarAssinatura(premium);
-                      await PerfilService.carregar(atualizar: true);
-                      if (mounted) setState(() => _planoAssinatura = plano);
+                      if (sel) return;
+                      await _alterarPlano(premium);
                     },
                     child: Container(
                       margin: const EdgeInsets.only(bottom: 8),
@@ -1034,7 +1101,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
-                  onPressed: () => _snack('Cartão salvo com sucesso!'),
+                  onPressed: _salvarCartao,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _oliva,
                     padding: const EdgeInsets.symmetric(

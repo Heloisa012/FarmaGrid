@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -18,8 +20,7 @@ public class GooglePlacesService {
     private final HttpClient client = HttpClient.newHttpClient();
 
     public List<Map<String, Object>> buscarFarmacias(String endereco) throws Exception {
-        if (apiKey == null || apiKey.isBlank())
-            throw new IllegalStateException("GOOGLE_PLACES_API_KEY não configurada na API.");
+        if (apiKey == null || apiKey.isBlank()) return buscarOpenStreetMap(endereco);
         String body = mapper.writeValueAsString(Map.of(
             "textQuery", "farmácias próximas de " + endereco,
             "includedType", "pharmacy", "languageCode", "pt-BR", "maxResultCount", 15
@@ -42,5 +43,36 @@ public class GooglePlacesService {
             item.put("googleMapsUri", p.path("googleMapsUri").asText()); result.add(item);
         }
         return result;
+    }
+
+    private List<Map<String, Object>> buscarOpenStreetMap(String endereco) throws Exception {
+        String q = URLEncoder.encode(endereco, StandardCharsets.UTF_8);
+        HttpRequest geoReq = HttpRequest.newBuilder(URI.create("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&q=" + q))
+            .header("User-Agent", "FarmaGrid/1.0 contato@farmagrid.app").GET().build();
+        JsonNode geo = mapper.readTree(client.send(geoReq, HttpResponse.BodyHandlers.ofString()).body());
+        if (!geo.isArray() || geo.isEmpty()) throw new IllegalStateException("Endereço não localizado. Confira cidade e CEP nas configurações.");
+        double lat = geo.get(0).path("lat").asDouble(), lon = geo.get(0).path("lon").asDouble();
+        String overpass = "[out:json];(node[amenity=pharmacy](around:10000," + lat + "," + lon + ");way[amenity=pharmacy](around:10000," + lat + "," + lon + "););out center tags;";
+        HttpRequest osmReq = HttpRequest.newBuilder(URI.create("https://overpass-api.de/api/interpreter"))
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .header("User-Agent", "FarmaGrid/1.0 contato@farmagrid.app")
+            .POST(HttpRequest.BodyPublishers.ofString("data=" + URLEncoder.encode(overpass, StandardCharsets.UTF_8))).build();
+        JsonNode elementos = mapper.readTree(client.send(osmReq, HttpResponse.BodyHandlers.ofString()).body()).path("elements");
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (JsonNode p : elementos) {
+            JsonNode tags = p.path("tags");
+            if (tags.path("name").asText().isBlank()) continue;
+            Map<String, Object> item = new LinkedHashMap<>();
+            item.put("id", "osm-" + p.path("id").asText()); item.put("nome", tags.path("name").asText());
+            item.put("endereco", montarEndereco(tags)); item.put("aberto", null);
+            item.put("horario", tags.path("opening_hours").asText("Horário não informado")); item.put("fonte", "OpenStreetMap");
+            result.add(item); if (result.size() == 15) break;
+        }
+        return result;
+    }
+
+    private String montarEndereco(JsonNode tags) {
+        return java.util.stream.Stream.of(tags.path("addr:street").asText(), tags.path("addr:housenumber").asText(), tags.path("addr:suburb").asText())
+            .filter(v -> v != null && !v.isBlank()).collect(java.util.stream.Collectors.joining(", "));
     }
 }

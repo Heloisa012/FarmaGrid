@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/paciente_models.dart';
 import '../../services/paciente_service.dart';
 import '../../services/perfil_service.dart';
+import 'configuracoesPaciente.dart';
 
 class TelaDescontos extends StatefulWidget {
   const TelaDescontos({super.key});
@@ -171,9 +172,13 @@ class _TelaDescontosState extends State<TelaDescontos> {
                   ),
                   onPressed: () async {
                     if (!_premium) {
-                      await PacienteService.alterarAssinatura(true);
-                      await PerfilService.carregar(atualizar: true);
-                      if (mounted) setState(() => _premium = true);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              const TelaConfiguracoesPaciente(abaInicial: 4),
+                        ),
+                      );
                     } else {
                       Navigator.push(
                         context,
