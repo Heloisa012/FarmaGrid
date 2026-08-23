@@ -120,8 +120,17 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("E-mail já cadastrado.");
         }
 
+        String cpf = somenteDigitos(req.cpf);
+        if (cpf.length() != 11) {
+            return ResponseEntity.badRequest().body("CPF inválido. Informe 11 dígitos.");
+        }
+        if (pacienteRepo.findByCpf(cpf).isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("CPF já cadastrado.");
+        }
+
         Paciente paciente = new Paciente();
         paciente.setNome(req.nome);
+        paciente.setCpf(cpf);
         paciente.setDataNascimento(req.dataNascimento);
         paciente.setSexo(req.sexo);
         paciente.setRua(req.rua);
@@ -197,5 +206,9 @@ public class AuthController {
 
     private BigDecimal parseDecimal(String value) {
         return value == null || value.isBlank() ? null : new BigDecimal(value);
+    }
+
+    private String somenteDigitos(String value) {
+        return value == null ? "" : value.replaceAll("\\D", "");
     }
 }

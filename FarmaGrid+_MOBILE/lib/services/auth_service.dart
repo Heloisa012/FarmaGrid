@@ -72,6 +72,7 @@ class AuthService {
     required String email,
     required String senha,
     required String nome,
+    required String cpf,
     required String dataNascimento,
     required String sexo,
     required String rua,
@@ -87,6 +88,7 @@ class AuthService {
       'email': email,
       'senha': senha,
       'nome': nome,
+      'cpf': cpf.replaceAll(RegExp(r'[^0-9]'), ''),
       'dataNascimento': dataNascimento,
       'sexo': sexo,
       'rua': rua,
@@ -198,7 +200,11 @@ class AuthService {
       final dynamic corpo = jsonDecode(resposta.body);
 
       if (corpo is Map) {
-        final campoMensagem = corpo['message'] ?? corpo['mensagem'] ?? corpo['error'] ?? corpo['erro'];
+        final campoMensagem =
+            corpo['message'] ??
+            corpo['mensagem'] ??
+            corpo['error'] ??
+            corpo['erro'];
         if (campoMensagem != null) {
           return campoMensagem.toString();
         }
@@ -208,7 +214,9 @@ class AuthService {
         return corpo;
       }
 
-      return resposta.body.isNotEmpty ? resposta.body : 'Erro inesperado ao conectar com o servidor.';
+      return resposta.body.isNotEmpty
+          ? resposta.body
+          : 'Erro inesperado ao conectar com o servidor.';
     } catch (_) {
       if (resposta.body.isNotEmpty) {
         return resposta.body;

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'detalhes_paciente.dart';
+import '../../models/medico_models.dart';
+import '../../services/medico_service.dart';
 
 class TelaProntuarios extends StatefulWidget {
   const TelaProntuarios({super.key});
@@ -16,32 +18,44 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
 
   final _buscaController = TextEditingController();
 
-  final List<Map<String, dynamic>> _pacientes = [
-    {
-      'nome': 'Maria Silva, 68 anos',
-      'cpf': '***.***.***-55',
-      'condicoes': ['Hipertensão', 'Diabetes tipo 2'],
-      'consultas': '24',
-      'receitas': '3',
-      'ultima': '28/10',
-    },
-    {
-      'nome': 'Maria Silva, 68 anos',
-      'cpf': '***.***.***-55',
-      'condicoes': ['Hipertensão', 'Diabetes tipo 2'],
-      'consultas': '24',
-      'receitas': '3',
-      'ultima': '28/10',
-    },
-    {
-      'nome': 'Maria Silva, 68 anos',
-      'cpf': '***.***.***-55',
-      'condicoes': ['Hipertensão', 'Diabetes tipo 2'],
-      'consultas': '24',
-      'receitas': '3',
-      'ultima': '28/10',
-    },
-  ];
+  List<PacienteMedico> _pacientes = const [];
+  bool _carregando = true;
+  String? _erro;
+
+  @override
+  void initState() {
+    super.initState();
+    _buscaController.addListener(() => setState(() {}));
+    _carregarPacientes();
+  }
+
+  Future<void> _carregarPacientes() async {
+    setState(() {
+      _carregando = true;
+      _erro = null;
+    });
+    try {
+      final pacientes = await MedicoService.listarPacientes();
+      if (mounted) setState(() => _pacientes = pacientes);
+    } catch (e) {
+      if (mounted) setState(() => _erro = e.toString());
+    } finally {
+      if (mounted) setState(() => _carregando = false);
+    }
+  }
+
+  List<PacienteMedico> get _pacientesFiltrados {
+    final busca = _buscaController.text.toLowerCase().replaceAll(
+      RegExp(r'[^a-z0-9á-ú]'),
+      '',
+    );
+    if (busca.isEmpty) return _pacientes;
+    return _pacientes.where((p) {
+      final nome = p.nome.toLowerCase().replaceAll(RegExp(r'[^a-z0-9á-ú]'), '');
+      final cpf = p.cpf.replaceAll(RegExp(r'[^0-9]'), '');
+      return nome.contains(busca) || cpf.contains(busca);
+    }).toList();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,10 +72,28 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
                 children: [
                   const Text(
                     "Meus Pacientes",
-                    style: TextStyle(color: Color(0xFF2E2E2E), fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Color(0xFF2E2E2E),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 15),
-                  ..._pacientes.map((p) => _construirCardPaciente(context, p)).toList(),
+                  if (_carregando)
+                    const Center(child: CircularProgressIndicator())
+                  else if (_erro != null)
+                    Center(
+                      child: TextButton(
+                        onPressed: _carregarPacientes,
+                        child: Text('$_erro\nTentar novamente'),
+                      ),
+                    )
+                  else if (_pacientesFiltrados.isEmpty)
+                    const Center(child: Text('Nenhum paciente encontrado.'))
+                  else
+                    ..._pacientesFiltrados.map(
+                      (p) => _construirCardPaciente(context, p),
+                    ),
                 ],
               ),
             ),
@@ -96,12 +128,20 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
             children: [
               GestureDetector(
                 onTap: () => Navigator.pop(context),
-                child: const Icon(Icons.arrow_back, color: Colors.white, size: 26),
+                child: const Icon(
+                  Icons.arrow_back,
+                  color: Colors.white,
+                  size: 26,
+                ),
               ),
               const SizedBox(width: 15),
               const Text(
                 "Prontuários",
-                style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -126,14 +166,20 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
     );
   }
 
-  Widget _construirCardPaciente(BuildContext context, Map<String, dynamic> p) {
+  Widget _construirCardPaciente(BuildContext context, PacienteMedico p) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -146,15 +192,29 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
                   color: corTealBotao.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(Icons.person_outline, color: corVerdeOliva, size: 26),
+                child: Icon(
+                  Icons.person_outline,
+                  color: corVerdeOliva,
+                  size: 26,
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(p['nome'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF2E2E2E))),
-                    Text(p['cpf'], style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                    Text(
+                      p.nomeComIdade,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                        color: Color(0xFF2E2E2E),
+                      ),
+                    ),
+                    Text(
+                      p.cpfMascarado,
+                      style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                    ),
                   ],
                 ),
               ),
@@ -164,38 +224,54 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
                     context,
                     MaterialPageRoute(
                       builder: (_) => TelaDetalhesPaciente(
-                        nome: p['nome'],
-                        cpfMascarado: p['cpf'],
+                        nome: p.nomeComIdade,
+                        cpfMascarado: p.cpfMascarado,
                       ),
                     ),
                   );
                 },
-                child: Icon(Icons.remove_red_eye_outlined, color: corVerdePrimario, size: 22),
+                child: Icon(
+                  Icons.remove_red_eye_outlined,
+                  color: corVerdePrimario,
+                  size: 22,
+                ),
               ),
             ],
           ),
           const SizedBox(height: 10),
           Wrap(
             spacing: 6,
-            children: (p['condicoes'] as List<String>)
-                .map((c) => Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: corVerdePrimario.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(20),
+            children: p.condicoes
+                .map(
+                  (c) => Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: corVerdePrimario.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      c,
+                      style: TextStyle(
+                        color: corVerdeOliva,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
                       ),
-                      child: Text(c, style: TextStyle(color: corVerdeOliva, fontSize: 11, fontWeight: FontWeight.w600)),
-                    ))
+                    ),
+                  ),
+                )
                 .toList(),
           ),
           const SizedBox(height: 12),
           Row(
             children: [
-              _statBox(p['consultas'], "Consultas"),
+              _statBox('${p.totalConsultas}', "Consultas"),
               const SizedBox(width: 10),
-              _statBox(p['receitas'], "Receitas"),
+              _statBox('${p.totalReceitas}', "Receitas"),
               const SizedBox(width: 10),
-              _statBox(p['ultima'], "Última"),
+              _statBox(p.ultimaVisita.isEmpty ? '—' : p.ultimaVisita, "Última"),
             ],
           ),
         ],
@@ -214,9 +290,19 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
         ),
         child: Column(
           children: [
-            Text(valor, style: TextStyle(color: corVerdePrimario, fontWeight: FontWeight.bold, fontSize: 16)),
+            Text(
+              valor,
+              style: TextStyle(
+                color: corVerdePrimario,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
             const SizedBox(height: 3),
-            Text(label, style: const TextStyle(color: Colors.grey, fontSize: 10)),
+            Text(
+              label,
+              style: const TextStyle(color: Colors.grey, fontSize: 10),
+            ),
           ],
         ),
       ),

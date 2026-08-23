@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api")
@@ -37,6 +38,7 @@ public class EndpointsEspecificosController {
     @Autowired private PacienteAlergiaRepository pacienteAlergiaRepo;
     @Autowired private CartaoRepository cartaoRepo;
     @Autowired private DisponibilidadeMedicoRepository disponibilidadeMedicoRepo;
+    @Autowired private ProntuarioRepository prontuarioRepo;
 
     // ──────────────────────────────────────────────────────────────────────────
     // PACIENTE — busca por nome
@@ -44,6 +46,28 @@ public class EndpointsEspecificosController {
     @GetMapping("/pacientes/buscar")
     public List<Paciente> buscarPorNome(@RequestParam String nome) {
         return pacienteRepo.findByNomeContainingIgnoreCase(nome);
+    }
+
+    @GetMapping("/medicos/{idMedico}/pacientes")
+    public List<PacienteMedicoResponse> pacientesDoMedico(@PathVariable Long idMedico) {
+        return pacienteRepo.findAll().stream().map(paciente -> {
+            PacienteMedicoResponse r = new PacienteMedicoResponse();
+            r.id = paciente.getId();
+            r.nome = paciente.getNome();
+            r.cpf = paciente.getCpf();
+            r.idade = paciente.getIdade();
+            prontuarioRepo.findFirstByIdPacienteOrderByIdDesc(paciente.getId()).ifPresent(prontuario -> {
+                r.condicao = prontuario.getCondicao();
+                r.ultimaVisita = prontuario.getUltimaVisita();
+                r.status = prontuario.getStatus();
+                if (prontuario.getCondicao() != null && !prontuario.getCondicao().isBlank()) {
+                    r.condicoes.add(prontuario.getCondicao());
+                }
+            });
+            r.totalConsultas = teleconsultaRepo.countByIdPaciente(paciente.getId());
+            r.totalReceitas = receitaRepo.countByIdPaciente(paciente.getId());
+            return r;
+        }).collect(Collectors.toList());
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -64,7 +88,43 @@ public class EndpointsEspecificosController {
     // ──────────────────────────────────────────────────────────────────────────
     @GetMapping("/receitas/paciente/{idPaciente}")
     public List<Receita> receitasPorPaciente(@PathVariable Long idPaciente) {
-        return receitaRepo.findByIdPaciente(idPaciente);
+        return receitaRepo.findByIdPacienteOrderByIdDesc(idPaciente);
+    }
+
+    @GetMapping("/receitas/medico/{idMedico}")
+    public List<Receita> receitasPorMedico(@PathVariable Long idMedico) {
+        return receitaRepo.findByIdMedicoOrderByIdDesc(idMedico);
+    }
+
+    @PostMapping("/receitas")
+    public ResponseEntity<Receita> salvarReceita(@RequestBody Receita receita) {
+        if (receita.getDataPrescricao() == null || receita.getDataPrescricao().isBlank()) {
+            receita.setDataPrescricao(LocalDate.now().toString());
+        }
+        if (receita.getStatus() == null || receita.getStatus().isBlank()) receita.setStatus("Ativa");
+        return ResponseEntity.status(HttpStatus.CREATED).body(receitaRepo.save(receita));
+    }
+
+    @GetMapping("/prontuarios/paciente/{idPaciente}")
+    public List<Prontuario> prontuariosPorPaciente(@PathVariable Long idPaciente) {
+        return prontuarioRepo.findByIdPacienteOrderByIdDesc(idPaciente);
+    }
+
+    @PostMapping("/prontuarios")
+    public ResponseEntity<Prontuario> salvarProntuario(@RequestBody Prontuario prontuario) {
+        if (prontuario.getStatus() == null || prontuario.getStatus().isBlank()) prontuario.setStatus("Ativo");
+        return ResponseEntity.status(HttpStatus.CREATED).body(prontuarioRepo.save(prontuario));
+    }
+
+    @PatchMapping("/teleconsultas/{id}/reagendar")
+    public ResponseEntity<?> reagendarTeleconsulta(@PathVariable Long id, @RequestBody ReagendarConsultaRequest req) {
+        Teleconsulta consulta = teleconsultaRepo.findById(id).orElse(null);
+        if (consulta == null) return ResponseEntity.notFound().build();
+        consulta.setData(req.novaData);
+        consulta.setHorario(req.novoHorario);
+        consulta.setDuracao(req.novaDuracao);
+        teleconsultaRepo.save(consulta);
+        return ResponseEntity.ok(consulta);
     }
 
     // ──────────────────────────────────────────────────────────────────────────

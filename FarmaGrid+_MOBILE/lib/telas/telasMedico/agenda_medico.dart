@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:farmagridd/app_theme.dart';
+import '../../models/medico_models.dart';
+import '../../services/medico_service.dart';
 
 class TelaAgendaMedico extends StatefulWidget {
   const TelaAgendaMedico({super.key});
@@ -14,16 +16,41 @@ class _TelaAgendaMedicoState extends State<TelaAgendaMedico> {
   final Color corTealBotao = const Color(0xFF7FC6BB);
 
   final _themeCtrl = AppThemeController();
+  List<ConsultaMedica> _consultas = const [];
+  bool _carregando = true;
+  String? _erro;
 
   @override
   void initState() {
     super.initState();
     _themeCtrl.addListener(() => setState(() {}));
+    _carregarAgenda();
   }
 
-  Color get corFundo => _themeCtrl.darkMode ? const Color(0xFF121212) : const Color.fromARGB(255, 245, 245, 245);
-  Color get corCard  => _themeCtrl.darkMode ? const Color(0xFF1E1E1E) : Colors.white;
-  Color get corTexto => _themeCtrl.darkMode ? Colors.white : const Color(0xFF2E2E2E);
+  Future<void> _carregarAgenda() async {
+    if (mounted) {
+      setState(() {
+        _carregando = true;
+        _erro = null;
+      });
+    }
+    try {
+      final consultas = await MedicoService.listarAgenda();
+      if (mounted) setState(() => _consultas = consultas);
+    } catch (e) {
+      if (mounted) setState(() => _erro = e.toString());
+    } finally {
+      if (mounted) setState(() => _carregando = false);
+    }
+  }
+
+  Color get corFundo => _themeCtrl.darkMode
+      ? const Color(0xFF121212)
+      : const Color.fromARGB(255, 245, 245, 245);
+  Color get corCard =>
+      _themeCtrl.darkMode ? const Color(0xFF1E1E1E) : Colors.white;
+  Color get corTexto =>
+      _themeCtrl.darkMode ? Colors.white : const Color(0xFF2E2E2E);
   Color get corSubtexto => _themeCtrl.darkMode ? Colors.white60 : Colors.grey;
 
   @override
@@ -39,20 +66,35 @@ class _TelaAgendaMedicoState extends State<TelaAgendaMedico> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _construirCardProximoAtendimento(),
-                  const SizedBox(height: 30),
-                  Text(
-                    "Agendadas",
-                    style: TextStyle(
-                      color: corTexto,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                  if (_carregando)
+                    const Center(child: CircularProgressIndicator())
+                  else if (_erro != null)
+                    _estadoErro()
+                  else if (_consultas.isEmpty)
+                    _estadoVazio()
+                  else ...[
+                    _construirCardProximoAtendimento(_consultas.first),
+                    const SizedBox(height: 30),
+                    Text(
+                      "Agendadas",
+                      style: TextStyle(
+                        color: corTexto,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 15),
-                  _construirCardConsulta("Heloisa Pola Argentin", "Hoje", "15:00", mostrarBotao: true),
-                  _construirCardConsulta("João Alves", "Hoje", "16:00", mostrarBotao: false),
-                  _construirCardConsulta("Ana Costa", "Hoje", "17:00", mostrarBotao: false),
+                    const SizedBox(height: 15),
+                    ..._consultas.map(
+                      (consulta) => _construirCardConsulta(
+                        consulta.nomePaciente,
+                        consulta.data,
+                        consulta.horario,
+                        mostrarBotao:
+                            consulta.tipo.toLowerCase().contains('online') ||
+                            consulta.tipo.toLowerCase().contains('tele'),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -100,7 +142,7 @@ class _TelaAgendaMedicoState extends State<TelaAgendaMedico> {
     );
   }
 
-  Widget _construirCardProximoAtendimento() {
+  Widget _construirCardProximoAtendimento(ConsultaMedica consulta) {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -108,7 +150,9 @@ class _TelaAgendaMedicoState extends State<TelaAgendaMedico> {
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: _themeCtrl.darkMode ? 0.2 : 0.06),
+            color: Colors.black.withValues(
+              alpha: _themeCtrl.darkMode ? 0.2 : 0.06,
+            ),
             blurRadius: 15,
             offset: const Offset(0, 6),
           ),
@@ -122,7 +166,11 @@ class _TelaAgendaMedicoState extends State<TelaAgendaMedico> {
               color: corVerdePrimario.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(14),
             ),
-            child: Icon(Icons.videocam_outlined, color: corVerdeOliva, size: 28),
+            child: Icon(
+              Icons.videocam_outlined,
+              color: corVerdeOliva,
+              size: 28,
+            ),
           ),
           const SizedBox(width: 15),
           Column(
@@ -130,11 +178,15 @@ class _TelaAgendaMedicoState extends State<TelaAgendaMedico> {
             children: [
               Text(
                 "Próximo Atendimento",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: corTexto),
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: corTexto,
+                ),
               ),
               const SizedBox(height: 3),
               Text(
-                "Hoje às 15:00",
+                "${consulta.data} às ${consulta.horario}",
                 style: TextStyle(color: corSubtexto, fontSize: 13),
               ),
             ],
@@ -144,7 +196,35 @@ class _TelaAgendaMedicoState extends State<TelaAgendaMedico> {
     );
   }
 
-  Widget _construirCardConsulta(String nome, String data, String hora, {required bool mostrarBotao}) {
+  Widget _estadoErro() => Center(
+    child: Column(
+      children: [
+        Text(
+          _erro!,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: corSubtexto),
+        ),
+        TextButton(
+          onPressed: _carregarAgenda,
+          child: const Text('Tentar novamente'),
+        ),
+      ],
+    ),
+  );
+
+  Widget _estadoVazio() => Center(
+    child: Text(
+      'Nenhuma consulta agendada.',
+      style: TextStyle(color: corSubtexto),
+    ),
+  );
+
+  Widget _construirCardConsulta(
+    String nome,
+    String data,
+    String hora, {
+    required bool mostrarBotao,
+  }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
       padding: const EdgeInsets.all(16),
@@ -153,7 +233,9 @@ class _TelaAgendaMedicoState extends State<TelaAgendaMedico> {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: _themeCtrl.darkMode ? 0.2 : 0.05),
+            color: Colors.black.withValues(
+              alpha: _themeCtrl.darkMode ? 0.2 : 0.05,
+            ),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -179,7 +261,11 @@ class _TelaAgendaMedicoState extends State<TelaAgendaMedico> {
                   children: [
                     Text(
                       nome,
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: corTexto),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: corTexto,
+                      ),
                     ),
                     Text(
                       "Paciente",
@@ -215,8 +301,13 @@ class _TelaAgendaMedicoState extends State<TelaAgendaMedico> {
                   backgroundColor: corVerdePrimario,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 11),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  textStyle: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
                 ),
               ),
             ),

@@ -14,4 +14,5 @@ public interface TeleconsultaRepository extends JpaRepository<Teleconsulta, Long
     List<Teleconsulta> findByIdMedicoOrderByData(@Param("idMedico") Long idMedico);
 
     List<Teleconsulta> findByIdPaciente(Long idPaciente);
+    long countByIdPaciente(Long idPaciente);
 }

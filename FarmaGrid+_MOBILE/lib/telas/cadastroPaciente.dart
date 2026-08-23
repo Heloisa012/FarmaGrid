@@ -24,6 +24,7 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   final TextEditingController _nomeCtrl = TextEditingController();
+  final TextEditingController _cpfCtrl = TextEditingController();
   final TextEditingController _emailCtrl = TextEditingController();
   final TextEditingController _senhaCtrl = TextEditingController();
   final TextEditingController _confirmCtrl = TextEditingController();
@@ -52,6 +53,11 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
 
   final _telefoneMask = MaskTextInputFormatter(
     mask: '(##) #####-####',
+    filter: {"#": RegExp(r'[0-9]')},
+  );
+
+  final _cpfMask = MaskTextInputFormatter(
+    mask: '###.###.###-##',
     filter: {"#": RegExp(r'[0-9]')},
   );
 
@@ -86,6 +92,7 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
           email: _emailCtrl.text.trim(),
           senha: _senhaCtrl.text,
           nome: _nomeCtrl.text.trim(),
+          cpf: _cpfMask.getUnmaskedText(),
           dataNascimento: _dataNascimentoCtrl.text.trim(),
           sexo: _genero,
           rua: _ruaCtrl.text.trim(),
@@ -188,6 +195,7 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
 
   void _limpar() {
     _nomeCtrl.clear();
+    _cpfCtrl.clear();
     _emailCtrl.clear();
     _senhaCtrl.clear();
     _confirmCtrl.clear();
@@ -238,6 +246,7 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
   @override
   void dispose() {
     _nomeCtrl.dispose();
+    _cpfCtrl.dispose();
     _emailCtrl.dispose();
     _senhaCtrl.dispose();
     _confirmCtrl.dispose();
@@ -284,6 +293,24 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
                         if (v == null || v.trim().isEmpty)
                           return "Campo obrigatório!";
                         if (v.trim().length < 3) return "Nome muito curto.";
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 14),
+
+                    _campo(
+                      controller: _cpfCtrl,
+                      label: "CPF",
+                      icone: Icons.badge_outlined,
+                      teclado: TextInputType.number,
+                      inputFormatters: [_cpfMask],
+                      validator: (v) {
+                        if (v == null || v.trim().isEmpty) {
+                          return "Campo obrigatório!";
+                        }
+                        if (_cpfMask.getUnmaskedText().length != 11) {
+                          return "CPF inválido. Digite 11 dígitos.";
+                        }
                         return null;
                       },
                     ),

@@ -17,6 +17,11 @@ public class Paciente {
     @Column(nullable = false, length = 100)
     private String nome;
 
+    @Column(unique = true, length = 20)
+    private String cpf;
+
+    private Integer idade;
+
     @Column(name = "data_nascimento", length = 20)
     private String dataNascimento;
 

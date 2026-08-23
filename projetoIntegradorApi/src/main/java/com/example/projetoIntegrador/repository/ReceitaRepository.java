@@ -7,4 +7,7 @@ import java.util.List;
 
 public interface ReceitaRepository extends JpaRepository<Receita, Long> {
     List<Receita> findByIdPaciente(Long idPaciente);
+    List<Receita> findByIdPacienteOrderByIdDesc(Long idPaciente);
+    List<Receita> findByIdMedicoOrderByIdDesc(Long idMedico);
+    long countByIdPaciente(Long idPaciente);
 }
