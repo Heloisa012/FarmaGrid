@@ -107,7 +107,9 @@ class DrawerPaciente extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      "Plano Básico",
+                      perfil?['planoPremium'] == true
+                          ? "Membro Premium"
+                          : "Plano Básico",
                       style: TextStyle(
                         color: corOliva,
                         fontWeight: FontWeight.bold,

@@ -63,6 +63,18 @@ public class Paciente {
     @Column(length = 100)
     private String cidade;
 
+    @Column(length = 2)
+    private String estado;
+
+    @Column(name = "plano_premium", nullable = false)
+    private Boolean planoPremium = false;
+
+    @Column(name = "assinatura_status", length = 20)
+    private String assinaturaStatus;
+
+    @Column(name = "assinatura_validade", length = 20)
+    private String assinaturaValidade;
+
     @Column(name = "plano_saude", length = 100)
     private String planoSaude;
 

@@ -10,7 +10,8 @@ import 'lojamedicamentos.dart';
 import '../../models/medico_models.dart';
 import '../../models/paciente_models.dart';
 import '../../services/paciente_service.dart';
-import '../../services/perfil_service.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 
 class TelaHomePaciente extends StatefulWidget {
   @override
@@ -109,6 +110,11 @@ class _TelaHomePacienteState extends State<TelaHomePaciente> {
   }
 
   Widget _construirCabecalho() {
+    Uint8List? foto;
+    try {
+      if ((_perfil?.fotoPerfil ?? '').isNotEmpty)
+        foto = base64Decode(_perfil!.fotoPerfil);
+    } catch (_) {}
     return Stack(
       clipBehavior: Clip.none,
       alignment: Alignment.center,
@@ -139,13 +145,8 @@ class _TelaHomePacienteState extends State<TelaHomePaciente> {
                 child: CircleAvatar(
                   radius: 28,
                   backgroundColor: Colors.white,
-                  backgroundImage:
-                      PerfilService.foto(PerfilService.atual.value) == null
-                      ? null
-                      : MemoryImage(
-                          PerfilService.foto(PerfilService.atual.value)!,
-                        ),
-                  child: PerfilService.foto(PerfilService.atual.value) == null
+                  backgroundImage: foto == null ? null : MemoryImage(foto),
+                  child: foto == null
                       ? const Icon(
                           Icons.person,
                           size: 35,

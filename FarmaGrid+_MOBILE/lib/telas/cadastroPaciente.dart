@@ -98,6 +98,8 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
           rua: _ruaCtrl.text.trim(),
           numCasa: int.tryParse(_numeroCtrl.text.trim()),
           bairro: _bairroCtrl.text.trim(),
+          cidade: _cidadeCtrl.text.trim(),
+          estado: _estadoCtrl.text.trim(),
           telefone: _telefoneCtrl.text.trim(),
           cep: _cepCtrl.text.trim(),
           tipoSanguineo: _tipoSanguineoCtrl.text.trim(),

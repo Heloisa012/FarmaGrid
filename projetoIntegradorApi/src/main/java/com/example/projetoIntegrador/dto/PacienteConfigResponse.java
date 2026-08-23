@@ -13,10 +13,14 @@ public class PacienteConfigResponse {
     public Integer numCasa;
     public String bairro;
     public String cidade;
+    public String estado;
     public String cep;
     public String tipoSanguineo;
     public String planoSaude;
     public String contatoEmergenciaNome;
     public String contatoEmergenciaTelefone;
     public byte[] fotoPerfil;
+    public Boolean planoPremium;
+    public String assinaturaStatus;
+    public String assinaturaValidade;
 }

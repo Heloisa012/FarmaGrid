@@ -40,6 +40,7 @@ public class EndpointsEspecificosController {
     @Autowired private DisponibilidadeMedicoRepository disponibilidadeMedicoRepo;
     @Autowired private ProntuarioRepository prontuarioRepo;
     @Autowired private LoginRepository loginRepo;
+    @Autowired private SolicitacaoExameRepository solicitacaoExameRepo;
 
     // ──────────────────────────────────────────────────────────────────────────
     // PACIENTE — busca por nome
@@ -90,6 +91,39 @@ public class EndpointsEspecificosController {
     @GetMapping("/receitas/paciente/{idPaciente}")
     public List<Receita> receitasPorPaciente(@PathVariable Long idPaciente) {
         return receitaRepo.findByIdPacienteOrderByIdDesc(idPaciente);
+    }
+
+    @GetMapping("/medicos-disponiveis")
+    public List<java.util.Map<String, Object>> medicosDisponiveis() {
+        return medicoRepo.findAll().stream().map(m -> {
+            java.util.Map<String, Object> r = new java.util.HashMap<>();
+            r.put("id", m.getId()); r.put("nome", m.getNome());
+            r.put("sobrenome", m.getSobrenome()); r.put("especialidade", m.getEspecialidade());
+            r.put("crm", m.getCrm()); return r;
+        }).collect(Collectors.toList());
+    }
+
+    @GetMapping("/solicitacoes-exame/paciente/{idPaciente}")
+    public List<SolicitacaoExame> solicitacoesExame(@PathVariable Long idPaciente) {
+        return solicitacaoExameRepo.findByIdPacienteOrderByIdDesc(idPaciente);
+    }
+
+    @PostMapping("/solicitacoes-exame")
+    public ResponseEntity<SolicitacaoExame> solicitarExame(@RequestBody SolicitacaoExame item) {
+        item.setId(null); item.setStatus("Solicitado");
+        item.setSolicitadoEm(LocalDate.now().toString());
+        return ResponseEntity.status(HttpStatus.CREATED).body(solicitacaoExameRepo.save(item));
+    }
+
+    @PutMapping("/pacientes/{idPaciente}/assinatura")
+    public ResponseEntity<?> alterarAssinatura(@PathVariable Long idPaciente, @RequestBody AssinaturaRequest req) {
+        Paciente p = pacienteRepo.findById(idPaciente).orElse(null);
+        if (p == null) return ResponseEntity.notFound().build();
+        p.setPlanoPremium(req.premium);
+        p.setAssinaturaStatus(req.premium ? "ATIVA" : "CANCELADA");
+        p.setAssinaturaValidade(req.premium ? LocalDate.now().plusMonths(1).toString() : null);
+        pacienteRepo.save(p);
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/receitas/medico/{idMedico}")

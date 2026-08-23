@@ -10,6 +10,8 @@ public class CadastroPacienteRequest {
     public String rua;
     public Integer numCasa;
     public String bairro;
+    public String cidade;
+    public String estado;
     public Long idCidade;
     public Long idPlano;
     public String telefone;

@@ -147,6 +147,9 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
       _contatoEmerTelCtrl.text =
           '${_perfil['contatoEmergenciaTelefone'] ?? ''}';
       _tipoSanguineo = '${_perfil['tipoSanguineo'] ?? 'Não informado'}';
+      _planoAssinatura = _perfil['planoPremium'] == true
+          ? 'Clube FarmaGrid+'
+          : 'Plano Básico';
       _foto = PerfilService.foto(_perfil);
       _dependentes
         ..clear()
@@ -188,6 +191,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
       'numCasa': int.tryParse(_numeroCtrl.text),
       'bairro': _bairroCtrl.text.trim(),
       'cidade': _cidadeCtrl.text.trim(),
+      'estado': _perfil['estado'],
       'cep': _cepCtrl.text.trim(),
       'tipoSanguineo': _tipoSanguineo,
       'planoSaude': _planoCtrl.text.trim(),
@@ -920,7 +924,12 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                 ...['Plano Básico', 'Clube FarmaGrid+'].map((plano) {
                   final sel = _planoAssinatura == plano;
                   return GestureDetector(
-                    onTap: () => setState(() => _planoAssinatura = plano),
+                    onTap: () async {
+                      final premium = plano == 'Clube FarmaGrid+';
+                      await PacienteService.alterarAssinatura(premium);
+                      await PerfilService.carregar(atualizar: true);
+                      if (mounted) setState(() => _planoAssinatura = plano);
+                    },
                     child: Container(
                       margin: const EdgeInsets.only(bottom: 8),
                       padding: const EdgeInsets.symmetric(

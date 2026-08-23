@@ -11,6 +11,7 @@ public class PacienteDadosRequest {
     public Integer numCasa;
     public String bairro;
     public String cidade;
+    public String estado;
     public String cep;
     public String tipoSanguineo;
     public String planoSaude;

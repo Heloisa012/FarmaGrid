@@ -48,6 +48,30 @@ class PacienteService {
       ApiService.getList('/api/pacientes/$idPaciente/cartoes');
   static Future<List<Map<String, dynamic>>> listarExames() =>
       ApiService.getList('/api/relatorios/paciente/$idPaciente');
+  static Future<List<Map<String, dynamic>>> listarSolicitacoesExame() =>
+      ApiService.getList('/api/solicitacoes-exame/paciente/$idPaciente');
+  static Future<Map<String, dynamic>> solicitarExame(
+    String exame,
+    String justificativa,
+  ) => ApiService.post('/api/solicitacoes-exame', {
+    'idPaciente': idPaciente,
+    'exame': exame,
+    'justificativa': justificativa,
+  });
+  static Future<List<Map<String, dynamic>>> listarMedicos() =>
+      ApiService.getList('/api/medicos-disponiveis');
+  static Future<Map<String, dynamic>> agendarTeleconsulta(
+    Map<String, dynamic> dados,
+  ) => ApiService.post('/api/teleconsultas', {
+    ...dados,
+    'idPaciente': idPaciente,
+  });
+  static Future<List<Map<String, dynamic>>> listarFarmaciasProximas() =>
+      ApiService.getList('/api/pacientes/$idPaciente/farmacias-proximas');
+  static Future<void> alterarAssinatura(bool premium) => ApiService.put(
+    '/api/pacientes/$idPaciente/assinatura',
+    {'premium': premium},
+  );
 
   static Future<void> atualizarPerfil(Map<String, dynamic> dados) async =>
       ApiService.put('/api/pacientes/$idPaciente', dados);

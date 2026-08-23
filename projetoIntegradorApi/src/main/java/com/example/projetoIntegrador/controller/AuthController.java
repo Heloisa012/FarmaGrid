@@ -136,6 +136,8 @@ public class AuthController {
         paciente.setRua(req.rua);
         paciente.setNumCasa(req.numCasa);
         paciente.setBairro(req.bairro);
+        paciente.setCidade(req.cidade);
+        paciente.setEstado(req.estado);
         paciente.setIdCidade(req.idCidade);
         paciente.setIdPlano(req.idPlano);
         paciente.setTelefone(req.telefone);

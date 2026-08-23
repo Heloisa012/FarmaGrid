@@ -2,6 +2,7 @@ import 'package:farmagridd/telas/login.dart';
 import 'package:flutter/material.dart';
 import '../../models/paciente_models.dart';
 import '../../services/paciente_service.dart';
+import '../../services/perfil_service.dart';
 
 class TelaDescontos extends StatefulWidget {
   const TelaDescontos({super.key});
@@ -16,6 +17,7 @@ class _TelaDescontosState extends State<TelaDescontos> {
   final Color corBegeCard = const Color(0xFFFDFCF4);
   final Color corTeal = Color(0xFF7FC6BB);
   List<CupomPaciente> _cupons = const [];
+  bool _premium = false;
 
   @override
   void initState() {
@@ -23,6 +25,16 @@ class _TelaDescontosState extends State<TelaDescontos> {
     PacienteService.listarCupons()
         .then((cupons) {
           if (mounted) setState(() => _cupons = cupons);
+        })
+        .catchError((_) {});
+    PerfilService.carregar(atualizar: true)
+        .then((p) {
+          if (mounted) {
+            setState(
+              () => _premium =
+                  p['planoPremium'] == true && p['assinaturaStatus'] == 'ATIVA',
+            );
+          }
         })
         .catchError((_) {});
   }
@@ -122,19 +134,26 @@ class _TelaDescontosState extends State<TelaDescontos> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Você é membro Premium!",
-                          style: TextStyle(
+                          _premium
+                              ? "Você é membro Premium!"
+                              : "Conheça o FarmaGrid Premium",
+                          style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 16,
                           ),
                         ),
                         Text(
-                          "Aproveite descontos exclusivos",
-                          style: TextStyle(color: Colors.grey, fontSize: 13),
+                          _premium
+                              ? "Aproveite descontos exclusivos"
+                              : "Assine para liberar os benefícios",
+                          style: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 13,
+                          ),
                         ),
                       ],
                     ),
@@ -150,15 +169,21 @@ class _TelaDescontosState extends State<TelaDescontos> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => TelaClube()),
-                    );
+                  onPressed: () async {
+                    if (!_premium) {
+                      await PacienteService.alterarAssinatura(true);
+                      await PerfilService.carregar(atualizar: true);
+                      if (mounted) setState(() => _premium = true);
+                    } else {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => TelaClube()),
+                      );
+                    }
                   },
-                  child: const Text(
-                    "Mostrar comprovante",
-                    style: TextStyle(
+                  child: Text(
+                    _premium ? "Mostrar comprovante" : "Assinar Premium",
+                    style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),

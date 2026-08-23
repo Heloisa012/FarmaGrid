@@ -37,4 +37,7 @@ public class Teleconsulta {
 
     @Column(name = "nome_paciente", length = 255)
     private String nomePaciente;
+
+    @Column(name = "link_sala", length = 500)
+    private String linkSala;
 }
