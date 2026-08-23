@@ -1,257 +1,259 @@
 import 'package:flutter/material.dart';
+import '../../services/medico_service.dart';
+import 'medico_visual.dart';
 
-class TelaRelatorios extends StatelessWidget {
-  final Color corVerdePrimario = const Color(0xFF59AA53);
-  final Color corVerdeOliva = const Color(0xFF136A48);
-  final Color corTealBotao = const Color(0xFF7FC6BB);
-  final Color corFundoSite = const Color.fromARGB(255, 245, 245, 245);
-
+class TelaRelatorios extends StatefulWidget {
   const TelaRelatorios({super.key});
+  @override
+  State<TelaRelatorios> createState() => _TelaRelatoriosState();
+}
+
+class _TelaRelatoriosState extends State<TelaRelatorios> {
+  Map<String, dynamic>? _painel;
+  String? _erro;
+  static const _meses = [
+    'Janeiro',
+    'Fevereiro',
+    'Março',
+    'Abril',
+    'Maio',
+    'Junho',
+    'Julho',
+    'Agosto',
+    'Setembro',
+    'Outubro',
+    'Novembro',
+    'Dezembro',
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _carregar();
+  }
+
+  Future<void> _carregar() async {
+    setState(() => _erro = null);
+    try {
+      final painel = await MedicoService.buscarPainel();
+      if (mounted) setState(() => _painel = painel);
+    } catch (e) {
+      if (mounted) setState(() => _erro = e.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final agora = DateTime.now();
+    final periodo = '${_meses[agora.month - 1]} ${agora.year}';
     return Scaffold(
-      backgroundColor: corFundoSite,
+      backgroundColor: medicoFundo,
       body: Column(
         children: [
-          _construirCabecalho(context),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _construirCardAnalise(),
-                  const SizedBox(height: 30),
-                  const Text(
-                    "Visão geral do mês",
-                    style: TextStyle(color: Color(0xFF2E2E2E), fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 15),
-                  _construirGridVisaoGeral(),
-                  const SizedBox(height: 30),
-                  const Text(
-                    "Consultas por Tipo",
-                    style: TextStyle(color: Color(0xFF2E2E2E), fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 15),
-                  _construirConsultasPorTipo(),
-                  const SizedBox(height: 30),
-                  const Text(
-                    "Diagnósticos Mais Frequentes",
-                    style: TextStyle(color: Color(0xFF2E2E2E), fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 15),
-                  _construirDiagnosticos(),
-                  const SizedBox(height: 25),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.download_outlined, size: 18),
-                      label: const Text("Relatório Mensal Completo"),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: corVerdePrimario,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        textStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+          MedicoCabecalho(
+            titulo: 'Relatório mensal',
+            subtitulo: 'Desempenho consolidado do período',
+            rodape: Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 13,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: .2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.calendar_month_outlined,
+                      color: Colors.white,
+                      size: 17,
+                    ),
+                    const SizedBox(width: 7),
+                    Text(
+                      periodo,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 30),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
+          Expanded(child: _conteudo()),
         ],
       ),
     );
   }
 
-  Widget _construirCabecalho(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.only(top: 60, left: 25, right: 25, bottom: 25),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            const Color(0xFF59AA53),
-            const Color(0xFF89C6B1).withValues(alpha: 1.0),
-          ],
+  Widget _conteudo() {
+    if (_erro != null) {
+      return Center(
+        child: TextButton.icon(
+          onPressed: _carregar,
+          icon: const Icon(Icons.refresh),
+          label: const Text('Não foi possível carregar. Tentar novamente'),
         ),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(40),
-          bottomRight: Radius.circular(40),
-        ),
-      ),
-      child: Row(
+      );
+    }
+    if (_painel == null) {
+      return const Center(child: CircularProgressIndicator(color: medicoVerde));
+    }
+    final tipos = Map<String, dynamic>.from(
+      _painel?['tiposConsulta'] ?? const {},
+    );
+    final totalTipos = tipos.values.fold<num>(0, (s, v) => s + (v as num));
+    return RefreshIndicator(
+      onRefresh: _carregar,
+      color: medicoVerde,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(24, 25, 24, 36),
         children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: const Icon(Icons.arrow_back, color: Colors.white, size: 26),
-          ),
-          const SizedBox(width: 15),
-          const Text(
-            "Relatórios",
-            style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _construirCardAnalise() {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 15, offset: const Offset(0, 6))],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: corVerdePrimario.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(Icons.bar_chart_outlined, color: corVerdeOliva, size: 28),
-          ),
-          const SizedBox(width: 15),
-          const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text("Análise de Desempenho", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF2E2E2E))),
-              SizedBox(height: 3),
-              Text("Outubro 2025", style: TextStyle(color: Colors.grey, fontSize: 13)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _construirGridVisaoGeral() {
-    return Row(
-      children: [
-        Expanded(child: _cardMetrica("124", "Consultas Realizadas", "+12% vs mês anterior", Icons.calendar_today_outlined)),
-        const SizedBox(width: 15),
-        Expanded(child: _cardMetrica("156", "Receitas Emitidas", "+15% vs mês anterior", Icons.description_outlined)),
-      ],
-    );
-  }
-
-  Widget _cardMetrica(String valor, String titulo, String rodape, IconData icone) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: corVerdePrimario,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: corVerdePrimario.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 6))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icone, color: Colors.white.withValues(alpha: 0.8), size: 22),
-          const SizedBox(height: 8),
-          Text(valor, style: const TextStyle(color: Colors.white, fontSize: 30, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 6),
-          Text(titulo, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
-          Text(rodape, style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 11)),
-        ],
-      ),
-    );
-  }
-
-  Widget _construirConsultasPorTipo() {
-    final itens = [
-      {"tipo": "Teleconsultas", "qtd": 78, "pct": "63%"},
-      {"tipo": "Retornos", "qtd": 32, "pct": "26%"},
-      {"tipo": "Primeira Consulta", "qtd": 14, "pct": "11%"},
-    ];
-    final total = 124.0;
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 4))],
-      ),
-      child: Column(
-        children: itens.map((item) {
-          final pct = (item['qtd'] as int) / total;
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 14),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(item['tipo'] as String, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Color(0xFF2E2E2E))),
-                    Text(item['pct'] as String, style: TextStyle(color: corVerdePrimario, fontWeight: FontWeight.bold, fontSize: 13)),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(6),
-                  child: LinearProgressIndicator(
-                    value: pct,
-                    backgroundColor: corFundoSite,
-                    color: corVerdePrimario,
-                    minHeight: 8,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
-  Widget _construirDiagnosticos() {
-    final lista = [
-      {"rank": "1", "nome": "Hipertensão Arterial", "casos": "45 casos"},
-      {"rank": "2", "nome": "Diabetes tipo 2", "casos": "32 casos"},
-      {"rank": "3", "nome": "Infecções Respiratórias", "casos": "28 casos"},
-    ];
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 4))],
-      ),
-      child: Column(
-        children: lista.map((item) {
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 12),
+          const MedicoTituloSecao('Resumo do mês'),
+          const SizedBox(height: 15),
+          MedicoCard(
             child: Row(
               children: [
-                Container(
-                  width: 30,
-                  height: 30,
-                  decoration: BoxDecoration(color: corVerdePrimario, borderRadius: BorderRadius.circular(8)),
-                  child: Center(
-                    child: Text(item['rank']!, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                Expanded(
+                  child: _resumo(
+                    '${_painel!['consultasMes'] ?? 0}',
+                    'Consultas',
+                    Icons.event_available_outlined,
                   ),
                 ),
-                const SizedBox(width: 14),
+                Container(width: 1, height: 62, color: const Color(0xFFE8E8E8)),
                 Expanded(
-                  child: Text(item['nome']!, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Color(0xFF2E2E2E))),
+                  child: _resumo(
+                    '${_painel!['receitasMes'] ?? 0}',
+                    'Receitas',
+                    Icons.description_outlined,
+                  ),
                 ),
-                Text(item['casos']!, style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                Container(width: 1, height: 62, color: const Color(0xFFE8E8E8)),
+                Expanded(
+                  child: _resumo(
+                    '${_painel!['totalPacientes'] ?? 0}',
+                    'Pacientes',
+                    Icons.people_outline,
+                  ),
+                ),
               ],
             ),
-          );
-        }).toList(),
+          ),
+          const SizedBox(height: 28),
+          const MedicoTituloSecao(
+            'Perfil dos atendimentos',
+            legenda: 'Distribuição das consultas registradas por modalidade',
+          ),
+          const SizedBox(height: 15),
+          MedicoCard(
+            child: tipos.isEmpty
+                ? const Text(
+                    'Nenhuma consulta registrada neste período.',
+                    style: TextStyle(color: Colors.grey),
+                  )
+                : Column(
+                    children: tipos.entries.map((e) {
+                      final qtd = e.value as num;
+                      final percentual = totalTipos == 0
+                          ? 0.0
+                          : qtd / totalTipos;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 18),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 5,
+                                  height: 34,
+                                  decoration: BoxDecoration(
+                                    color: medicoTeal,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    e.key,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: medicoTexto,
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  '$qtd',
+                                  style: const TextStyle(
+                                    color: medicoVerdeEscuro,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  '${(percentual * 100).round()}%',
+                                  style: const TextStyle(
+                                    color: Colors.grey,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 9),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: LinearProgressIndicator(
+                                value: percentual,
+                                minHeight: 8,
+                                color: medicoVerde,
+                                backgroundColor: medicoFundo,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+          ),
+          const SizedBox(height: 18),
+          const MedicoCard(
+            color: Color(0xFFEAF5EF),
+            child: Row(
+              children: [
+                Icon(Icons.storage_outlined, color: medicoVerdeEscuro),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Relatório atualizado com consultas, receitas e prontuários vinculados ao médico autenticado.',
+                    style: TextStyle(color: Color(0xFF557068), height: 1.4),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
+
+  Widget _resumo(String valor, String titulo, IconData icone) => Column(
+    children: [
+      Icon(icone, color: medicoVerdeEscuro, size: 22),
+      const SizedBox(height: 8),
+      Text(
+        valor,
+        style: const TextStyle(
+          color: medicoTexto,
+          fontSize: 24,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+      Text(titulo, style: const TextStyle(color: Colors.grey, fontSize: 11)),
+    ],
+  );
 }

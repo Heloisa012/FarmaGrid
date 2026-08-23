@@ -85,6 +85,12 @@ class PacienteMedico {
     if (digitos.length != 11) return cpf.isEmpty ? 'CPF não informado' : cpf;
     return '***.***.${digitos.substring(6, 9)}-${digitos.substring(9)}';
   }
+
+  String get cpfFormatado {
+    final digitos = cpf.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digitos.length != 11) return cpf.isEmpty ? 'CPF não informado' : cpf;
+    return '${digitos.substring(0, 3)}.${digitos.substring(3, 6)}.${digitos.substring(6, 9)}-${digitos.substring(9)}';
+  }
 }
 
 class ReceitaMedica {

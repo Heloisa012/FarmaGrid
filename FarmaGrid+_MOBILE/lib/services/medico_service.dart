@@ -33,6 +33,36 @@ class MedicoService {
     return _lista(json).map(PacienteMedico.fromJson).toList();
   }
 
+  static Future<Map<String, dynamic>> buscarPainel() async {
+    final json = await _get('/api/medicos/$_idMedico/painel');
+    return json is Map ? Map<String, dynamic>.from(json) : {};
+  }
+
+  static Future<List<Map<String, dynamic>>> listarProntuariosPaciente(
+    int idPaciente,
+  ) async => _lista(await _get('/api/prontuarios/paciente/$idPaciente'));
+
+  static Future<Map<String, dynamic>> salvarProntuario(
+    Map<String, dynamic> dados,
+  ) async {
+    final json = await _send('POST', '/api/prontuarios', {
+      ...dados,
+      'idMedico': _idMedico,
+    });
+    return json is Map ? Map<String, dynamic>.from(json) : {};
+  }
+
+  static Future<Map<String, dynamic>> editarProntuario(
+    int id,
+    Map<String, dynamic> dados,
+  ) async {
+    final json = await _send('PUT', '/api/prontuarios/$id', {
+      ...dados,
+      'idMedico': _idMedico,
+    });
+    return json is Map ? Map<String, dynamic>.from(json) : {};
+  }
+
   static Future<ReceitaMedica> criarReceita(ReceitaMedica receita) async {
     final json = await _send('POST', '/api/receitas', receita.toJson());
     final map = json is Map<String, dynamic> ? json : <String, dynamic>{};

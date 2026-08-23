@@ -73,8 +73,8 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
   }
 
   void _preencherDados() {
-    _nomeCtrl.text = '${_perfil['nome'] ?? ''}';
-    _sobrenomeCtrl.text = '${_perfil['sobrenome'] ?? ''}';
+    _nomeCtrl.text = PerfilService.nome(_perfil);
+    _sobrenomeCtrl.clear();
     _emailCtrl.text =
         '${_perfil['email'] ?? AuthService.usuarioLogado?.email ?? ''}';
     _telefoneCtrl.text = '${_perfil['telefone'] ?? ''}';
@@ -120,7 +120,7 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
   Future<void> _salvarPerfil() async {
     await PerfilService.salvarPerfil({
       'nome': _nomeCtrl.text.trim(),
-      'sobrenome': _sobrenomeCtrl.text.trim(),
+      'sobrenome': null,
       'email': _emailCtrl.text.trim(),
       'telefone': _telefoneCtrl.text.trim(),
       'dataNascimento': _nascimentoCtrl.text.trim(),
@@ -555,24 +555,10 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
             subtitulo: 'Mantenha suas informações pessoais atualizadas',
             child: Column(
               children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: _campo(
-                        'Nome:',
-                        _nomeCtrl,
-                        habilitado: _editandoPerfil,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _campo(
-                        'Sobrenome:',
-                        _sobrenomeCtrl,
-                        habilitado: _editandoPerfil,
-                      ),
-                    ),
-                  ],
+                _campo(
+                  'Nome completo:',
+                  _nomeCtrl,
+                  habilitado: _editandoPerfil,
                 ),
                 const SizedBox(height: 12),
                 _campo('E-mail:', _emailCtrl, habilitado: _editandoPerfil),

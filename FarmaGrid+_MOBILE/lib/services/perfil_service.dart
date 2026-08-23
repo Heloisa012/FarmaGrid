@@ -31,9 +31,11 @@ class PerfilService {
       final listas = await Future.wait([
         ApiService.getList('/api/medicos/$idEntidade/pacientes'),
         ApiService.getList('/api/teleconsultas/medico/$idEntidade'),
+        ApiService.getList('/api/receitas/medico/$idEntidade'),
       ]);
       perfil['totalPacientes'] = listas[0].length;
       perfil['totalConsultas'] = listas[1].length;
+      perfil['totalReceitas'] = listas[2].length;
     } else {
       final listas = await Future.wait([
         ApiService.getList('/api/teleconsultas/paciente/$idEntidade'),

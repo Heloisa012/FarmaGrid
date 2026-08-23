@@ -17,6 +17,9 @@ public class Prontuario {
     @Column(name = "id_paciente", nullable = false)
     private Long idPaciente;
 
+    @Column(name = "id_medico")
+    private Long idMedico;
+
     @Column(name = "nome_paciente", nullable = false, length = 100)
     private String nomePaciente;
 

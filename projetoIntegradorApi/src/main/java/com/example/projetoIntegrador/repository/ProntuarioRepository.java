@@ -10,4 +10,5 @@ public interface ProntuarioRepository extends JpaRepository<Prontuario, Long> {
     List<Prontuario> findByIdPacienteOrderByIdDesc(Long idPaciente);
     Optional<Prontuario> findFirstByIdPacienteOrderByIdDesc(Long idPaciente);
     long countByIdPaciente(Long idPaciente);
+    List<Prontuario> findByIdMedicoOrderByIdDesc(Long idMedico);
 }

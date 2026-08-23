@@ -1,243 +1,216 @@
 import 'package:flutter/material.dart';
+import '../../services/medico_service.dart';
+import 'medico_visual.dart';
 
-class TelaIAInsights extends StatelessWidget {
-  final Color corVerdePrimario = const Color(0xFF59AA53);
-  final Color corVerdeOliva = const Color(0xFF136A48);
-  final Color corTealBotao = const Color(0xFF7FC6BB);
-  final Color corFundoSite = const Color.fromARGB(255, 245, 245, 245);
-
+class TelaIAInsights extends StatefulWidget {
   const TelaIAInsights({super.key});
+  @override
+  State<TelaIAInsights> createState() => _TelaIAInsightsState();
+}
+
+class _TelaIAInsightsState extends State<TelaIAInsights> {
+  Map<String, dynamic>? _painel;
+  String? _erro;
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: corFundoSite,
-      body: Column(
-        children: [
-          _construirCabecalho(context),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 25),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _construirCardAnalise(),
-                  const SizedBox(height: 30),
-                  const Text(
-                    "Métricas Principais",
-                    style: TextStyle(color: Color(0xFF2E2E2E), fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 15),
-                  _construirGridMetricas(),
-                  const SizedBox(height: 30),
-                  const Text(
-                    "Pacientes Prioritários",
-                    style: TextStyle(color: Color(0xFF2E2E2E), fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 15),
-                  _construirCardPacientePrioritario(),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+  void initState() {
+    super.initState();
+    _carregar();
   }
 
-  Widget _construirCabecalho(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.only(top: 60, left: 25, right: 25, bottom: 25),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            const Color(0xFF59AA53),
-            const Color(0xFF89C6B1).withValues(alpha: 1.0),
-          ],
-        ),
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(40),
-          bottomRight: Radius.circular(40),
-        ),
-      ),
-      child: Row(
-        children: [
-          GestureDetector(
-            onTap: () => Navigator.pop(context),
-            child: const Icon(Icons.arrow_back, color: Colors.white, size: 26),
-          ),
-          const SizedBox(width: 15),
-          const Text(
-            "IA Insights",
-            style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-    );
+  Future<void> _carregar() async {
+    setState(() => _erro = null);
+    try {
+      final painel = await MedicoService.buscarPainel();
+      if (mounted) setState(() => _painel = painel);
+    } catch (e) {
+      if (mounted) setState(() => _erro = e.toString());
+    }
   }
 
-  Widget _construirCardAnalise() {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 15, offset: const Offset(0, 6)),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: corVerdePrimario.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(Icons.psychology_outlined, color: corVerdeOliva, size: 28),
-          ),
-          const SizedBox(width: 15),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Análise Inteligente",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF2E2E2E)),
-                ),
-                SizedBox(height: 3),
-                Text(
-                  "Insights baseados em IA sobre seus pacientes",
-                  style: TextStyle(color: Colors.grey, fontSize: 12),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _construirGridMetricas() {
-    return Row(
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: medicoFundo,
+    body: Column(
       children: [
-        Expanded(child: _cardMetrica("78%", "Taxa de Adesão ao Tratamento", "Pacientes seguindo prescrições corretamente")),
-        const SizedBox(width: 15),
-        Expanded(child: _cardMetrica("85%", "Eficácia de Tratamentos", "Melhora nos indicadores clínicos")),
+        const MedicoCabecalho(
+          titulo: 'Insights clínicos',
+          subtitulo: 'Uma leitura objetiva dos seus atendimentos',
+        ),
+        Expanded(child: _conteudo()),
       ],
-    );
-  }
+    ),
+  );
 
-  Widget _cardMetrica(String valor, String titulo, String subtitulo) {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: corVerdePrimario,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(color: corVerdePrimario.withValues(alpha: 0.3), blurRadius: 12, offset: const Offset(0, 6)),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.favorite_border, color: Colors.white.withValues(alpha: 0.8), size: 20),
-          const SizedBox(height: 8),
-          Text(valor, style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 10),
-          Text(titulo, style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
-          Text(subtitulo, style: TextStyle(color: Colors.white.withValues(alpha: 0.7), fontSize: 11)),
-        ],
-      ),
+  Widget _conteudo() {
+    if (_erro != null) {
+      return Center(
+        child: TextButton.icon(
+          onPressed: _carregar,
+          icon: const Icon(Icons.refresh),
+          label: const Text('Não foi possível carregar. Tentar novamente'),
+        ),
+      );
+    }
+    if (_painel == null) {
+      return const Center(child: CircularProgressIndicator(color: medicoVerde));
+    }
+    final diagnosticos = Map<String, dynamic>.from(
+      _painel?['diagnosticos'] ?? const {},
     );
-  }
+    final ordenados = diagnosticos.entries.toList()
+      ..sort((a, b) => (b.value as num).compareTo(a.value as num));
+    final maior = ordenados.isEmpty
+        ? 1.0
+        : (ordenados.first.value as num).toDouble();
+    final registros = diagnosticos.values.fold<num>(
+      0,
+      (s, v) => s + (v as num),
+    );
 
-  Widget _construirCardPacientePrioritario() {
-    return Container(
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(22),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 10, offset: const Offset(0, 4)),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return RefreshIndicator(
+      onRefresh: _carregar,
+      color: medicoVerde,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(24, 25, 24, 36),
         children: [
+          const MedicoTituloSecao(
+            'Visão geral',
+            legenda:
+                'Indicadores calculados com os dados registrados no sistema',
+          ),
+          const SizedBox(height: 15),
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: corTealBotao.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
+              Expanded(
+                child: _metrica(
+                  '${_painel!['totalPacientes'] ?? 0}',
+                  'Pacientes',
+                  Icons.people_outline,
                 ),
-                child: Icon(Icons.person_outline, color: corVerdeOliva, size: 26),
               ),
               const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("Maria Silva, 68 anos", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF2E2E2E))),
-                  Text("Diabetes tipo 2", style: TextStyle(color: Colors.grey[500], fontSize: 12)),
-                ],
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                decoration: BoxDecoration(
-                  color: Colors.orange,
-                  borderRadius: BorderRadius.circular(8),
+              Expanded(
+                child: _metrica(
+                  '${_painel!['consultasMes'] ?? 0}',
+                  'Consultas no mês',
+                  Icons.calendar_today_outlined,
                 ),
-                child: const Text("Risco Moderado", style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
-          const SizedBox(height: 15),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: corFundoSite,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              children: [
-                Icon(Icons.show_chart, color: corVerdePrimario, size: 18),
-                const SizedBox(width: 8),
-                const Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("Métricas Recentes:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF2E2E2E))),
-                    SizedBox(height: 2),
-                    Text("185 mg/dL", style: TextStyle(color: Colors.grey, fontSize: 12)),
-                  ],
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: _metrica(
+                  '${_painel!['receitasMes'] ?? 0}',
+                  'Receitas no mês',
+                  Icons.description_outlined,
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _metrica(
+                  '$registros',
+                  'Registros clínicos',
+                  Icons.monitor_heart_outlined,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 10),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: corTealBotao.withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(12),
-            ),
+          const SizedBox(height: 28),
+          const MedicoTituloSecao(
+            'Diagnósticos recorrentes',
+            legenda: 'Frequência encontrada nos prontuários dos seus pacientes',
+          ),
+          const SizedBox(height: 15),
+          MedicoCard(
+            child: ordenados.isEmpty
+                ? const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Text(
+                      'Ainda não há diagnósticos registrados para gerar esta leitura.',
+                      style: TextStyle(color: Colors.grey, height: 1.4),
+                    ),
+                  )
+                : Column(
+                    children: ordenados.take(5).map((e) {
+                      final quantidade = (e.value as num).toDouble();
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 17),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                Container(
+                                  width: 5,
+                                  height: 34,
+                                  decoration: BoxDecoration(
+                                    color: medicoTeal,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                ),
+                                const SizedBox(width: 11),
+                                Expanded(
+                                  child: Text(
+                                    e.key,
+                                    style: const TextStyle(
+                                      color: medicoTexto,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                Text(
+                                  '${e.value} registro${quantidade == 1 ? '' : 's'}',
+                                  style: const TextStyle(
+                                    color: medicoVerdeEscuro,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 9),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: LinearProgressIndicator(
+                                value: quantidade / maior,
+                                minHeight: 7,
+                                backgroundColor: medicoFundo,
+                                color: medicoVerde,
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ),
+          ),
+          const SizedBox(height: 18),
+          const MedicoCard(
+            color: Color(0xFFEAF5EF),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.lightbulb_outline, color: corVerdeOliva, size: 18),
-                const SizedBox(width: 8),
-                const Expanded(
+                Icon(Icons.verified_outlined, color: medicoVerdeEscuro),
+                SizedBox(width: 12),
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Recomendação IA:", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF2E2E2E))),
-                      SizedBox(height: 2),
-                      Text("Ajustar medicação para controle glicêmico", style: TextStyle(color: Colors.grey, fontSize: 12)),
+                      Text(
+                        'Origem confiável',
+                        style: TextStyle(
+                          color: medicoVerdeEscuro,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Os indicadores usam apenas consultas e prontuários vinculados ao seu login. Eles apoiam a leitura da rotina, mas não substituem avaliação clínica.',
+                        style: TextStyle(color: Color(0xFF557068), height: 1.4),
+                      ),
                     ],
                   ),
                 ),
@@ -248,4 +221,32 @@ class TelaIAInsights extends StatelessWidget {
       ),
     );
   }
+
+  Widget _metrica(String valor, String label, IconData icon) => MedicoCard(
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(9),
+          decoration: BoxDecoration(
+            color: medicoVerde.withValues(alpha: .1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(icon, color: medicoVerdeEscuro, size: 22),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          valor,
+          style: const TextStyle(
+            color: medicoTexto,
+            fontSize: 26,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+      ],
+    ),
+  );
 }

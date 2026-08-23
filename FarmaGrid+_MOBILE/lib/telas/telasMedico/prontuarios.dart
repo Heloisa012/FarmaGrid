@@ -7,7 +7,7 @@ class TelaProntuarios extends StatefulWidget {
   const TelaProntuarios({super.key});
 
   @override
-  _TelaProntuariosState createState() => _TelaProntuariosState();
+  State<TelaProntuarios> createState() => _TelaProntuariosState();
 }
 
 class _TelaProntuariosState extends State<TelaProntuarios> {
@@ -212,7 +212,7 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
                       ),
                     ),
                     Text(
-                      p.cpfMascarado,
+                      p.cpfFormatado,
                       style: TextStyle(color: Colors.grey[400], fontSize: 12),
                     ),
                   ],
@@ -224,8 +224,9 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
                     context,
                     MaterialPageRoute(
                       builder: (_) => TelaDetalhesPaciente(
+                        idPaciente: p.id,
                         nome: p.nomeComIdade,
-                        cpfMascarado: p.cpfMascarado,
+                        cpfMascarado: p.cpfFormatado,
                       ),
                     ),
                   );

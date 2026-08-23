@@ -52,7 +52,9 @@ public class EndpointsEspecificosController {
 
     @GetMapping("/medicos/{idMedico}/pacientes")
     public List<PacienteMedicoResponse> pacientesDoMedico(@PathVariable Long idMedico) {
-        return pacienteRepo.findAll().stream().map(paciente -> {
+        return pacienteRepo.findAll().stream()
+          .filter(paciente -> teleconsultaRepo.existsByIdMedicoAndIdPaciente(idMedico, paciente.getId()))
+          .map(paciente -> {
             PacienteMedicoResponse r = new PacienteMedicoResponse();
             r.id = paciente.getId();
             r.nome = paciente.getNome();
@@ -77,7 +79,13 @@ public class EndpointsEspecificosController {
     // ──────────────────────────────────────────────────────────────────────────
     @GetMapping("/teleconsultas/medico/{idMedico}")
     public List<Teleconsulta> consultasPorMedico(@PathVariable Long idMedico) {
-        return teleconsultaRepo.findByIdMedicoOrderByData(idMedico);
+        List<Teleconsulta> consultas = teleconsultaRepo.findByIdMedicoOrderByData(idMedico);
+        consultas.forEach(c -> {
+            if (c.getNomePaciente() == null || c.getNomePaciente().isBlank()) {
+                pacienteRepo.findById(c.getIdPaciente()).ifPresent(p -> c.setNomePaciente(p.getNome()));
+            }
+        });
+        return consultas;
     }
 
     @GetMapping("/teleconsultas/paciente/{idPaciente}")
@@ -149,6 +157,44 @@ public class EndpointsEspecificosController {
     public ResponseEntity<Prontuario> salvarProntuario(@RequestBody Prontuario prontuario) {
         if (prontuario.getStatus() == null || prontuario.getStatus().isBlank()) prontuario.setStatus("Ativo");
         return ResponseEntity.status(HttpStatus.CREATED).body(prontuarioRepo.save(prontuario));
+    }
+
+    @PutMapping("/prontuarios/{id}")
+    public ResponseEntity<?> editarProntuario(@PathVariable Long id, @RequestBody Prontuario dados) {
+        Prontuario p = prontuarioRepo.findById(id).orElse(null);
+        if (p == null) return ResponseEntity.notFound().build();
+        if (dados.getIdMedico() != null) p.setIdMedico(dados.getIdMedico());
+        p.setCondicao(dados.getCondicao()); p.setCid10(dados.getCid10()); p.setAnamnese(dados.getAnamnese());
+        p.setExameFisico(dados.getExameFisico()); p.setConduta(dados.getConduta()); p.setDataRetorno(dados.getDataRetorno());
+        p.setPa(dados.getPa()); p.setTemperatura(dados.getTemperatura()); p.setPeso(dados.getPeso()); p.setSpo2(dados.getSpo2());
+        p.setNotas(dados.getNotas()); p.setStatus(dados.getStatus()); p.setUltimaVisita(dados.getUltimaVisita());
+        return ResponseEntity.ok(prontuarioRepo.save(p));
+    }
+
+    @GetMapping("/medicos/{idMedico}/painel")
+    public java.util.Map<String, Object> painelMedico(@PathVariable Long idMedico) {
+        List<Teleconsulta> consultas = teleconsultaRepo.findByIdMedicoOrderByData(idMedico);
+        List<Receita> receitas = receitaRepo.findByIdMedicoOrderByIdDesc(idMedico);
+        List<Prontuario> prontuarios = prontuarioRepo.findByIdMedicoOrderByIdDesc(idMedico);
+        java.time.YearMonth mes = java.time.YearMonth.now();
+        long consultasMes = consultas.stream().filter(c -> {
+            try { return java.time.YearMonth.from(LocalDate.parse(c.getData())).equals(mes); } catch (Exception e) { return false; }
+        }).count();
+        long receitasMes = receitas.stream().filter(r -> {
+            try { return java.time.YearMonth.from(LocalDate.parse(r.getDataPrescricao())).equals(mes); } catch (Exception e) { return false; }
+        }).count();
+        java.util.Map<String, Long> tipos = consultas.stream().filter(c -> {
+            try { return java.time.YearMonth.from(LocalDate.parse(c.getData())).equals(mes); } catch (Exception e) { return false; }
+        }).collect(Collectors.groupingBy(c -> c.getTipo() == null ? "Consulta" : c.getTipo(), Collectors.counting()));
+        java.util.Map<String, Long> diagnosticos = prontuarios.stream()
+            .filter(p -> p.getCondicao() != null && !p.getCondicao().isBlank())
+            .collect(Collectors.groupingBy(Prontuario::getCondicao, Collectors.counting()));
+        java.util.Map<String, Object> r = new java.util.LinkedHashMap<>();
+        r.put("consultasMes", consultasMes); r.put("receitasMes", receitasMes);
+        r.put("totalPacientes", consultas.stream().map(Teleconsulta::getIdPaciente).distinct().count());
+        r.put("tiposConsulta", tipos); r.put("diagnosticos", diagnosticos);
+        r.put("consultas", consultas); r.put("prontuarios", prontuarios);
+        return r;
     }
 
     @PatchMapping("/teleconsultas/{id}/reagendar")

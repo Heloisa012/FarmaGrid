@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/paciente_service.dart';
+import 'paciente_visual.dart';
 
 class Teleconsultas extends StatefulWidget {
   const Teleconsultas({super.key});
@@ -8,9 +9,10 @@ class Teleconsultas extends StatefulWidget {
 }
 
 class _TeleconsultasState extends State<Teleconsultas> {
-  static const verde = Color(0xFF59AA53);
-  List<Map<String, dynamic>> consultas = [], medicos = [];
-  bool carregando = true;
+  List<Map<String, dynamic>> _consultas = [], _medicos = [];
+  bool _carregando = true;
+  String? _erro;
+
   @override
   void initState() {
     super.initState();
@@ -18,178 +20,488 @@ class _TeleconsultasState extends State<Teleconsultas> {
   }
 
   Future<void> _carregar() async {
-    final dados = await Future.wait([
-      PacienteService.listarConsultas(),
-      PacienteService.listarMedicos(),
-    ]);
-    if (!mounted) return;
     setState(() {
-      consultas = (dados[0] as List)
-          .map(
-            (c) => <String, dynamic>{
-              'id': c.id,
-              'idMedico': c.idMedico,
-              'data': c.data,
-              'horario': c.horario,
-              'status': c.status,
-            },
-          )
-          .toList();
-      medicos = dados[1] as List<Map<String, dynamic>>;
-      carregando = false;
+      _carregando = true;
+      _erro = null;
     });
+    try {
+      final dados = await Future.wait([
+        PacienteService.listarConsultas(),
+        PacienteService.listarMedicos(),
+      ]);
+      if (!mounted) return;
+      setState(() {
+        _consultas = (dados[0] as List)
+            .map(
+              (c) => <String, dynamic>{
+                'id': c.id,
+                'idMedico': c.idMedico,
+                'data': c.data,
+                'horario': c.horario,
+                'status': c.status,
+                'duracao': c.duracao,
+                'tipo': c.tipo,
+              },
+            )
+            .toList();
+        _medicos = dados[1] as List<Map<String, dynamic>>;
+      });
+    } catch (e) {
+      if (mounted) setState(() => _erro = '$e');
+    } finally {
+      if (mounted) setState(() => _carregando = false);
+    }
+  }
+
+  Map<String, dynamic>? _medico(dynamic id) {
+    for (final medico in _medicos) {
+      if ('${medico['id']}' == '$id') return medico;
+    }
+    return null;
   }
 
   String _nomeMedico(dynamic id) {
-    final m = medicos.cast<Map<String, dynamic>?>().firstWhere(
-      (m) => '${m?['id']}' == '$id',
-      orElse: () => null,
-    );
-    return m == null
-        ? 'Médico'
-        : 'Dr(a). ${m['nome'] ?? ''} ${m['sobrenome'] ?? ''}';
+    final medico = _medico(id);
+    if (medico == null) return 'Médico';
+    final nome = '${medico['nome'] ?? ''}'.trim();
+    final sobrenome = '${medico['sobrenome'] ?? ''}'.trim();
+    final completo =
+        sobrenome.isEmpty ||
+            nome.toLowerCase().endsWith(sobrenome.toLowerCase())
+        ? nome
+        : '$nome $sobrenome';
+    return 'Dr(a). $completo';
   }
 
-  Future<void> _agendar() async {
-    if (medicos.isEmpty) return;
-    Map<String, dynamic>? medico = medicos.first;
-    DateTime data = DateTime.now().add(const Duration(days: 1));
-    String hora = '09:00';
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setLocal) => AlertDialog(
-          title: const Text('Agendar teleconsulta'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
+  bool _agendada(Map<String, dynamic> c) {
+    final status = '${c['status'] ?? ''}'.toLowerCase();
+    return !status.contains('cancel') && !status.contains('conclu');
+  }
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    backgroundColor: pacienteFundo,
+    body: Column(
+      children: [
+        PacienteCabecalho(
+          titulo: 'Teleconsultas',
+          subtitulo: 'Cuide da sua saúde de onde estiver',
+          rodape: SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _medicos.isEmpty ? null : _agendar,
+              icon: const Icon(Icons.add, size: 19),
+              label: const Text('Agendar teleconsulta'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                foregroundColor: pacienteVerdeEscuro,
+                disabledBackgroundColor: Colors.white54,
+                padding: const EdgeInsets.symmetric(vertical: 13),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                textStyle: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+            ),
+          ),
+        ),
+        Expanded(child: _conteudo()),
+      ],
+    ),
+  );
+
+  Widget _conteudo() {
+    if (_carregando) {
+      return const Center(
+        child: CircularProgressIndicator(color: pacienteVerde),
+      );
+    }
+    if (_erro != null) {
+      return Center(
+        child: TextButton.icon(
+          onPressed: _carregar,
+          icon: const Icon(Icons.refresh),
+          label: const Text('Não foi possível carregar. Tentar novamente'),
+        ),
+      );
+    }
+    final agendadas = _consultas.where(_agendada).toList();
+    final anteriores = _consultas.where((c) => !_agendada(c)).toList();
+    return RefreshIndicator(
+      onRefresh: _carregar,
+      color: pacienteVerde,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(24, 25, 24, 38),
+        children: [
+          const PacienteTituloSecao(
+            'Próximos atendimentos',
+            legenda: 'Consultas online vinculadas ao seu cadastro',
+          ),
+          const SizedBox(height: 15),
+          if (agendadas.isEmpty)
+            PacienteCard(
+              child: Column(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(13),
+                    decoration: BoxDecoration(
+                      color: pacienteVerde.withValues(alpha: .1),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: const Icon(
+                      Icons.videocam_outlined,
+                      color: pacienteVerdeEscuro,
+                      size: 30,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Nenhuma teleconsulta agendada',
+                    style: TextStyle(
+                      color: pacienteTexto,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  const Text(
+                    'Escolha um médico, uma data e um horário para começar.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
+                ],
+              ),
+            )
+          else
+            ...agendadas.map(
+              (c) => _cardConsulta(c, destaque: c == agendadas.first),
+            ),
+          if (anteriores.isNotEmpty) ...[
+            const SizedBox(height: 27),
+            const PacienteTituloSecao('Histórico'),
+            const SizedBox(height: 15),
+            ...anteriores.map((c) => _cardConsulta(c)),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _cardConsulta(Map<String, dynamic> c, {bool destaque = false}) {
+    final medico = _medico(c['idMedico']);
+    final especialidade = '${medico?['especialidade'] ?? 'Atendimento médico'}';
+    final status = '${c['status'] ?? 'Agendada'}';
+    return PacienteCard(
+      margin: const EdgeInsets.only(bottom: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
             children: [
-              DropdownButtonFormField<Map<String, dynamic>>(
-                initialValue: medico,
-                decoration: const InputDecoration(labelText: 'Médico'),
-                items: medicos
-                    .map(
-                      (m) => DropdownMenuItem(
-                        value: m,
-                        child: Text(
-                          '${m['nome']} • ${m['especialidade'] ?? ''}',
-                        ),
+              Container(
+                padding: const EdgeInsets.all(11),
+                decoration: BoxDecoration(
+                  color: pacienteVerde.withValues(alpha: .1),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.videocam_outlined,
+                  color: pacienteVerdeEscuro,
+                  size: 25,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _nomeMedico(c['idMedico']),
+                      style: const TextStyle(
+                        color: pacienteTexto,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
                       ),
-                    )
-                    .toList(),
-                onChanged: (v) => setLocal(() => medico = v),
+                    ),
+                    Text(
+                      especialidade,
+                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                  ],
+                ),
               ),
-              ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Data'),
-                subtitle: Text('${data.day}/${data.month}/${data.year}'),
-                trailing: const Icon(Icons.calendar_month),
-                onTap: () async {
-                  final d = await showDatePicker(
-                    context: ctx,
-                    initialDate: data,
-                    firstDate: DateTime.now(),
-                    lastDate: DateTime.now().add(const Duration(days: 180)),
-                  );
-                  if (d != null) setLocal(() => data = d);
-                },
-              ),
-              DropdownButtonFormField<String>(
-                initialValue: hora,
-                decoration: const InputDecoration(labelText: 'Horário'),
-                items:
-                    [
-                          '08:00',
-                          '09:00',
-                          '10:00',
-                          '11:00',
-                          '14:00',
-                          '15:00',
-                          '16:00',
-                          '17:00',
-                        ]
-                        .map((h) => DropdownMenuItem(value: h, child: Text(h)))
-                        .toList(),
-                onChanged: (v) => hora = v!,
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                decoration: BoxDecoration(
+                  color: _agendada(c)
+                      ? pacienteVerde.withValues(alpha: .1)
+                      : Colors.grey.withValues(alpha: .12),
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: Text(
+                  status,
+                  style: TextStyle(
+                    color: _agendada(c) ? pacienteVerdeEscuro : Colors.grey,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancelar'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Agendar'),
+          const SizedBox(height: 15),
+          Row(
+            children: [
+              Container(
+                width: 5,
+                height: 35,
+                decoration: BoxDecoration(
+                  color: pacienteTeal,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              const SizedBox(width: 11),
+              Icon(
+                Icons.calendar_today_outlined,
+                size: 15,
+                color: Colors.grey[500],
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '${c['data'] ?? ''}',
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
+              ),
+              const SizedBox(width: 14),
+              Icon(
+                Icons.access_time_outlined,
+                size: 16,
+                color: Colors.grey[500],
+              ),
+              const SizedBox(width: 5),
+              Text(
+                '${c['horario'] ?? ''}',
+                style: const TextStyle(color: Colors.grey, fontSize: 12),
+              ),
+            ],
+          ),
+          if (destaque) ...[
+            const SizedBox(height: 14),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text(
+                      'A sala será liberada no horário da consulta.',
+                    ),
+                  ),
+                ),
+                icon: const Icon(Icons.videocam_outlined, size: 18),
+                label: const Text('Entrar na consulta'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: pacienteVerde,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  textStyle: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+              ),
             ),
           ],
+        ],
+      ),
+    );
+  }
+
+  Future<void> _agendar() async {
+    if (_medicos.isEmpty) return;
+    Map<String, dynamic>? medico = _medicos.first;
+    DateTime data = DateTime.now().add(const Duration(days: 1));
+    String hora = '09:00';
+    final ok = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: pacienteFundo,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) => Padding(
+          padding: EdgeInsets.fromLTRB(
+            24,
+            14,
+            24,
+            MediaQuery.viewInsetsOf(ctx).bottom + 28,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 42,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: Colors.black12,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                const Text(
+                  'Agendar teleconsulta',
+                  style: TextStyle(
+                    color: pacienteTexto,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 5),
+                const Text(
+                  'Escolha o profissional e o melhor horário.',
+                  style: TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+                const SizedBox(height: 20),
+                PacienteCard(
+                  child: Column(
+                    children: [
+                      DropdownButtonFormField<Map<String, dynamic>>(
+                        initialValue: medico,
+                        decoration: _decoracao('Médico', Icons.person_outline),
+                        items: _medicos
+                            .map(
+                              (m) => DropdownMenuItem(
+                                value: m,
+                                child: Text(
+                                  '${m['nome']} • ${m['especialidade'] ?? ''}',
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (v) => setLocal(() => medico = v),
+                      ),
+                      const SizedBox(height: 13),
+                      InkWell(
+                        onTap: () async {
+                          final d = await showDatePicker(
+                            context: ctx,
+                            initialDate: data,
+                            firstDate: DateTime.now(),
+                            lastDate: DateTime.now().add(
+                              const Duration(days: 180),
+                            ),
+                          );
+                          if (d != null) setLocal(() => data = d);
+                        },
+                        child: InputDecorator(
+                          decoration: _decoracao(
+                            'Data',
+                            Icons.calendar_month_outlined,
+                          ),
+                          child: Text(
+                            '${data.day.toString().padLeft(2, '0')}/${data.month.toString().padLeft(2, '0')}/${data.year}',
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 13),
+                      DropdownButtonFormField<String>(
+                        initialValue: hora,
+                        decoration: _decoracao(
+                          'Horário',
+                          Icons.access_time_outlined,
+                        ),
+                        items:
+                            [
+                                  '08:00',
+                                  '09:00',
+                                  '10:00',
+                                  '11:00',
+                                  '14:00',
+                                  '15:00',
+                                  '16:00',
+                                  '17:00',
+                                ]
+                                .map(
+                                  (h) => DropdownMenuItem(
+                                    value: h,
+                                    child: Text(h),
+                                  ),
+                                )
+                                .toList(),
+                        onChanged: (v) => hora = v ?? hora,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 18),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    icon: const Icon(Icons.check),
+                    label: const Text('Confirmar agendamento'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: pacienteVerde,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      textStyle: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
     if (ok != true || medico == null) return;
     final iso =
         '${data.year}-${data.month.toString().padLeft(2, '0')}-${data.day.toString().padLeft(2, '0')}';
-    await PacienteService.agendarTeleconsulta({
-      'idMedico': medico!['id'],
-      'data': iso,
-      'horario': hora,
-      'status': 'Agendada',
-      'duracao': '30 min',
-      'tipo': 'Teleconsulta',
-    });
-    await _carregar();
+    try {
+      await PacienteService.agendarTeleconsulta({
+        'idMedico': medico!['id'],
+        'data': iso,
+        'horario': hora,
+        'status': 'Agendada',
+        'duracao': '30 min',
+        'tipo': 'Teleconsulta',
+      });
+      await _carregar();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Teleconsulta agendada com sucesso.'),
+            backgroundColor: pacienteVerde,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Não foi possível agendar: $e')));
+      }
+    }
   }
 
-  @override
-  Widget build(BuildContext context) => Scaffold(
-    backgroundColor: const Color(0xFFF5F5F5),
-    appBar: AppBar(
-      title: const Text('Teleconsultas'),
-      backgroundColor: verde,
-      foregroundColor: Colors.white,
+  InputDecoration _decoracao(String label, IconData icon) => InputDecoration(
+    labelText: label,
+    prefixIcon: Icon(icon, color: pacienteVerdeEscuro),
+    filled: true,
+    fillColor: pacienteFundo,
+    enabledBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: const BorderSide(color: Color(0xFFE6E6E6)),
     ),
-    floatingActionButton: FloatingActionButton.extended(
-      onPressed: _agendar,
-      backgroundColor: verde,
-      foregroundColor: Colors.white,
-      icon: const Icon(Icons.add),
-      label: const Text('Agendar'),
+    focusedBorder: OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: const BorderSide(color: pacienteVerde, width: 1.5),
     ),
-    body: carregando
-        ? const Center(child: CircularProgressIndicator())
-        : RefreshIndicator(
-            onRefresh: _carregar,
-            child: consultas.isEmpty
-                ? ListView(
-                    children: const [
-                      SizedBox(height: 180),
-                      Center(child: Text('Nenhuma teleconsulta agendada.')),
-                    ],
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(20),
-                    itemCount: consultas.length,
-                    itemBuilder: (_, i) {
-                      final c = consultas[i];
-                      return Card(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        child: ListTile(
-                          leading: const CircleAvatar(
-                            backgroundColor: verde,
-                            child: Icon(Icons.videocam, color: Colors.white),
-                          ),
-                          title: Text(
-                            _nomeMedico(c['idMedico']),
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Text('${c['data']} às ${c['horario']}'),
-                          trailing: Chip(
-                            label: Text('${c['status'] ?? 'Agendada'}'),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-          ),
   );
 }

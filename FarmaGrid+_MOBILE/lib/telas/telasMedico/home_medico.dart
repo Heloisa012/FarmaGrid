@@ -11,6 +11,9 @@ import 'configuracoesMedico.dart';
 import 'package:farmagridd/telas/sobreNos.dart';
 import '../../services/perfil_service.dart';
 import '../../services/auth_service.dart';
+import '../../services/medico_service.dart';
+import '../../models/medico_models.dart';
+import 'menuMedico.dart';
 
 class TelaHomeMedico extends StatefulWidget {
   const TelaHomeMedico({super.key});
@@ -26,6 +29,7 @@ class _TelaHomeMedicoState extends State<TelaHomeMedico> {
 
   final _themeCtrl = AppThemeController();
   Map<String, dynamic>? _perfil;
+  List<ConsultaMedica> _consultasHoje = [];
 
   @override
   void initState() {
@@ -34,6 +38,18 @@ class _TelaHomeMedicoState extends State<TelaHomeMedico> {
     PerfilService.carregar(atualizar: true).then((p) {
       if (mounted) setState(() => _perfil = p);
     });
+    MedicoService.listarAgenda()
+        .then((lista) {
+          final hoje = DateTime.now();
+          final iso =
+              '${hoje.year}-${hoje.month.toString().padLeft(2, '0')}-${hoje.day.toString().padLeft(2, '0')}';
+          if (mounted) {
+            setState(
+              () => _consultasHoje = lista.where((c) => c.data == iso).toList(),
+            );
+          }
+        })
+        .catchError((_) {});
   }
 
   Color get corFundo => _themeCtrl.darkMode
@@ -49,7 +65,7 @@ class _TelaHomeMedicoState extends State<TelaHomeMedico> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _DrawerMedico(
+      builder: (_) => DrawerMedico(
         themeCtrl: _themeCtrl,
         corVerde: corVerdePrimario,
         corOliva: corVerdeOliva,
@@ -83,19 +99,22 @@ class _TelaHomeMedicoState extends State<TelaHomeMedico> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  _construirCardAgenda(
-                    "Heloisa Pola Argentin",
-                    "15:00",
-                    "Teleconsulta",
-                    true,
-                  ),
-                  _construirCardAgenda("João Alves", "16:00", "Retorno", false),
-                  _construirCardAgenda(
-                    "Ana Costa",
-                    "17:00",
-                    "Teleconsulta",
-                    false,
-                  ),
+                  if (_consultasHoje.isEmpty)
+                    const Text(
+                      'Nenhuma consulta marcada para hoje.',
+                      style: TextStyle(color: Colors.grey),
+                    )
+                  else
+                    ..._consultasHoje.asMap().entries.map(
+                      (e) => _construirCardAgenda(
+                        e.value.nomePaciente.isEmpty
+                            ? 'Paciente #${e.value.idPaciente}'
+                            : e.value.nomePaciente,
+                        e.value.horario,
+                        e.value.tipo.isEmpty ? 'Consulta' : e.value.tipo,
+                        e.key == 0,
+                      ),
+                    ),
                   const SizedBox(height: 30),
                   Text(
                     "Ferramentas",
