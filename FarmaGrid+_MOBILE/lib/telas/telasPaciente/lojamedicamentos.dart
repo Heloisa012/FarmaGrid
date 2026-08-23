@@ -1,5 +1,6 @@
 import 'package:farmagridd/telas/telasPaciente/descontos.dart';
 import 'package:flutter/material.dart';
+import '../../services/paciente_service.dart';
 
 class ItemCarrinho {
   final Map<String, dynamic> medicamento;
@@ -23,15 +24,14 @@ class TelaCarrinho extends StatefulWidget {
 }
 
 class _TelaCarrinhoState extends State<TelaCarrinho> {
-  static const Color _teal  = Color(0xFF7FC6BB);
+  static const Color _teal = Color(0xFF7FC6BB);
   static const Color _teal2 = Color(0xFF629991);
 
   double get _total {
     return widget.itens.fold(0.0, (soma, item) {
       final preco = item.medicamento['precoFinal'] as String;
-      final valor = double.tryParse(
-            preco.replaceAll('R\$ ', '').replaceAll(',', '.'),
-          ) ??
+      final valor =
+          double.tryParse(preco.replaceAll('R\$ ', '').replaceAll(',', '.')) ??
           0.0;
       return soma + valor * item.quantidade;
     });
@@ -53,8 +53,10 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
       backgroundColor: const Color(0xFFF5F5F5),
       appBar: AppBar(
         backgroundColor: _teal,
-        title: const Text('Meu Carrinho',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Meu Carrinho',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
@@ -66,15 +68,21 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.shopping_cart_outlined,
-                      size: 80, color: Colors.grey.shade300),
+                  Icon(
+                    Icons.shopping_cart_outlined,
+                    size: 80,
+                    color: Colors.grey.shade300,
+                  ),
                   const SizedBox(height: 16),
-                  Text('Carrinho vazio',
-                      style: TextStyle(
-                          fontSize: 18, color: Colors.grey.shade500)),
+                  Text(
+                    'Carrinho vazio',
+                    style: TextStyle(fontSize: 18, color: Colors.grey.shade500),
+                  ),
                   const SizedBox(height: 8),
-                  Text('Adicione medicamentos para continuar',
-                      style: TextStyle(color: Colors.grey.shade400)),
+                  Text(
+                    'Adicione medicamentos para continuar',
+                    style: TextStyle(color: Colors.grey.shade400),
+                  ),
                 ],
               ),
             )
@@ -98,7 +106,7 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
                               color: Colors.black.withValues(alpha: 0.05),
                               blurRadius: 8,
                               offset: const Offset(0, 3),
-                            )
+                            ),
                           ],
                         ),
                         child: Row(
@@ -110,29 +118,41 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
                                 color: _teal.withValues(alpha: 0.15),
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              child: const Icon(Icons.medical_services_outlined,
-                                  color: _teal2, size: 28),
+                              child: const Icon(
+                                Icons.medical_services_outlined,
+                                color: _teal2,
+                                size: 28,
+                              ),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(med['nome'],
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 13)),
+                                  Text(
+                                    med['nome'],
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 13,
+                                    ),
+                                  ),
                                   const SizedBox(height: 2),
-                                  Text(med['categoria'],
-                                      style: TextStyle(
-                                          color: Colors.grey.shade500,
-                                          fontSize: 11)),
+                                  Text(
+                                    med['categoria'],
+                                    style: TextStyle(
+                                      color: Colors.grey.shade500,
+                                      fontSize: 11,
+                                    ),
+                                  ),
                                   const SizedBox(height: 4),
-                                  Text(med['precoFinal'],
-                                      style: const TextStyle(
-                                          color: _teal2,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 14)),
+                                  Text(
+                                    med['precoFinal'],
+                                    style: const TextStyle(
+                                      color: _teal2,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -141,11 +161,15 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
                                 _btnQtd(Icons.remove, () => _alterar(item, -1)),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 10),
-                                  child: Text('${item.quantidade}',
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16)),
+                                    horizontal: 10,
+                                  ),
+                                  child: Text(
+                                    '${item.quantidade}',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
                                 ),
                                 _btnQtd(Icons.add, () => _alterar(item, 1)),
                               ],
@@ -162,9 +186,10 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
                     color: Colors.white,
                     boxShadow: [
                       BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.06),
-                          blurRadius: 12,
-                          offset: const Offset(0, -4))
+                        color: Colors.black.withValues(alpha: 0.06),
+                        blurRadius: 12,
+                        offset: const Offset(0, -4),
+                      ),
                     ],
                   ),
                   child: Column(
@@ -172,15 +197,20 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Total',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16)),
+                          const Text(
+                            'Total',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
                           Text(
                             'R\$ ${_total.toStringAsFixed(2).replaceAll('.', ',')}',
                             style: const TextStyle(
-                                color: _teal2,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20),
+                              color: _teal2,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
                           ),
                         ],
                       ),
@@ -190,17 +220,20 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
                           backgroundColor: _teal,
                           minimumSize: const Size(double.infinity, 50),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(15)),
+                            borderRadius: BorderRadius.circular(15),
+                          ),
                         ),
                         onPressed: () {
                           showDialog(
                             context: context,
                             builder: (_) => AlertDialog(
                               shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(20)),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
                               title: const Text('Pedido Confirmado! 🎉'),
                               content: const Text(
-                                  'Seu pedido foi realizado com sucesso. Em breve você receberá a confirmação.'),
+                                'Seu pedido foi realizado com sucesso. Em breve você receberá a confirmação.',
+                              ),
                               actions: [
                                 TextButton(
                                   onPressed: () {
@@ -215,11 +248,14 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
                             ),
                           );
                         },
-                        child: const Text('Finalizar Pedido',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16)),
+                        child: const Text(
+                          'Finalizar Pedido',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -255,13 +291,46 @@ class TelaMedicamentos extends StatefulWidget {
 class _TelaMedicamentosState extends State<TelaMedicamentos> {
   static const Color _verde = Color(0xFF59AA53);
   static const Color _fundo = Color(0xFFF5F5F5);
-  static const Color _teal  = Color(0xFF7FC6BB);
+  static const Color _teal = Color(0xFF7FC6BB);
   static const Color _teal2 = Color(0xFF629991);
 
   final TextEditingController _buscaCtrl = TextEditingController();
   String _termoBusca = '';
 
   final List<ItemCarrinho> _carrinho = [];
+  List<Map<String, dynamic>> _produtosApi = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarProdutos();
+  }
+
+  Future<void> _carregarProdutos() async {
+    try {
+      final produtos = await PacienteService.listarProdutos();
+      if (!mounted) return;
+      setState(
+        () => _produtosApi = produtos
+            .where((p) => p.quantidade > 0)
+            .map(
+              (p) => {
+                'id': p.id,
+                'nome': p.nome,
+                'categoria': p.categoria,
+                'precoOriginal':
+                    'R\$ ${p.preco.toStringAsFixed(2).replaceAll('.', ',')}',
+                'precoFinal':
+                    'R\$ ${p.preco.toStringAsFixed(2).replaceAll('.', ',')}',
+                'desconto': p.controlado ? 'Receita' : '',
+                'avaliacao': '—',
+                'distancia': 'Estoque: ${p.quantidade}',
+              },
+            )
+            .toList(),
+      );
+    } catch (_) {}
+  }
 
   int get _totalItens =>
       _carrinho.fold(0, (soma, item) => soma + item.quantidade);
@@ -295,14 +364,13 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
         ),
         backgroundColor: _teal2,
         behavior: SnackBarBehavior.floating,
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         duration: const Duration(seconds: 2),
       ),
     );
   }
 
-  static const List<Map<String, dynamic>> _todosMedicamentos = [
+  static const List<Map<String, dynamic>> _fallbackMedicamentos = [
     {
       'nome': 'Paracetamol 750mg',
       'categoria': 'Analgésico',
@@ -378,12 +446,17 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
   ];
 
   List<Map<String, dynamic>> get _medicamentosFiltrados {
-    if (_termoBusca.isEmpty) return _todosMedicamentos;
+    final todosMedicamentos = _produtosApi.isEmpty
+        ? _fallbackMedicamentos
+        : _produtosApi;
+    if (_termoBusca.isEmpty) return todosMedicamentos;
     final termo = _termoBusca.toLowerCase();
-    return _todosMedicamentos
-        .where((m) =>
-            (m['nome'] as String).toLowerCase().contains(termo) ||
-            (m['categoria'] as String).toLowerCase().contains(termo))
+    return todosMedicamentos
+        .where(
+          (m) =>
+              (m['nome'] as String).toLowerCase().contains(termo) ||
+              (m['categoria'] as String).toLowerCase().contains(termo),
+        )
         .toList();
   }
 
@@ -417,15 +490,18 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
                                   ? "Melhores Ofertas"
                                   : "${lista.length} resultado(s)",
                               style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 18),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                              ),
                             ),
                             if (_termoBusca.isEmpty)
                               GestureDetector(
                                 onTap: () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (_) =>
-                                            const TelaDescontos())),
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => const TelaDescontos(),
+                                  ),
+                                ),
                                 child: Text(
                                   "Ver descontos",
                                   style: TextStyle(
@@ -443,14 +519,13 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
                           physics: const NeverScrollableScrollPhysics(),
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            childAspectRatio: 0.68,
-                            crossAxisSpacing: 15,
-                            mainAxisSpacing: 15,
-                          ),
+                                crossAxisCount: 2,
+                                childAspectRatio: 0.68,
+                                crossAxisSpacing: 15,
+                                mainAxisSpacing: 15,
+                              ),
                           itemCount: lista.length,
-                          itemBuilder: (_, i) =>
-                              _cardMedicamento(lista[i]),
+                          itemBuilder: (_, i) => _cardMedicamento(lista[i]),
                         ),
                       ],
                     ),
@@ -476,8 +551,7 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
           bottomRight: Radius.circular(35),
         ),
       ),
-      padding:
-          const EdgeInsets.only(top: 50, left: 20, right: 20, bottom: 20),
+      padding: const EdgeInsets.only(top: 50, left: 20, right: 20, bottom: 20),
       child: Column(
         children: [
           Row(
@@ -489,9 +563,10 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
               const Text(
                 "Medicamentos",
                 style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold),
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ],
           ),
@@ -514,8 +589,9 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
               fillColor: Colors.white,
               filled: true,
               border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(25),
-                  borderSide: BorderSide.none),
+                borderRadius: BorderRadius.circular(25),
+                borderSide: BorderSide.none,
+              ),
               contentPadding: const EdgeInsets.symmetric(vertical: 0),
             ),
           ),
@@ -550,7 +626,6 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
   }
 
   Widget _cardMedicamento(Map<String, dynamic> med) {
-
     final noCarrinho = _carrinho
         .where((i) => i.medicamento['nome'] == med['nome'])
         .firstOrNull;
@@ -565,7 +640,7 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
             color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
-          )
+          ),
         ],
       ),
       child: Column(
@@ -574,30 +649,40 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
           Stack(
             children: [
               ClipRRect(
-                borderRadius:
-                    const BorderRadius.vertical(top: Radius.circular(20)),
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
                 child: Container(
                   height: 100,
                   width: double.infinity,
                   color: _teal.withValues(alpha: 0.12),
-                  child: const Icon(Icons.medical_services_outlined,
-                      size: 48, color: Color(0xFF629991)),
+                  child: const Icon(
+                    Icons.medical_services_outlined,
+                    size: 48,
+                    color: Color(0xFF629991),
+                  ),
                 ),
               ),
               Positioned(
                 right: 8,
                 top: 8,
                 child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
-                      color: _teal2,
-                      borderRadius: BorderRadius.circular(10)),
-                  child: Text(med['desconto'],
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold)),
+                    color: _teal2,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    med['desconto'],
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -607,44 +692,65 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(med['nome'],
-                    style: const TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 13),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis),
+                Text(
+                  med['nome'],
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 const SizedBox(height: 2),
-                Text(med['categoria'],
-                    style: TextStyle(
-                        color: Colors.grey.shade500, fontSize: 11)),
+                Text(
+                  med['categoria'],
+                  style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
+                ),
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(Icons.star,
-                        color: Color(0xFFF3CD23), size: 14),
+                    const Icon(Icons.star, color: Color(0xFFF3CD23), size: 14),
                     const SizedBox(width: 4),
-                    Text(med['avaliacao'],
-                        style: const TextStyle(
-                            color: Color(0xFF36515F), fontSize: 12)),
+                    Text(
+                      med['avaliacao'],
+                      style: const TextStyle(
+                        color: Color(0xFF36515F),
+                        fontSize: 12,
+                      ),
+                    ),
                     const SizedBox(width: 8),
-                    const Icon(Icons.location_on,
-                        color: Color(0xFF36515F), size: 14),
+                    const Icon(
+                      Icons.location_on,
+                      color: Color(0xFF36515F),
+                      size: 14,
+                    ),
                     const SizedBox(width: 2),
-                    Text(med['distancia'],
-                        style: const TextStyle(
-                            color: Color(0xFF36515F), fontSize: 12)),
+                    Text(
+                      med['distancia'],
+                      style: const TextStyle(
+                        color: Color(0xFF36515F),
+                        fontSize: 12,
+                      ),
+                    ),
                   ],
                 ),
                 const SizedBox(height: 6),
-                Text(med['precoOriginal'],
-                    style: const TextStyle(
-                        decoration: TextDecoration.lineThrough,
-                        fontSize: 11,
-                        color: Colors.grey)),
-                Text(med['precoFinal'],
-                    style: const TextStyle(
-                        color: _teal2,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15)),
+                Text(
+                  med['precoOriginal'],
+                  style: const TextStyle(
+                    decoration: TextDecoration.lineThrough,
+                    fontSize: 11,
+                    color: Colors.grey,
+                  ),
+                ),
+                Text(
+                  med['precoFinal'],
+                  style: const TextStyle(
+                    color: _teal2,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15,
+                  ),
+                ),
                 const SizedBox(height: 8),
 
                 Align(
@@ -655,9 +761,14 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
                           child: Container(
                             padding: const EdgeInsets.all(6),
                             decoration: const BoxDecoration(
-                                color: _teal2, shape: BoxShape.circle),
-                            child: const Icon(Icons.add_shopping_cart,
-                                color: Colors.white, size: 18),
+                              color: _teal2,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.add_shopping_cart,
+                              color: Colors.white,
+                              size: 18,
+                            ),
                           ),
                         )
                       : Row(
@@ -680,18 +791,25 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
                                   color: _teal.withValues(alpha: 0.2),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(Icons.remove,
-                                    size: 14, color: _teal2),
+                                child: const Icon(
+                                  Icons.remove,
+                                  size: 14,
+                                  color: _teal2,
+                                ),
                               ),
                             ),
                             Padding(
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 6),
-                              child: Text('$qtdNoCarrinho',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: _teal2,
-                                      fontSize: 14)),
+                                horizontal: 6,
+                              ),
+                              child: Text(
+                                '$qtdNoCarrinho',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: _teal2,
+                                  fontSize: 14,
+                                ),
+                              ),
                             ),
                             GestureDetector(
                               onTap: () => _adicionarAoCarrinho(med),
@@ -699,9 +817,14 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
                                 width: 26,
                                 height: 26,
                                 decoration: const BoxDecoration(
-                                    color: _teal2, shape: BoxShape.circle),
-                                child: const Icon(Icons.add,
-                                    size: 14, color: Colors.white),
+                                  color: _teal2,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.add,
+                                  size: 14,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ],
@@ -719,19 +842,22 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-                color: Colors.black.withValues(alpha: 0.05),
-                blurRadius: 10,
-                offset: const Offset(0, -4))
-          ]),
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: _teal,
           minimumSize: const Size(double.infinity, 50),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
         ),
         onPressed: () {
           Navigator.push(
@@ -766,9 +892,10 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
                         child: Text(
                           '$_totalItens',
                           style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold),
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
@@ -776,11 +903,14 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
               ],
             ),
             const SizedBox(width: 12),
-            const Text("Ver Carrinho",
-                style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16)),
+            const Text(
+              "Ver Carrinho",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
           ],
         ),
       ),

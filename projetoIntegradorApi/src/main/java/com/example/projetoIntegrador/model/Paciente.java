@@ -3,6 +3,8 @@ package com.example.projetoIntegrador.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "paciente")
@@ -57,4 +59,15 @@ public class Paciente {
 
     @Column(name = "contato_emergencia_telefone", length = 20)
     private String contatoEmergenciaTelefone;
+
+    @Column(length = 100)
+    private String cidade;
+
+    @Column(name = "plano_saude", length = 100)
+    private String planoSaude;
+
+    @Lob
+    @JdbcTypeCode(SqlTypes.LONGVARBINARY)
+    @Column(name = "foto_perfil", columnDefinition = "LONGBLOB")
+    private byte[] fotoPerfil;
 }

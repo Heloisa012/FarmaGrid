@@ -2,6 +2,7 @@ import 'package:farmagridd/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:farmagridd/telas/telasMedico/configuracoesMedico.dart';
 import 'package:farmagridd/telas/sobreNos.dart';
+import '../../services/perfil_service.dart';
 
 class DrawerMedico extends StatelessWidget {
   final AppThemeController themeCtrl;
@@ -20,9 +21,11 @@ class DrawerMedico extends StatelessWidget {
   void _navegarParaAba(BuildContext context, int abaIndex) {
     final nav = Navigator.of(context, rootNavigator: true);
     nav.pop();
-    nav.push(MaterialPageRoute(
-      builder: (_) => TelaConfiguracoesMedico(abaInicial: abaIndex),
-    ));
+    nav.push(
+      MaterialPageRoute(
+        builder: (_) => TelaConfiguracoesMedico(abaInicial: abaIndex),
+      ),
+    );
   }
 
   void _navegarPara(BuildContext context, Widget tela) {
@@ -33,7 +36,10 @@ class DrawerMedico extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark  = themeCtrl.darkMode;
+    final perfil = PerfilService.atual.value;
+    final foto = PerfilService.foto(perfil);
+    final nome = PerfilService.nome(perfil);
+    final isDark = themeCtrl.darkMode;
     final bgColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
     final subColor = isDark ? Colors.white60 : Colors.grey;
 
@@ -59,8 +65,9 @@ class DrawerMedico extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                    color: Colors.grey.shade400,
-                    borderRadius: BorderRadius.circular(4)),
+                  color: Colors.grey.shade400,
+                  borderRadius: BorderRadius.circular(4),
+                ),
               ),
             ),
             Center(
@@ -69,22 +76,36 @@ class DrawerMedico extends StatelessWidget {
                   CircleAvatar(
                     radius: 42,
                     backgroundColor: corVerde.withValues(alpha: 0.15),
-                    child: Icon(Icons.person, size: 50, color: corVerde),
+                    backgroundImage: foto == null ? null : MemoryImage(foto),
+                    child: foto == null
+                        ? Icon(Icons.person, size: 50, color: corVerde)
+                        : null,
                   ),
                   const SizedBox(height: 12),
-                  Text("Dra. Ana Carolina Lanzoni",
-                      style: TextStyle(
-                          color: corTexto, fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text(
+                    "Dr(a). ${nome.isEmpty ? 'Médico' : nome}",
+                    style: TextStyle(
+                      color: corTexto,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 4),
-                  Text("ana.lanzoni@farmagrid.com",
-                      style: TextStyle(color: subColor, fontSize: 13)),
+                  Text(
+                    '${perfil?['email'] ?? ''}',
+                    style: TextStyle(color: subColor, fontSize: 13),
+                  ),
                   const SizedBox(height: 8),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      _badge("CRM/SP 123456", corVerde, corOliva),
+                      _badge("CRM ${perfil?['crm'] ?? ''}", corVerde, corOliva),
                       const SizedBox(width: 8),
-                      _badge("CRM Ativo", Colors.green.shade100, Colors.green.shade700),
+                      _badge(
+                        "CRM Ativo",
+                        Colors.green.shade100,
+                        Colors.green.shade700,
+                      ),
                     ],
                   ),
                 ],
@@ -101,59 +122,150 @@ class DrawerMedico extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text("Dados Profissionais",
-                      style: TextStyle(
-                          color: corOliva, fontWeight: FontWeight.bold, fontSize: 13)),
+                  Text(
+                    "Dados Profissionais",
+                    style: TextStyle(
+                      color: corOliva,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
                   const SizedBox(height: 12),
-                  _dadoProfissional(Icons.badge_outlined, "CRM", "CRM/SP 123456", isDark),
+                  _dadoProfissional(
+                    Icons.badge_outlined,
+                    "CRM",
+                    "CRM/SP 123456",
+                    isDark,
+                  ),
                   const SizedBox(height: 10),
-                  _dadoProfissional(Icons.local_hospital_outlined, "Especialidade", "Clínica Geral", isDark),
+                  _dadoProfissional(
+                    Icons.local_hospital_outlined,
+                    "Especialidade",
+                    "Clínica Geral",
+                    isDark,
+                  ),
                   const SizedBox(height: 10),
-                  _dadoProfissional(Icons.school_outlined, "Formação", "USP – Medicina 2012", isDark),
+                  _dadoProfissional(
+                    Icons.school_outlined,
+                    "Formação",
+                    "USP – Medicina 2012",
+                    isDark,
+                  ),
                   const SizedBox(height: 10),
-                  _dadoProfissional(Icons.work_outline, "Experiência", "12 anos", isDark),
+                  _dadoProfissional(
+                    Icons.work_outline,
+                    "Experiência",
+                    "12 anos",
+                    isDark,
+                  ),
                   const SizedBox(height: 10),
-                  _dadoProfissional(Icons.location_on_outlined, "Consultório", "Av. Paulista, 1000 - SP", isDark),
+                  _dadoProfissional(
+                    Icons.location_on_outlined,
+                    "Consultório",
+                    "Av. Paulista, 1000 - SP",
+                    isDark,
+                  ),
                 ],
               ),
             ),
             const SizedBox(height: 20),
             Row(
               children: [
-                Expanded(child: _infoCard("150", "Pacientes", Icons.people_outline, corVerde, isDark)),
+                Expanded(
+                  child: _infoCard(
+                    '${perfil?['totalPacientes'] ?? 0}',
+                    "Pacientes",
+                    Icons.people_outline,
+                    corVerde,
+                    isDark,
+                  ),
+                ),
                 const SizedBox(width: 10),
-                Expanded(child: _infoCard("8", "Hoje", Icons.calendar_today_outlined, corTeal, isDark)),
+                Expanded(
+                  child: _infoCard(
+                    '${perfil?['totalConsultas'] ?? 0}',
+                    "Consultas",
+                    Icons.calendar_today_outlined,
+                    corTeal,
+                    isDark,
+                  ),
+                ),
                 const SizedBox(width: 10),
-                Expanded(child: _infoCard("4.9", "Nota", Icons.star_outline, corOliva, isDark)),
+                Expanded(
+                  child: _infoCard(
+                    "4.9",
+                    "Nota",
+                    Icons.star_outline,
+                    corOliva,
+                    isDark,
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 28),
             _secao("Conta", subColor),
-            _item(Icons.person_outline, "Meu Perfil", "Editar dados pessoais",
-                corVerde, isDark, () => _navegarParaAba(context, 0)),
-            _item(Icons.work_outline, "Informações Profissionais", "Registro, especialidades e clínica",
-                corVerde, isDark, () => _navegarParaAba(context, 1)),
-            _item(Icons.shield_outlined, "Segurança", "Alterar senha de acesso",
-                corVerde, isDark, () => _navegarParaAba(context, 2)),
-            _item(Icons.settings_outlined, "Preferências", "Notificações e aparência do app",
-                corVerde, isDark, () => _navegarParaAba(context, 3)),
+            _item(
+              Icons.person_outline,
+              "Meu Perfil",
+              "Editar dados pessoais",
+              corVerde,
+              isDark,
+              () => _navegarParaAba(context, 0),
+            ),
+            _item(
+              Icons.work_outline,
+              "Informações Profissionais",
+              "Registro, especialidades e clínica",
+              corVerde,
+              isDark,
+              () => _navegarParaAba(context, 1),
+            ),
+            _item(
+              Icons.shield_outlined,
+              "Segurança",
+              "Alterar senha de acesso",
+              corVerde,
+              isDark,
+              () => _navegarParaAba(context, 2),
+            ),
+            _item(
+              Icons.settings_outlined,
+              "Preferências",
+              "Notificações e aparência do app",
+              corVerde,
+              isDark,
+              () => _navegarParaAba(context, 3),
+            ),
             const SizedBox(height: 20),
             _secao("Preferências", subColor),
             _itemSwitch(
               Icons.dark_mode_outlined,
               "Tema Escuro",
               "Alternar aparência do app",
-              corVerde, isDark,
+              corVerde,
+              isDark,
               themeCtrl.darkMode,
               () => themeCtrl.toggleTheme(),
             ),
-            _item(Icons.privacy_tip_outlined, "Privacidade", "Dados e permissões",
-                corVerde, isDark, () => _navegarParaAba(context, 2)),
+            _item(
+              Icons.privacy_tip_outlined,
+              "Privacidade",
+              "Dados e permissões",
+              corVerde,
+              isDark,
+              () => _navegarParaAba(context, 2),
+            ),
             const SizedBox(height: 20),
 
             _secao("Suporte", subColor),
-            _item(Icons.info_outline, "Sobre Nós", "Conheça a equipe",
-                corVerde, isDark, () => _navegarPara(context, const TelaSobreNos())),
+            _item(
+              Icons.info_outline,
+              "Sobre Nós",
+              "Conheça a equipe",
+              corVerde,
+              isDark,
+              () => _navegarPara(context, const TelaSobreNos()),
+            ),
             const SizedBox(height: 24),
             GestureDetector(
               onTap: () {
@@ -173,9 +285,14 @@ class DrawerMedico extends StatelessWidget {
                   children: [
                     Icon(Icons.logout, color: Colors.red, size: 20),
                     SizedBox(width: 8),
-                    Text("Sair da conta",
-                        style: TextStyle(
-                            color: Colors.red, fontWeight: FontWeight.bold, fontSize: 15)),
+                    Text(
+                      "Sair da conta",
+                      style: TextStyle(
+                        color: Colors.red,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -188,37 +305,69 @@ class DrawerMedico extends StatelessWidget {
   }
 
   Widget _badge(String texto, Color bg, Color fg) => Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-        decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
-        child: Text(texto, style: TextStyle(color: fg, fontWeight: FontWeight.bold, fontSize: 12)),
-      );
+    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+    decoration: BoxDecoration(
+      color: bg,
+      borderRadius: BorderRadius.circular(20),
+    ),
+    child: Text(
+      texto,
+      style: TextStyle(color: fg, fontWeight: FontWeight.bold, fontSize: 12),
+    ),
+  );
 
-  Widget _dadoProfissional(IconData icone, String label, String valor, bool isDark) =>
-      Row(
+  Widget _dadoProfissional(
+    IconData icone,
+    String label,
+    String valor,
+    bool isDark,
+  ) => Row(
+    children: [
+      Icon(icone, size: 18, color: corVerde),
+      const SizedBox(width: 10),
+      Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icone, size: 18, color: corVerde),
-          const SizedBox(width: 10),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label, style: TextStyle(color: isDark ? Colors.white38 : Colors.grey, fontSize: 11)),
-              Text(valor,
-                  style: TextStyle(
-                      color: isDark ? Colors.white : const Color(0xFF2E2E2E),
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13)),
-            ],
+          Text(
+            label,
+            style: TextStyle(
+              color: isDark ? Colors.white38 : Colors.grey,
+              fontSize: 11,
+            ),
+          ),
+          Text(
+            valor,
+            style: TextStyle(
+              color: isDark ? Colors.white : const Color(0xFF2E2E2E),
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
+            ),
           ),
         ],
-      );
+      ),
+    ],
+  );
 
   Widget _secao(String titulo, Color cor) => Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: Text(titulo,
-            style: TextStyle(color: cor, fontSize: 12, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-      );
+    padding: const EdgeInsets.only(bottom: 10),
+    child: Text(
+      titulo,
+      style: TextStyle(
+        color: cor,
+        fontSize: 12,
+        fontWeight: FontWeight.bold,
+        letterSpacing: 1.2,
+      ),
+    ),
+  );
 
-  Widget _infoCard(String valor, String label, IconData icone, Color cor, bool isDark) {
+  Widget _infoCard(
+    String valor,
+    String label,
+    IconData icone,
+    Color cor,
+    bool isDark,
+  ) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14),
       decoration: BoxDecoration(
@@ -229,15 +378,31 @@ class DrawerMedico extends StatelessWidget {
         children: [
           Icon(icone, color: cor, size: 20),
           const SizedBox(height: 6),
-          Text(valor, style: TextStyle(color: cor, fontWeight: FontWeight.bold, fontSize: 18)),
-          Text(label, style: TextStyle(color: cor.withValues(alpha: 0.7), fontSize: 10)),
+          Text(
+            valor,
+            style: TextStyle(
+              color: cor,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
+          Text(
+            label,
+            style: TextStyle(color: cor.withValues(alpha: 0.7), fontSize: 10),
+          ),
         ],
       ),
     );
   }
 
-  Widget _item(IconData icone, String titulo, String sub, Color cor,
-      bool isDark, VoidCallback onTap) {
+  Widget _item(
+    IconData icone,
+    String titulo,
+    String sub,
+    Color cor,
+    bool isDark,
+    VoidCallback onTap,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -252,7 +417,9 @@ class DrawerMedico extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(9),
               decoration: BoxDecoration(
-                  color: cor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
+                color: cor.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
               child: Icon(icone, color: cor, size: 20),
             ),
             const SizedBox(width: 14),
@@ -260,26 +427,44 @@ class DrawerMedico extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(titulo,
-                      style: TextStyle(
-                          color: isDark ? Colors.white : const Color(0xFF2E2E2E),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14)),
-                  Text(sub,
-                      style: TextStyle(color: isDark ? Colors.white38 : Colors.grey, fontSize: 12)),
+                  Text(
+                    titulo,
+                    style: TextStyle(
+                      color: isDark ? Colors.white : const Color(0xFF2E2E2E),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                  Text(
+                    sub,
+                    style: TextStyle(
+                      color: isDark ? Colors.white38 : Colors.grey,
+                      fontSize: 12,
+                    ),
+                  ),
                 ],
               ),
             ),
-            Icon(Icons.chevron_right,
-                color: isDark ? Colors.white30 : Colors.grey.shade300, size: 20),
+            Icon(
+              Icons.chevron_right,
+              color: isDark ? Colors.white30 : Colors.grey.shade300,
+              size: 20,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _itemSwitch(IconData icone, String titulo, String sub, Color cor,
-      bool isDark, bool valor, VoidCallback onTap) {
+  Widget _itemSwitch(
+    IconData icone,
+    String titulo,
+    String sub,
+    Color cor,
+    bool isDark,
+    bool valor,
+    VoidCallback onTap,
+  ) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
@@ -292,7 +477,9 @@ class DrawerMedico extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(9),
             decoration: BoxDecoration(
-                color: cor.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(10)),
+              color: cor.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(10),
+            ),
             child: Icon(icone, color: cor, size: 20),
           ),
           const SizedBox(width: 14),
@@ -300,13 +487,21 @@ class DrawerMedico extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(titulo,
-                    style: TextStyle(
-                        color: isDark ? Colors.white : const Color(0xFF2E2E2E),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14)),
-                Text(sub,
-                    style: TextStyle(color: isDark ? Colors.white38 : Colors.grey, fontSize: 12)),
+                Text(
+                  titulo,
+                  style: TextStyle(
+                    color: isDark ? Colors.white : const Color(0xFF2E2E2E),
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  sub,
+                  style: TextStyle(
+                    color: isDark ? Colors.white38 : Colors.grey,
+                    fontSize: 12,
+                  ),
+                ),
               ],
             ),
           ),
@@ -327,7 +522,10 @@ class DrawerMedico extends StatelessWidget {
                   margin: const EdgeInsets.all(3),
                   width: 20,
                   height: 20,
-                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
                 ),
               ),
             ),

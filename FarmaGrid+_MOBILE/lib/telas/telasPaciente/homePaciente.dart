@@ -7,6 +7,10 @@ import 'package:flutter/material.dart';
 import 'receitas_prontuarios.dart';
 import 'teleconsultas.dart';
 import 'lojamedicamentos.dart';
+import '../../models/medico_models.dart';
+import '../../models/paciente_models.dart';
+import '../../services/paciente_service.dart';
+import '../../services/perfil_service.dart';
 
 class TelaHomePaciente extends StatefulWidget {
   @override
@@ -15,22 +19,44 @@ class TelaHomePaciente extends StatefulWidget {
 
 class _TelaHomePacienteState extends State<TelaHomePaciente> {
   final Color corVerdePrimario = const Color(0xFF59AA53);
-  final Color corVerdeOliva   = const Color(0xFF136A48);
-  final Color corTealBotao    = const Color(0xFF7FC6BB);
+  final Color corVerdeOliva = const Color(0xFF136A48);
+  final Color corTealBotao = const Color(0xFF7FC6BB);
 
   final _themeCtrl = AppThemeController();
+  PacientePerfil? _perfil;
+  ConsultaMedica? _proximaConsulta;
 
   @override
   void initState() {
     super.initState();
     _themeCtrl.addListener(() => setState(() {}));
+    _carregarResumo();
+  }
+
+  Future<void> _carregarResumo() async {
+    try {
+      final resultados = await Future.wait([
+        PacienteService.buscarPerfil(),
+        PacienteService.listarConsultas(),
+      ]);
+      final consultas = resultados[1] as List<ConsultaMedica>;
+      if (mounted)
+        setState(() {
+          _perfil = resultados[0] as PacientePerfil;
+          _proximaConsulta = consultas.isEmpty ? null : consultas.first;
+        });
+    } catch (_) {
+      // Os atalhos continuam disponíveis mesmo se o resumo não carregar.
+    }
   }
 
   Color get corFundo => _themeCtrl.darkMode
       ? const Color(0xFF121212)
       : const Color.fromARGB(255, 245, 245, 245);
-  Color get corCard  => _themeCtrl.darkMode ? const Color(0xFF1E1E1E) : Colors.white;
-  Color get corTexto => _themeCtrl.darkMode ? Colors.white : const Color(0xFF2E2E2E);
+  Color get corCard =>
+      _themeCtrl.darkMode ? const Color(0xFF1E1E1E) : Colors.white;
+  Color get corTexto =>
+      _themeCtrl.darkMode ? Colors.white : const Color(0xFF2E2E2E);
 
   void _abrirPerfil() {
     showModalBottomSheet(
@@ -110,23 +136,41 @@ class _TelaHomePacienteState extends State<TelaHomePaciente> {
             children: [
               GestureDetector(
                 onTap: _abrirPerfil,
-                child: const CircleAvatar(
+                child: CircleAvatar(
                   radius: 28,
                   backgroundColor: Colors.white,
-                  child: Icon(Icons.person, size: 35, color: Color(0xFF59AA53)),
+                  backgroundImage:
+                      PerfilService.foto(PerfilService.atual.value) == null
+                      ? null
+                      : MemoryImage(
+                          PerfilService.foto(PerfilService.atual.value)!,
+                        ),
+                  child: PerfilService.foto(PerfilService.atual.value) == null
+                      ? const Icon(
+                          Icons.person,
+                          size: 35,
+                          color: Color(0xFF59AA53),
+                        )
+                      : null,
                 ),
               ),
               const SizedBox(width: 15),
-              const Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text("Olá,", style: TextStyle(color: Colors.white70, fontSize: 16)),
-                  Text("Paciente Exemplo",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold)),
+                  const Text(
+                    "Olá,",
+                    style: TextStyle(color: Colors.white70, fontSize: 16),
+                  ),
+                  Text(
+                    _perfil?.nome ?? "Paciente",
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -157,26 +201,39 @@ class _TelaHomePacienteState extends State<TelaHomePaciente> {
                     color: corVerdePrimario.withValues(alpha: 0.1),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.videocam_outlined,
-                      color: corVerdeOliva, size: 28),
+                  child: Icon(
+                    Icons.videocam_outlined,
+                    color: corVerdeOliva,
+                    size: 28,
+                  ),
                 ),
                 const SizedBox(width: 15),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text("Sua teleconsulta",
-                        style: TextStyle(color: Colors.grey, fontSize: 12)),
-                    Text("Dr. Cláudio - 14:30",
-                        style: TextStyle(
-                            color: corVerdeOliva,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16)),
+                    Text(
+                      _proximaConsulta == null ? "Agenda" : "Sua teleconsulta",
+                      style: TextStyle(color: Colors.grey, fontSize: 12),
+                    ),
+                    Text(
+                      _proximaConsulta == null
+                          ? "Nenhuma consulta agendada"
+                          : "${_proximaConsulta!.tipo.isEmpty ? 'Consulta' : _proximaConsulta!.tipo} - ${_proximaConsulta!.horario}",
+                      style: TextStyle(
+                        color: corVerdeOliva,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
                   ],
                 ),
                 const Spacer(),
-                const Icon(Icons.arrow_forward_ios,
-                    size: 14, color: Colors.grey),
+                const Icon(
+                  Icons.arrow_forward_ios,
+                  size: 14,
+                  color: Colors.grey,
+                ),
               ],
             ),
           ),
@@ -194,18 +251,28 @@ class _TelaHomePacienteState extends State<TelaHomePaciente> {
       mainAxisSpacing: 20,
       childAspectRatio: 0.95,
       children: [
-        _itemMenu("Receitas e Prontuários",
-            Icons.history_edu_outlined, corVerdePrimario),
-        _itemMenu("Teleconsultas",
-            Icons.videocam_outlined, corVerdeOliva),
-        _itemMenu("Comprar Medicamentos",
-            Icons.shopping_cart_outlined, corTealBotao),
-        _itemMenu("Farmácias Próximas",
-            Icons.location_on_outlined, corVerdePrimario),
-        _itemMenu("Descontos",
-            Icons.sell_outlined, corVerdeOliva),
-        _itemMenu("Meus Exames",
-            Icons.assignment_turned_in_outlined, corTealBotao),
+        _itemMenu(
+          "Receitas e Prontuários",
+          Icons.history_edu_outlined,
+          corVerdePrimario,
+        ),
+        _itemMenu("Teleconsultas", Icons.videocam_outlined, corVerdeOliva),
+        _itemMenu(
+          "Comprar Medicamentos",
+          Icons.shopping_cart_outlined,
+          corTealBotao,
+        ),
+        _itemMenu(
+          "Farmácias Próximas",
+          Icons.location_on_outlined,
+          corVerdePrimario,
+        ),
+        _itemMenu("Descontos", Icons.sell_outlined, corVerdeOliva),
+        _itemMenu(
+          "Meus Exames",
+          Icons.assignment_turned_in_outlined,
+          corTealBotao,
+        ),
       ],
     );
   }
@@ -214,23 +281,35 @@ class _TelaHomePacienteState extends State<TelaHomePaciente> {
     return GestureDetector(
       onTap: () {
         if (titulo == "Receitas e Prontuários")
-          Navigator.push(context,
-              MaterialPageRoute(builder: (_) => TelaReceitasProntuarios()));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => TelaReceitasProntuarios()),
+          );
         else if (titulo == "Teleconsultas")
-          Navigator.push(context,
-              MaterialPageRoute(builder: (_) => Teleconsultas()));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => Teleconsultas()),
+          );
         else if (titulo == "Comprar Medicamentos")
-          Navigator.push(context,
-              MaterialPageRoute(builder: (_) => TelaMedicamentos()));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => TelaMedicamentos()),
+          );
         else if (titulo == "Descontos")
-          Navigator.push(context,
-              MaterialPageRoute(builder: (_) => TelaDescontos()));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => TelaDescontos()),
+          );
         else if (titulo == "Farmácias Próximas")
-          Navigator.push(context,
-              MaterialPageRoute(builder: (_) => TelaFarmaciasProximas()));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => TelaFarmaciasProximas()),
+          );
         else if (titulo == "Meus Exames")
-          Navigator.push(context,
-              MaterialPageRoute(builder: (_) => TelaExames()));
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => TelaExames()),
+          );
       },
       child: Container(
         decoration: BoxDecoration(
@@ -250,7 +329,9 @@ class _TelaHomePacienteState extends State<TelaHomePaciente> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                  color: cor, borderRadius: BorderRadius.circular(15)),
+                color: cor,
+                borderRadius: BorderRadius.circular(15),
+              ),
               child: Icon(icone, size: 30, color: Colors.white),
             ),
             const SizedBox(height: 15),

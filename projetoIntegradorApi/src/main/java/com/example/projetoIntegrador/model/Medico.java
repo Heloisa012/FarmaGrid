@@ -48,7 +48,7 @@ public class Medico {
 
     @Lob
     @JdbcTypeCode(SqlTypes.LONGVARBINARY)
-    @Column(name = "foto_perfil")
+    @Column(name = "foto_perfil", columnDefinition = "LONGBLOB")
     private byte[] fotoPerfil;
 
     @Column(length = 20)

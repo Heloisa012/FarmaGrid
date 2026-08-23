@@ -39,6 +39,7 @@ public class EndpointsEspecificosController {
     @Autowired private CartaoRepository cartaoRepo;
     @Autowired private DisponibilidadeMedicoRepository disponibilidadeMedicoRepo;
     @Autowired private ProntuarioRepository prontuarioRepo;
+    @Autowired private LoginRepository loginRepo;
 
     // ──────────────────────────────────────────────────────────────────────────
     // PACIENTE — busca por nome
@@ -281,16 +282,25 @@ public class EndpointsEspecificosController {
     }
 
     @PutMapping("/medicos/{id}")
+    @Transactional
     public ResponseEntity<?> atualizarDadosMedico(@PathVariable Long id, @RequestBody MedicoDadosRequest req) {
         Medico m = medicoRepo.findById(id).orElse(null);
         if (m == null) return ResponseEntity.notFound().build();
+        Login login = loginRepo.findByIdMedico(id).orElse(null);
+        if (login == null) return ResponseEntity.notFound().build();
+        if (req.email != null && !req.email.equalsIgnoreCase(login.getEmail())
+                && loginRepo.existsByEmailAndIdNot(req.email, login.getId())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Este e-mail já está em uso.");
+        }
         m.setNome(req.nome);
         m.setSobrenome(req.sobrenome);
         m.setEmail(req.email);
         m.setTelefone(req.telefone);
         m.setDataNascimento(req.dataNascimento);
         m.setEndereco(req.endereco);
+        login.setEmail(req.email);
         medicoRepo.save(m);
+        loginRepo.save(login);
         return ResponseEntity.ok().build();
     }
 

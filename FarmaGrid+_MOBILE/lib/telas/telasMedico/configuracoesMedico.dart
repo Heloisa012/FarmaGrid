@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:farmagridd/app_theme.dart';
 import '../../services/auth_service.dart';
+import '../../services/perfil_service.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:typed_data';
 
 const Color _verde = Color(0xFF59AA53);
 const Color _oliva = Color(0xFF136A48);
@@ -39,6 +42,8 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
 
   bool _editandoPerfil = false;
   bool _editandoProfissional = false;
+  Map<String, dynamic> _perfil = {};
+  Uint8List? _foto;
 
   bool _verSenhaAtual = false;
   bool _verNovaSenha = false;
@@ -64,14 +69,33 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
     _themeCtrl.addListener(
       () => setState(() => _temaEscuro = _themeCtrl.darkMode),
     );
-    _preencherDados();
+    _carregarDados();
   }
 
   void _preencherDados() {
-    final usuario = AuthService.usuarioLogado;
-    if (usuario == null) return;
+    _nomeCtrl.text = '${_perfil['nome'] ?? ''}';
+    _sobrenomeCtrl.text = '${_perfil['sobrenome'] ?? ''}';
+    _emailCtrl.text =
+        '${_perfil['email'] ?? AuthService.usuarioLogado?.email ?? ''}';
+    _telefoneCtrl.text = '${_perfil['telefone'] ?? ''}';
+    _nascimentoCtrl.text = '${_perfil['dataNascimento'] ?? ''}';
+    _crmCtrl.text = '${_perfil['crm'] ?? ''}';
+    _especialidadeCtrl.text = '${_perfil['especialidade'] ?? ''}';
+    _clinicaNomeCtrl.text = '${_perfil['nomeClinica'] ?? ''}';
+    _foto = PerfilService.foto(_perfil);
+  }
 
-    _emailCtrl.text = usuario.email;
+  Future<void> _carregarDados() async {
+    try {
+      final perfil = await PerfilService.carregar(atualizar: true);
+      if (!mounted) return;
+      setState(() {
+        _perfil = perfil;
+        _preencherDados();
+      });
+    } catch (e) {
+      if (mounted) _snack('$e');
+    }
   }
 
   @override
@@ -93,14 +117,57 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
     super.dispose();
   }
 
-  void _salvarPerfil() {
-    setState(() => _editandoPerfil = false);
+  Future<void> _salvarPerfil() async {
+    await PerfilService.salvarPerfil({
+      'nome': _nomeCtrl.text.trim(),
+      'sobrenome': _sobrenomeCtrl.text.trim(),
+      'email': _emailCtrl.text.trim(),
+      'telefone': _telefoneCtrl.text.trim(),
+      'dataNascimento': _nascimentoCtrl.text.trim(),
+      'endereco': _perfil['endereco'],
+    });
+    if (mounted) setState(() => _editandoPerfil = false);
     _snack('Perfil atualizado com sucesso!');
   }
 
-  void _salvarProfissional() {
-    setState(() => _editandoProfissional = false);
+  Future<void> _salvarProfissional() async {
+    await PerfilService.salvarProfissional({
+      'crm': _crmCtrl.text.trim(),
+      'especialidade': _especialidadeCtrl.text.trim(),
+      'nomeClinica': _clinicaNomeCtrl.text.trim(),
+      'rqe': _perfil['rqe'],
+      'subespecialidades': _perfil['subespecialidades'],
+      'tipoAtendimento': _perfil['tipoAtendimento'],
+      'enderecoClinica': _perfil['enderecoClinica'],
+      'tempoConsulta': _perfil['tempoConsulta'],
+      'valorConsulta': _perfil['valorConsulta'],
+    });
+    if (mounted) setState(() => _editandoProfissional = false);
     _snack('Informações profissionais atualizadas!');
+  }
+
+  Future<void> _selecionarFoto() async {
+    final arquivo = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 82,
+    );
+    if (arquivo == null) return;
+    final bytes = await arquivo.readAsBytes();
+    await PerfilService.salvarFoto(bytes);
+    if (mounted) setState(() => _foto = bytes);
+    _snack('Foto atualizada no banco de dados!');
+  }
+
+  Future<void> _alterarSenha() async {
+    if (_novaSenhaCtrl.text != _confirmSenhaCtrl.text) {
+      _snack('As novas senhas não coincidem.');
+      return;
+    }
+    await PerfilService.alterarSenha(_senhaAtualCtrl.text, _novaSenhaCtrl.text);
+    _senhaAtualCtrl.clear();
+    _novaSenhaCtrl.clear();
+    _confirmSenhaCtrl.clear();
+    _snack('Senha atualizada no banco de dados!');
   }
 
   @override
@@ -167,14 +234,17 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
           CircleAvatar(
             radius: 22,
             backgroundColor: Colors.white.withValues(alpha: 0.25),
-            child: Text(
-              iniciais,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 13,
-              ),
-            ),
+            backgroundImage: _foto == null ? null : MemoryImage(_foto!),
+            child: _foto != null
+                ? null
+                : Text(
+                    iniciais,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
           ),
         ],
       ),
@@ -425,24 +495,27 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
                 CircleAvatar(
                   radius: 28,
                   backgroundColor: _teal.withValues(alpha: 0.3),
-                  child: Text(
-                    _nomeCtrl.text.isNotEmpty
-                        ? _nomeCtrl.text.substring(0, 1).toUpperCase() +
-                              (_sobrenomeCtrl.text.isNotEmpty
-                                  ? _sobrenomeCtrl.text
-                                        .substring(0, 1)
-                                        .toUpperCase()
-                                  : '')
-                        : 'DR',
-                    style: const TextStyle(
-                      color: _oliva,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+                  backgroundImage: _foto == null ? null : MemoryImage(_foto!),
+                  child: _foto != null
+                      ? null
+                      : Text(
+                          _nomeCtrl.text.isNotEmpty
+                              ? _nomeCtrl.text.substring(0, 1).toUpperCase() +
+                                    (_sobrenomeCtrl.text.isNotEmpty
+                                        ? _sobrenomeCtrl.text
+                                              .substring(0, 1)
+                                              .toUpperCase()
+                                        : '')
+                              : 'DR',
+                          style: const TextStyle(
+                            color: _oliva,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                 ),
                 const SizedBox(width: 16),
                 OutlinedButton.icon(
-                  onPressed: _editandoPerfil ? () {} : null,
+                  onPressed: _editandoPerfil ? _selecionarFoto : null,
                   icon: Icon(
                     Icons.camera_alt_outlined,
                     size: 16,
@@ -616,7 +689,7 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
                 ),
                 const SizedBox(height: 20),
                 ElevatedButton(
-                  onPressed: () => _snack('Senha atualizada com sucesso!'),
+                  onPressed: _alterarSenha,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: _oliva,
                     padding: const EdgeInsets.symmetric(
