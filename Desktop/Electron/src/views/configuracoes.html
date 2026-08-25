@@ -1126,6 +1126,15 @@
                 input.readOnly = true;
             });
 
+            if (!resultado?.sucesso) {
+                mostrarNotificacao(
+                    `❌ Não foi possível salvar: ${resultado?.erro || 'erro desconhecido'}`
+                );
+                
+                return;
+            }
+
+
             mostrarNotificacao('✓ Alterações salvas com sucesso!');
         }
 

@@ -1061,45 +1061,64 @@ ipcMain.handle('atualizar-dados-medico', async (event, dados) => {
 
 // === SALVAR ALTERAÇÕES PROFISSIONAIS DO MEDICO ===
 ipcMain.handle('atualizar-dados-profissionais', async (event, dados) => {
-  try {
+  const connection = await db.promise().getConnection();
 
-    await db.promise().query(`
+  try {
+    await connection.beginTransaction();
+
+    const [resultadoMedico] = await connection.query(`
       UPDATE medico
-      SET
-        crm = ?,
-        rqe = ?,
-        especialidade = ?,
-        subespecialidades = ?
+      SET crm = ?,
+          rqe = ?,
+          especialidade = ?,
+          subespecialidades = ?
       WHERE id = ?
     `, [
-      dados.crm,
-      dados.rqe,
-      dados.especialidade,
-      dados.subespecialidades,
+      dados.crm || null,
+      dados.rqe || null,
+      dados.especialidade || null,
+      dados.subespecialidades || null,
       dados.id
     ]);
 
-    await db.promise().query(`
-      UPDATE medico_clinica
-      SET
-        nome_clinica = ?,
-        endereco_clinica = ?,
-        tempo_consulta = ?,
-        valor_consulta = ?
-      WHERE id_medico = ?
+    if (resultadoMedico.affectedRows === 0) {
+      throw new Error('Médico não encontrado.');
+    }
+
+    await connection.query(`
+      INSERT INTO medico_clinica (
+        id_medico,
+        nome_clinica,
+        endereco_clinica,
+        tempo_consulta,
+        valor_consulta
+      )
+      VALUES (?, ?, ?, ?, ?)
+      ON DUPLICATE KEY UPDATE
+        nome_clinica = VALUES(nome_clinica),
+        endereco_clinica = VALUES(endereco_clinica),
+        tempo_consulta = VALUES(tempo_consulta),
+        valor_consulta = VALUES(valor_consulta)
     `, [
-      dados.nome_clinica,
-      dados.endereco_clinica,
-      dados.tempo_consulta,
-      dados.valor_consulta,
-      dados.id
+      dados.id,
+      dados.nome_clinica || null,
+      dados.endereco_clinica || null,
+      dados.tempo_consulta || null,
+      dados.valor_consulta === '' ? null : dados.valor_consulta
     ]);
 
+    await connection.commit();
     return { sucesso: true };
-
   } catch (err) {
-    console.error(err);
-    return { sucesso: false };
+    await connection.rollback();
+    console.error('Erro ao atualizar dados profissionais:', err);
+
+    return {
+      sucesso: false,
+      erro: err.message
+    };
+  } finally {
+    connection.release();
   }
 });
 
