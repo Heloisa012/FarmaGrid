@@ -557,18 +557,24 @@
         let dadosMedico;
 
         window.addEventListener('DOMContentLoaded', async () => {
-            const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
-            dadosMedico = await window.electronAPI.buscarDadosMedico(
-                usuarioLogado.id_medico
-            );
+            const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
 
-            if (dadosMedico.foto_perfil) {
-                localStorage.setItem('fotoPerfilBase64', dadosMedico.foto_perfil);
+            try {
+            const medico = await window.electronAPI.buscarDadosMedico(usuarioLogado.id_medico);
+            if (medico) {
+                document.querySelector('.nome').textContent = `Dr(a). ${medico.nome} ${medico.sobrenome || ''}`.trim();
+                document.querySelector('.crm').textContent = `CRM ${medico.crm}`;
+
                 const fotoBarra = document.querySelector('.foto');
-                fotoBarra.style.backgroundImage = `url(data:image/jpeg;base64,${dadosMedico.foto_perfil})`;
+                if (medico.foto_perfil) {
+                fotoBarra.style.backgroundImage = `url(data:image/jpeg;base64,${medico.foto_perfil})`;
                 fotoBarra.style.backgroundSize = 'cover';
                 fotoBarra.style.backgroundPosition = 'center';
                 fotoBarra.textContent = '';
+                }
+            }
+            } catch (err) {
+            console.error('Erro ao carregar dados do médico logado:', err);
             }
 
             const botBp  = document.getElementById('bp');

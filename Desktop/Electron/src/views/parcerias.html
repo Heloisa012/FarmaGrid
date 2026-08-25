@@ -1606,14 +1606,25 @@
 
 
   <script>
-     window.addEventListener('DOMContentLoaded', () => {
-      const fotoSalva = localStorage.getItem('fotoPerfilBase64');
-        if (fotoSalva) {
+     window.addEventListener('DOMContentLoaded', async () => {
+      const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+
+        try {
+          const medico = await window.electronAPI.buscarDadosMedico(usuarioLogado.id_medico);
+          if (medico) {
+            document.querySelector('.nome').textContent = `Dr(a). ${medico.nome} ${medico.sobrenome || ''}`.trim();
+            document.querySelector('.crm').textContent = `CRM ${medico.crm}`;
+
             const fotoBarra = document.querySelector('.foto');
-            fotoBarra.style.backgroundImage = `url(data:image/jpeg;base64,${fotoSalva})`;
-            fotoBarra.style.backgroundSize = 'cover';
-            fotoBarra.style.backgroundPosition = 'center';
-            fotoBarra.textContent = '';
+            if (medico.foto_perfil) {
+              fotoBarra.style.backgroundImage = `url(data:image/jpeg;base64,${medico.foto_perfil})`;
+              fotoBarra.style.backgroundSize = 'cover';
+              fotoBarra.style.backgroundPosition = 'center';
+              fotoBarra.textContent = '';
+            }
+          }
+        } catch (err) {
+          console.error('Erro ao carregar dados do médico logado:', err);
         }
 
     const botBp = document.getElementById('bp');
@@ -1701,10 +1712,10 @@
 
     // --- CADASTRAR PARCEIRO --- //
     document.getElementById('cadastrarBtn').addEventListener('click', async () => {
-      const medicoLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
+       const medicoLogado = JSON.parse(localStorage.getItem('usuarioLogado'));
 
       const novoParceiro = {
-        idMedico: medicoLogado ? medicoLogado.id : null,
+        idMedico: medicoLogado ? medicoLogado.id_medico : null,
         parceiro: document.getElementById('nomeParceria').value,
         tipo: document.getElementById('tipoParceria').value,
         email: document.getElementById('emailParceria').value,
@@ -2160,7 +2171,7 @@
       const medico = JSON.parse(localStorage.getItem('usuarioLogado'));
       if (!medico) return;
       try {
-        listaParceirosAtual = await window.electronAPI.buscarParceiros(medico.id);
+        listaParceirosAtual = await window.electronAPI.buscarParceiros(medico.id_medico);
         renderizarTabelaParceiros(listaParceirosAtual);
       } catch (error) {
         console.error('Erro ao carregar parceiros:', error);
