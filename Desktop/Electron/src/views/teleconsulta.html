@@ -355,6 +355,9 @@
         padding: 15px;
         width: 630px;
         margin-left: 20px;
+        max-height: 385px;
+        overflow-y: auto;
+        scrollbar-width: none;
     }
 
     .consulta-card {
@@ -482,10 +485,21 @@
         }
 
         .consultas-lista {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        flex-direction: row;
-        gap: 10px;
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          flex-direction: row;
+          gap: 10px;
+          max-height: 300px;
+          overflow-y: auto;
+          scrollbar-width: none;
+        }
+
+        .consultas-lista2 {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          flex-direction: row;
+          gap: 10px;
+          max-height: 250px;
         }
 
         .consulta-item {
@@ -599,6 +613,20 @@
           border-radius: 5px;
           background-color: rgb(238, 238, 238);
         }
+
+        #buscaConsultaPaciente{
+          width: 87%;
+          height: 40px;
+          border-radius: 5px;
+          border: 1px solid #42773b;
+          margin-bottom: 10px;
+          padding: 10px;
+        }
+
+        #buscaConsultaPaciente:focus{
+          border: none;
+          outline-color: #42773b;
+        }
     </style>
 
    
@@ -696,13 +724,14 @@
     </div>
 
     <div class="proximas-consultas">
-  <h4>Todas as Consultas</h4>
-  <p>Visão geral de todos agendamentos</p>
+        <h4>Todas as Consultas</h4>
+        <p style="margin: 10px 0;">Visão geral de todos agendamentos</p>
+        <input type="search" id="buscaConsultaPaciente" placeholder="Buscar por paciente...">
 
-  <div class="consultas-lista">
-    <div class="consultas-lista" id="todasConsultas"></div>
-  </div>
-</div>
+        <div class="consultas-lista">
+          <div class="consultas-lista2" id="todasConsultas"></div>
+        </div>
+    </div>
 
   </div>
 
@@ -1125,14 +1154,27 @@
         consultasPorData[dataFormatada].push(novaConsulta);
 
         renderizarTodasConsultas();
-        alert("Consulta agendada!");
+        mostrarMensagem("Consulta agendada com sucesso!");
+        limparFormulario();
         document.getElementById("myModal").style.display = "none";
 
       } catch (err) {
         console.error("Erro ao agendar:", err);
-        alert("Erro ao salvar consulta.");
+        mostrarMensagem("Erro ao salvar consulta.");
       }
   }
+
+    function limparFormulario() {
+    document.getElementById("pacienteSelect").value = "";
+    document.getElementById("dataConsulta").value = "";
+    document.getElementById("horaConsulta").value = "";
+    document.getElementById("duracaoConsulta").value = "";
+    document.getElementById("consultasSelect").value = "";
+  }
+
+  document.getElementById("btnCancelar").addEventListener("click", function () {
+    document.getElementById("myModal2").style.display = "none";
+  });
 
    async function Reagendar() {
       const dataReagendar = document.getElementById("dataReagendar").value;
@@ -1155,7 +1197,7 @@
         });
 
         if (!resultado.sucesso) {
-          alert("Erro ao reagendar no banco.");
+          mostrarMensagem("Erro ao reagendar no banco.");
           return;
         }
 
@@ -1176,14 +1218,48 @@
         document.getElementById("myModal2").style.display = "none";
         renderizarTodasConsultas();
         mostrarConsultas(novaData);
-        alert("Consulta reagendada com sucesso!");
+        mostrarMensagem("Consulta reagendada com sucesso!");
 
       } catch (err) {
         console.error("Erro ao reagendar:", err);
-        alert("Erro ao reagendar consulta.");
+        mostrarMensagem("Erro ao reagendar consulta.");
       }
     }
 
+    function mostrarMensagem(texto) {
+      const mensagem = document.createElement("div");
+
+      mensagem.textContent = texto;
+      mensagem.style.cssText = `
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        background: #355e3b;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        z-index: 9999;
+      `;
+
+      document.body.appendChild(mensagem);
+
+      setTimeout(() => {
+        mensagem.remove();
+      }, 3000);
+    }
+
+    const pesquisaInput = document.getElementById('buscaConsultaPaciente');
+
+    pesquisaInput.addEventListener('input', function () {
+      const termo = pesquisaInput.value.toLowerCase();
+      const pacientes = document.querySelectorAll('.consulta-item');
+
+      pacientes.forEach(paciente => {
+        const nome = paciente.querySelector('strong').textContent.toLowerCase();
+
+        paciente.style.display = nome.includes(termo) ? 'flex' : 'none';
+      });
+    });
 
   </script>
 
