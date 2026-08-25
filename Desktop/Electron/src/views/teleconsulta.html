@@ -1107,7 +1107,7 @@
 
      
       if (!pacienteId || !dataInput || !hora) {
-        alert("Preencha todos os campos obrigatórios.");
+        mostrarMensagem("Preencha todos os campos obrigatórios.");
         return;
       }
 
@@ -1116,7 +1116,7 @@
 
       const medico = JSON.parse(localStorage.getItem('usuarioLogado'));
         if (!medico) {
-          alert("Sessão inválida. Faça login novamente.");
+          mostrarMensagem("Sessão inválida. Faça login novamente.");
           return;
         }
 
@@ -1135,7 +1135,7 @@
         });
 
         if (!resultado.sucesso) {
-          alert("Erro ao agendar consulta.");
+          mostrarMensagem("Erro ao agendar consulta.");
           return;
         }
 
@@ -1184,7 +1184,7 @@
       const novaDuracao = document.getElementById("duracaoReagendar").value;
 
       if (!dataReagendar || !novoHorario) {
-        alert("Preencha a nova data e horário.");
+        mostrarMensagem("Preencha a nova data e horário.");
         return;
       }
 

@@ -770,7 +770,7 @@ select.form-control:focus {
     const status = document.getElementById("statusIA");
 
     if (!sintomas || !info) {
-        alert("Por favor, preencha os sintomas e as informações do paciente.");
+        mostrarMensagem("Por favor, preencha os sintomas e as informações do paciente.");
         return;
     }
 
@@ -851,6 +851,28 @@ select.form-control:focus {
         console.error(err);
     }
 }
+
+  function mostrarMensagem(texto) {
+      const mensagem = document.createElement("div");
+
+      mensagem.textContent = texto;
+      mensagem.style.cssText = `
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        background: #355e3b;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        z-index: 9999;
+      `;
+
+      document.body.appendChild(mensagem);
+
+      setTimeout(() => {
+        mensagem.remove();
+      }, 3000);
+    }
   </script>
 
 </body>
