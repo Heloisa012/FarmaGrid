@@ -27,7 +27,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   atualizarDescontoParceiro: (dados) => ipcRenderer.invoke('atualizar-desconto-parceiro', dados),
   adicionarServicoParceiro: (dados) => ipcRenderer.invoke('adicionar-servico-parceiro', dados),
   encaminharPacienteParceiro: (dados) => ipcRenderer.invoke('encaminhar-paciente-parceiro', dados),
-  buscarPacientesMedico: () => ipcRenderer.invoke('buscar-pacientes-medico'),
+  buscarPacientesMedico: (idMedico) => ipcRenderer.invoke('buscar-pacientes-medico', idMedico),
   buscarConsultasMedico: (idMedico) => ipcRenderer.invoke('buscar-consultas-medico', idMedico),
   perguntarIA: (prompt) => ipcRenderer.invoke('enviar-prompt', prompt),
   cadastrarFuncionario: (dados) => ipcRenderer.invoke('cadastrar-funcionario', dados),

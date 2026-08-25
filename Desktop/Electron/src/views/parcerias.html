@@ -1087,11 +1087,6 @@
         color: #234e2d;
       }
 
-      .paciente-sub-item {
-        font-size: 12px;
-        color: #7a8c7d;
-      }
-
       .check-selecionado {
         color: #4ba94b;
         font-size: 16px;
@@ -1525,7 +1520,6 @@
               <div class="paciente-avatar">👤</div>
               <div>
                 <div class="paciente-nome-item" id="pacienteSelecionadoNome"></div>
-                <div class="paciente-sub-item" id="pacienteSelecionadoSub"></div>
               </div>
             </div>
             <span class="link-alterar" id="alterarPaciente">Alterar</span>
@@ -2024,7 +2018,10 @@
 
       // Busca os pacientes do médico
       try {
-        todosPacientesEncaminhar = await window.electronAPI.buscarPacientesMedico();
+        const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+
+        todosPacientesEncaminhar = await window.electronAPI.buscarPacientesMedico(usuarioLogado.id_medico);
+
       } catch (error) {
         console.error('Erro ao buscar pacientes:', error);
         todosPacientesEncaminhar = [];
@@ -2042,16 +2039,6 @@
       if (e.target === modalEncaminhar) modalEncaminhar.style.display = 'none';
     });
 
-    function calcularIdade(dataNascimento) {
-      if (!dataNascimento) return '';
-      const nascimento = new Date(dataNascimento);
-      if (isNaN(nascimento)) return '';
-      const hoje = new Date();
-      let idade = hoje.getFullYear() - nascimento.getFullYear();
-      const m = hoje.getMonth() - nascimento.getMonth();
-      if (m < 0 || (m === 0 && hoje.getDate() < nascimento.getDate())) idade--;
-      return idade;
-    }
 
     function renderizarListaPacientes(lista) {
       const container = document.getElementById('listaPacientesEncaminhar');
@@ -2063,7 +2050,6 @@
       }
 
       lista.forEach(p => {
-        const idade = calcularIdade(p.data_nascimento);
         const item = document.createElement('div');
         item.className = 'paciente-item';
         if (pacienteSelecionadoEncaminhar && pacienteSelecionadoEncaminhar.id === p.id) {
@@ -2074,7 +2060,6 @@
             <div class="paciente-avatar">👤</div>
             <div>
               <div class="paciente-nome-item">${p.nome}</div>
-              <div class="paciente-sub-item">${idade !== '' ? idade + ' anos' : ''}</div>
             </div>
           </div>
           <span class="check-selecionado">✓</span>
@@ -2112,8 +2097,6 @@
       document.getElementById('etapaIndicador2').classList.add('ativa');
 
       document.getElementById('pacienteSelecionadoNome').textContent = pacienteSelecionadoEncaminhar.nome;
-      const idade = calcularIdade(pacienteSelecionadoEncaminhar.data_nascimento);
-      document.getElementById('pacienteSelecionadoSub').textContent = idade !== '' ? `${idade} anos` : '';
     }
 
     document.getElementById('btnContinuarEncaminhar').addEventListener('click', () => {

@@ -2069,17 +2069,37 @@ ipcMain.handle('adicionar-servico-parceiro', async (event, dados) => {
 });
 
 // === BUSCAR PACIENTES (para o modal de encaminhamento) ===
-ipcMain.handle('buscar-pacientes-medico', async () => {
-  try {
-    const [rows] = await db.promise().query(
-      'SELECT id, nome, data_nascimento FROM paciente ORDER BY nome'
-    );
-    return rows;
-  } catch (err) {
-    console.error('Erro ao buscar pacientes:', err);
-    throw err;
+ipcMain.handle(
+  'buscar-pacientes-medico',
+  async (event, idMedico) => {
+    try {
+      if (!idMedico) {
+        throw new Error('Médico não identificado.');
+      }
+
+      const [rows] = await db.promise().query(`
+        SELECT DISTINCT
+          pac.id,
+          pac.nome,
+          pac.data_nascimento
+        FROM paciente pac
+        INNER JOIN teleconsulta tc
+          ON tc.id_paciente = pac.id
+        WHERE tc.id_medico = ?
+        ORDER BY pac.nome
+      `, [idMedico]);
+
+      return rows;
+    } catch (err) {
+      console.error(
+        'Erro ao buscar pacientes do médico:',
+        err
+      );
+
+      throw err;
+    }
   }
-});
+);
 
 // === ENCAMINHAR PACIENTE PARA PARCEIRO ===
 ipcMain.handle('encaminhar-paciente-parceiro', async (event, dados) => {
