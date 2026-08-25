@@ -5,6 +5,7 @@ import 'telasPaciente/homePaciente.dart';
 import 'telasMedico/home_medico.dart';
 import 'cadastroPaciente.dart';
 import '../services/auth_service.dart';
+import '../services/perfil_service.dart';
 import '../models/usuario_logado.dart';
 
 const Color corFundoClaro = Color.fromARGB(255, 245, 245, 245);
@@ -52,6 +53,12 @@ class _TelaLoginState extends State<TelaLogin> {
 
     try {
       final UsuarioLogado usuario = await AuthService.login(email, senha, tipo);
+
+      try {
+        await PerfilService.carregar(atualizar: true);
+      } catch (_) {
+        // O resumo pode ser recuperado novamente pela tela inicial.
+      }
 
       if (!mounted) {
         return;

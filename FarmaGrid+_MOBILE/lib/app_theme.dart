@@ -8,9 +8,14 @@ class AppThemeController extends ChangeNotifier {
   bool _darkMode = false;
   bool get darkMode => _darkMode;
 
-  void toggleTheme() {
-    _darkMode = !_darkMode;
+  void setDarkMode(bool ativo) {
+    if (_darkMode == ativo) return;
+    _darkMode = ativo;
     notifyListeners();
+  }
+
+  void toggleTheme() {
+    setDarkMode(!_darkMode);
   }
 }
 
@@ -28,7 +33,15 @@ class _AppThemeProviderState extends State<AppThemeProvider> {
   @override
   void initState() {
     super.initState();
-    _ctrl.addListener(() => setState(() {}));
+    _ctrl.addListener(_atualizarTema);
+  }
+
+  void _atualizarTema() => setState(() {});
+
+  @override
+  void dispose() {
+    _ctrl.removeListener(_atualizarTema);
+    super.dispose();
   }
 
   @override

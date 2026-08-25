@@ -10,6 +10,7 @@ import 'lojamedicamentos.dart';
 import '../../models/medico_models.dart';
 import '../../models/paciente_models.dart';
 import '../../services/paciente_service.dart';
+import '../../services/perfil_service.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -30,7 +31,7 @@ class _TelaHomePacienteState extends State<TelaHomePaciente> {
   @override
   void initState() {
     super.initState();
-    _themeCtrl.addListener(() => setState(() {}));
+    _themeCtrl.addListener(_atualizarTema);
     _carregarResumo();
   }
 
@@ -39,6 +40,7 @@ class _TelaHomePacienteState extends State<TelaHomePaciente> {
       final resultados = await Future.wait([
         PacienteService.buscarPerfil(),
         PacienteService.listarConsultas(),
+        PerfilService.carregar(atualizar: true),
       ]);
       final consultas = resultados[1] as List<ConsultaMedica>;
       if (mounted)
@@ -51,6 +53,14 @@ class _TelaHomePacienteState extends State<TelaHomePaciente> {
     }
   }
 
+  void _atualizarTema() => setState(() {});
+
+  @override
+  void dispose() {
+    _themeCtrl.removeListener(_atualizarTema);
+    super.dispose();
+  }
+
   Color get corFundo => _themeCtrl.darkMode
       ? const Color(0xFF121212)
       : const Color.fromARGB(255, 245, 245, 245);
@@ -59,7 +69,11 @@ class _TelaHomePacienteState extends State<TelaHomePaciente> {
   Color get corTexto =>
       _themeCtrl.darkMode ? Colors.white : const Color(0xFF2E2E2E);
 
-  void _abrirPerfil() {
+  Future<void> _abrirPerfil() async {
+    try {
+      await PerfilService.carregar();
+    } catch (_) {}
+    if (!mounted) return;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,

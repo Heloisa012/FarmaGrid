@@ -429,7 +429,7 @@ class _TelaHomeMedicoState extends State<TelaHomeMedico> {
           corVerdePrimario,
         ),
         _itemFerramenta(
-          "IA Insights",
+          "Apoio clínico",
           Icons.psychology_outlined,
           corVerdeOliva,
         ),
@@ -453,7 +453,7 @@ class _TelaHomeMedicoState extends State<TelaHomeMedico> {
             context,
             MaterialPageRoute(builder: (_) => const TelaAgendaMedico()),
           );
-        else if (titulo == "IA Insights")
+        else if (titulo == "Apoio clínico")
           Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const TelaIAInsights()),

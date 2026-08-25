@@ -9,9 +9,6 @@ import 'dart:typed_data';
 const Color _verde = Color(0xFF59AA53);
 const Color _oliva = Color(0xFF136A48);
 const Color _teal = Color(0xFF7FC6BB);
-const Color _fundo = Color(0xFFF5F5F5);
-const Color _fundoCard = Colors.white;
-const Color _bordaCampo = Color(0xFFDDDDDD);
 
 class TelaConfiguracoesMedico extends StatefulWidget {
   final int abaInicial;
@@ -25,6 +22,19 @@ class TelaConfiguracoesMedico extends StatefulWidget {
 class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
   int _abaSelecionada = 0;
   final _themeCtrl = AppThemeController();
+
+  bool get _isDark => _themeCtrl.darkMode;
+  Color get _corFundo =>
+      _isDark ? const Color(0xFF121212) : const Color(0xFFF5F5F5);
+  Color get _corCard => _isDark ? const Color(0xFF1E1E1E) : Colors.white;
+  Color get _corTexto => _isDark ? Colors.white : const Color(0xFF2E2E2E);
+  Color get _corSubtexto => _isDark ? Colors.white60 : Colors.grey;
+  Color get _corBorda =>
+      _isDark ? const Color(0xFF333333) : const Color(0xFFEEEEEE);
+  Color get _corCampo =>
+      _isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF9F9F9);
+  Color get _corBordaCampo =>
+      _isDark ? const Color(0xFF444444) : const Color(0xFFDDDDDD);
 
   final _nomeCtrl = TextEditingController();
   final _sobrenomeCtrl = TextEditingController();
@@ -173,7 +183,7 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _fundo,
+      backgroundColor: _corFundo,
       body: Column(
         children: [
           _cabecalho(context),
@@ -255,7 +265,7 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
     return Container(
       height: 64,
       decoration: const BoxDecoration(
-        color: _fundoCard,
+        color: _corCard,
         boxShadow: [
           BoxShadow(
             color: Color(0x0D000000),
@@ -285,7 +295,7 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: sel ? _verde : _fundo,
+          color: sel ? _verde : _corFundo,
           borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
@@ -531,7 +541,7 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
                   style: OutlinedButton.styleFrom(
                     side: BorderSide(
                       color: _editandoPerfil
-                          ? _bordaCampo
+                          ? _corBordaCampo
                           : Colors.grey.shade300,
                     ),
                     shape: RoundedRectangleBorder(
@@ -748,9 +758,9 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
       padding: const EdgeInsets.all(18),
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
-        color: _fundoCard,
+        color: _corCard,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFEEEEEE)),
+        border: Border.all(color: _corBorda),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -773,7 +783,7 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
           const SizedBox(height: 2),
           Text(
             subtitulo,
-            style: const TextStyle(color: Colors.grey, fontSize: 11),
+            style: TextStyle(color: _corSubtexto, fontSize: 11),
           ),
           const SizedBox(height: 16),
           child,
@@ -792,7 +802,7 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 13, color: Color(0xFF444444)),
+          style: TextStyle(fontSize: 13, color: _corTexto),
         ),
         const SizedBox(height: 5),
         TextField(
@@ -800,13 +810,11 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
           enabled: habilitado,
           style: TextStyle(
             fontSize: 14,
-            color: habilitado ? Colors.black87 : Colors.black54,
+            color: habilitado ? _corTexto : _corSubtexto,
           ),
           decoration: InputDecoration(
             filled: true,
-            fillColor: habilitado
-                ? const Color(0xFFF9F9F9)
-                : const Color(0xFFEFEFEF),
+            fillColor: habilitado ? _corCampo : _corFundo,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 12,
@@ -816,11 +824,11 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
                 : null,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: _bordaCampo),
+              borderSide: BorderSide(color: _corBordaCampo),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: _bordaCampo),
+              borderSide: BorderSide(color: _corBordaCampo),
             ),
             disabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
@@ -847,16 +855,16 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
       children: [
         Text(
           label,
-          style: const TextStyle(fontSize: 13, color: Color(0xFF444444)),
+          style: TextStyle(fontSize: 13, color: _corTexto),
         ),
         const SizedBox(height: 5),
         TextField(
           controller: ctrl,
           obscureText: !visivel,
-          style: const TextStyle(fontSize: 14),
+          style: TextStyle(fontSize: 14, color: _corTexto),
           decoration: InputDecoration(
             filled: true,
-            fillColor: const Color(0xFFF9F9F9),
+            fillColor: _corCampo,
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 12,
@@ -873,11 +881,11 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
             ),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: _bordaCampo),
+              borderSide: BorderSide(color: _corBordaCampo),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
-              borderSide: const BorderSide(color: _bordaCampo),
+              borderSide: BorderSide(color: _corBordaCampo),
             ),
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
