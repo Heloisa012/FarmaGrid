@@ -72,7 +72,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   cadastrarProntuario: (dados) => ipcRenderer.invoke('cadastrar-prontuario', dados),
   buscarProntuarioRecente: (idPaciente) => ipcRenderer.invoke('buscar-prontuario-recente', idPaciente),
   cadastrarReceita: (dados) => ipcRenderer.invoke('cadastrar-receita', dados),
-  buscarPacientesProntuario: () => ipcRenderer.invoke('buscar-pacientes-prontuario'),
+  buscarPacientesProntuario: (idMedico) => ipcRenderer.invoke('buscar-pacientes-prontuario', idMedico),
   buscarProntuariosPaciente: (idPaciente) => ipcRenderer.invoke('buscar-prontuarios-paciente', idPaciente),
   atualizarSenha: (dados) => ipcRenderer.invoke('atualizar-senha', dados),
   verificarEmailRecuperacao: (email) => ipcRenderer.invoke('verificar-email-recuperacao', email),

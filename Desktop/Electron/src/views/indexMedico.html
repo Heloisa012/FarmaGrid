@@ -1370,7 +1370,8 @@
       document.getElementById('conf').addEventListener('click', () => window.electronAPI.abrirJanelaConfig());
 
       try {
-        const pacientes = await window.electronAPI.buscarPacientesProntuario();
+        const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+        const pacientes = await window.electronAPI.buscarPacientesProntuario(usuarioLogado.id_medico);
         const painel = document.querySelector('.selecionarPaciente');
         const listaContainer = document.querySelector('.listaPaciente');
 
@@ -1629,7 +1630,7 @@
                   const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
 
                   const dadosReceita = {
-                    idMedico: usuarioLogado.id,
+                    idMedico: usuarioLogado.id_medico,
                     idPaciente: p.id,
                     medicamento: document.getElementById('nomeMedicamentoReceita').value.trim(),
                     concentracao: document.getElementById('concentracaoReceita').value.trim(),

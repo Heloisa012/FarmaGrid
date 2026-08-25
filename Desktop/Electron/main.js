@@ -1996,10 +1996,10 @@ ipcMain.handle('buscar-prontuario-recente', async (event, idPaciente) => {
 });
 
 // === BUSCAR LISTA DE PACIENTES (para sidebar, com CPF real) ===
-ipcMain.handle('buscar-pacientes-prontuario', async () => {
+ipcMain.handle('buscar-pacientes-prontuario', async (event, idMedico) => {
   try {
     const [rows] = await db.promise().query(`
-      SELECT 
+      SELECT DISTINCT
         pac.id,
         pac.nome AS nome_paciente,
         pac.idade,
@@ -2008,8 +2008,10 @@ ipcMain.handle('buscar-pacientes-prontuario', async () => {
         (SELECT pr.ultima_visita FROM prontuario pr WHERE pr.id_paciente = pac.id ORDER BY pr.id DESC LIMIT 1) AS ultima_visita,
         (SELECT pr.status FROM prontuario pr WHERE pr.id_paciente = pac.id ORDER BY pr.id DESC LIMIT 1) AS status
       FROM paciente pac
+      INNER JOIN teleconsulta tc ON tc.id_paciente = pac.id
+      WHERE tc.id_medico = ?
       ORDER BY pac.nome
-    `);
+    `, [idMedico]);
     return rows;
   } catch (err) {
     console.error('Erro ao buscar pacientes:', err);
