@@ -1,5 +1,4 @@
 import 'package:farmagridd/telas/login.dart';
-import 'package:farmagridd/app_theme.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -11,39 +10,31 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppThemeProvider(
-      builder: (themeMode) => MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'FarmaGrid+',
-        themeMode: themeMode,
-        theme: _criarTema(Brightness.light),
-        darkTheme: _criarTema(Brightness.dark),
-        home: TelaLogin(),
-      ),
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      title: 'FarmaGrid+',
+      theme: _criarTema(),
+      home: TelaLogin(),
     );
   }
 
-  ThemeData _criarTema(Brightness brilho) {
-    final escuro = brilho == Brightness.dark;
+  ThemeData _criarTema() {
     return ThemeData(
       colorScheme: ColorScheme.fromSeed(
         seedColor: const Color(0xFF59AA53),
-        brightness: brilho,
+        brightness: Brightness.light,
       ),
       useMaterial3: true,
-      brightness: brilho,
-      scaffoldBackgroundColor:
-          escuro ? const Color(0xFF121212) : const Color(0xFFF5F5F5),
-      cardColor: escuro ? const Color(0xFF1E1E1E) : Colors.white,
-      dialogTheme: DialogThemeData(
-        backgroundColor: escuro ? const Color(0xFF1E1E1E) : Colors.white,
-      ),
-      inputDecorationTheme: InputDecorationTheme(
+      brightness: Brightness.light,
+      scaffoldBackgroundColor: const Color(0xFFF5F5F5),
+      cardColor: Colors.white,
+      dialogTheme: const DialogThemeData(backgroundColor: Colors.white),
+      inputDecorationTheme: const InputDecorationTheme(
         filled: true,
-        fillColor: escuro ? const Color(0xFF2A2A2A) : const Color(0xFFF9F9F9),
+        fillColor: Color(0xFFF9F9F9),
       ),
-      navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: escuro ? const Color(0xFF1E1E1E) : Colors.white,
+      navigationBarTheme: const NavigationBarThemeData(
+        backgroundColor: Colors.white,
       ),
     );
   }

@@ -61,24 +61,18 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
   bool _notifConsultas = true;
   bool _notifMensagens = true;
   bool _notifLembretes = false;
-  bool _temaEscuro = false;
   String _idioma = 'Português (BR)';
 
   final List<Map<String, dynamic>> _abas = [
     {'titulo': 'Perfil Pessoal', 'icone': Icons.person_outline},
     {'titulo': 'Info. Profissionais', 'icone': Icons.work_outline},
     {'titulo': 'Segurança', 'icone': Icons.shield_outlined},
-    {'titulo': 'Preferências', 'icone': Icons.settings_outlined},
   ];
 
   @override
   void initState() {
     super.initState();
     _abaSelecionada = widget.abaInicial;
-    _temaEscuro = _themeCtrl.darkMode;
-    _themeCtrl.addListener(
-      () => setState(() => _temaEscuro = _themeCtrl.darkMode),
-    );
     _carregarDados();
   }
 
@@ -329,8 +323,6 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
         return _abaInfoProfissional();
       case 2:
         return _abaSeguranca();
-      case 3:
-        return _abaPreferencias();
       default:
         return _abaPerfil();
     }
@@ -713,41 +705,6 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
     );
   }
 
-  Widget _abaPreferencias() {
-    return _scaffoldAba(
-      titulo: 'Preferências',
-      subtitulo: 'Personalize sua experiência no aplicativo',
-      editando: false,
-      mostrarBotaoEditar: false,
-      onEditar: () {},
-      onSalvar: () {},
-      onCancelar: () {},
-      child: Column(
-        children: [
-          const SizedBox(height: 14),
-          _cardSecao(
-            titulo: 'Aparência',
-            subtitulo: 'Personalize a interface do aplicativo',
-            child: Column(
-              children: [
-                _switchItem(
-                  Icons.dark_mode_outlined,
-                  'Tema Escuro',
-                  'Alternar entre tema claro e escuro',
-                  _temaEscuro,
-                  (v) {
-                    _themeCtrl.toggleTheme();
-                    setState(() => _temaEscuro = v);
-                  },
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _cardSecao({
     required String titulo,
     required String subtitulo,
@@ -781,10 +738,7 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
             ),
           ),
           const SizedBox(height: 2),
-          Text(
-            subtitulo,
-            style: TextStyle(color: _corSubtexto, fontSize: 11),
-          ),
+          Text(subtitulo, style: TextStyle(color: _corSubtexto, fontSize: 11)),
           const SizedBox(height: 16),
           child,
         ],
@@ -800,10 +754,7 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 13, color: _corTexto),
-        ),
+        Text(label, style: TextStyle(fontSize: 13, color: _corTexto)),
         const SizedBox(height: 5),
         TextField(
           controller: ctrl,
@@ -853,10 +804,7 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: TextStyle(fontSize: 13, color: _corTexto),
-        ),
+        Text(label, style: TextStyle(fontSize: 13, color: _corTexto)),
         const SizedBox(height: 5),
         TextField(
           controller: ctrl,

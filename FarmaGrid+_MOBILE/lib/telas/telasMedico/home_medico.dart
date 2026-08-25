@@ -198,12 +198,6 @@ class _TelaHomeMedicoState extends State<TelaHomeMedico> {
                   ),
                 ],
               ),
-              const Spacer(),
-              const Icon(
-                Icons.notifications_none_outlined,
-                color: Colors.white,
-                size: 30,
-              ),
             ],
           ),
         ),
@@ -758,28 +752,8 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
               isDark,
               () => _irParaAba(2),
             ),
-            _item(
-              Icons.settings_outlined,
-              "Preferências",
-              "Notificações e aparência do app",
-              widget.corVerde,
-              isDark,
-              () => _irParaAba(3),
-            ),
             const SizedBox(height: 20),
             _secao("Preferências", subColor),
-            _itemSwitch(
-              Icons.dark_mode_outlined,
-              "Tema Escuro",
-              "Alternar aparência do app",
-              widget.corVerde,
-              isDark,
-              widget.themeCtrl.darkMode,
-              () {
-                widget.themeCtrl.toggleTheme();
-                setState(() {});
-              },
-            ),
 
             _item(
               Icons.privacy_tip_outlined,

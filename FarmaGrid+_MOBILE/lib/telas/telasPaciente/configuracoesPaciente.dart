@@ -64,7 +64,6 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
   bool _notifConsultas = true;
   bool _notifReceitas = true;
   bool _notifDescontos = false;
-  bool _temaEscuro = false;
   String _idioma = 'Português (BR)';
   String _tipoSanguineo = 'O+';
   String _planoAssinatura = 'Plano Básico';
@@ -78,7 +77,6 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
     {'titulo': 'Perfil pessoal', 'icone': Icons.person_outline},
     {'titulo': 'Saúde', 'icone': Icons.health_and_safety_outlined},
     {'titulo': 'Segurança', 'icone': Icons.shield_outlined},
-    {'titulo': 'Preferências', 'icone': Icons.settings_outlined},
     {'titulo': 'Pagamento', 'icone': Icons.credit_card_outlined},
     {'titulo': 'Dependentes', 'icone': Icons.people_outline},
   ];
@@ -104,10 +102,6 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
   void initState() {
     super.initState();
     _abaSelecionada = widget.abaInicial;
-    _temaEscuro = _themeCtrl.darkMode;
-    _themeCtrl.addListener(
-      () => setState(() => _temaEscuro = _themeCtrl.darkMode),
-    );
 
     _nomeCtrl = TextEditingController();
     _sobrenomeCtrl = TextEditingController();
@@ -466,10 +460,8 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
       case 2:
         return _abaSeguranca();
       case 3:
-        return _abaPreferencias();
-      case 4:
         return _abaPagamento();
-      case 5:
+      case 4:
         return _abaDependentes();
       default:
         return _abaPerfil();
@@ -892,36 +884,6 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
             ),
           ),
           const SizedBox(height: 14),
-        ],
-      ),
-    );
-  }
-
-  Widget _abaPreferencias() {
-    return _scaffoldAba(
-      titulo: 'Preferências',
-      subtitulo: 'Personalize sua experiência no aplicativo',
-      child: Column(
-        children: [
-          const SizedBox(height: 14),
-          _cardSecao(
-            titulo: 'Aparência',
-            subtitulo: 'Personalize a interface do aplicativo',
-            child: Column(
-              children: [
-                _switchItem(
-                  Icons.dark_mode_outlined,
-                  'Tema Escuro',
-                  'Alternar entre tema claro e escuro',
-                  _temaEscuro,
-                  (v) {
-                    _themeCtrl.toggleTheme();
-                    setState(() => _temaEscuro = v);
-                  },
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );

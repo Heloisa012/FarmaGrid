@@ -16,13 +16,10 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
   final Color corVerdePrimario = const Color(0xFF59AA53);
   final Color corVerdeOliva = const Color(0xFF136A48);
   final Color corTealBotao = const Color(0xFF7FC6BB);
-  bool get _escuro => Theme.of(context).brightness == Brightness.dark;
-  Color get corFundoSite =>
-      _escuro ? const Color(0xFF121212) : const Color(0xFFF5F5F5);
-  Color get corCard => _escuro ? const Color(0xFF1E1E1E) : Colors.white;
-  Color get corTexto => _escuro ? Colors.white : const Color(0xFF2E2E2E);
-  Color get corCampo =>
-      _escuro ? const Color(0xFF2A2A2A) : Colors.white;
+  Color get corFundoSite => const Color(0xFFF5F5F5);
+  Color get corCard => Colors.white;
+  Color get corTexto => const Color(0xFF2E2E2E);
+  Color get corCampo => Colors.white;
 
   final _buscaController = TextEditingController();
 
