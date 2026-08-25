@@ -47,7 +47,7 @@ class _TelaRelatoriosState extends State<TelaRelatorios> {
     final agora = DateTime.now();
     final periodo = '${_meses[agora.month - 1]} ${agora.year}';
     return Scaffold(
-      backgroundColor: medicoFundo,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           MedicoCabecalho(

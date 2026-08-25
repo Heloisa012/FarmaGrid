@@ -55,7 +55,7 @@ class _TelaFarmaciasProximasState extends State<TelaFarmaciasProximas> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: pacienteFundo,
+    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
     body: Column(
       children: [
         PacienteCabecalho(

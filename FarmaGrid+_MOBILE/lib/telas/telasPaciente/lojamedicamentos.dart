@@ -50,7 +50,7 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: _teal,
         title: const Text(

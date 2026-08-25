@@ -11,6 +11,7 @@ public class PacienteMedicoResponse {
     public String condicao;
     public String ultimaVisita;
     public String status;
+    public byte[] fotoPerfil;
     public long totalConsultas;
     public long totalReceitas;
     public List<String> condicoes = new ArrayList<>();

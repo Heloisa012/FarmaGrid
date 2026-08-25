@@ -50,7 +50,7 @@ class _TelaReceitasProntuariosState extends State<TelaReceitasProntuarios> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           _construirCabecalhoSuperior(),

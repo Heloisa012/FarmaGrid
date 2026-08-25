@@ -251,7 +251,7 @@ class _TelaHomeMedicoState extends State<TelaHomeMedico> {
                             style: TextStyle(color: Colors.grey, fontSize: 11),
                           ),
                           Text(
-                            "8 agendadas",
+                            "${_consultasHoje.length} agendada${_consultasHoje.length == 1 ? '' : 's'}",
                             style: TextStyle(
                               color: corVerdeOliva,
                               fontWeight: FontWeight.bold,
@@ -294,7 +294,7 @@ class _TelaHomeMedicoState extends State<TelaHomeMedico> {
                             style: TextStyle(color: Colors.grey, fontSize: 11),
                           ),
                           Text(
-                            "150 ativos",
+                            "${_perfil?['totalPacientes'] ?? 0} cadastrado${(_perfil?['totalPacientes'] ?? 0) == 1 ? '' : 's'}",
                             style: TextStyle(
                               color: corVerdeOliva,
                               fontWeight: FontWeight.bold,
@@ -611,7 +611,7 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    "Dra. Ana Carolina Lanzoni",
+                    "Dr(a). ${PerfilService.nome(PerfilService.atual.value).isEmpty ? 'Médico' : PerfilService.nome(PerfilService.atual.value)}",
                     style: TextStyle(
                       color: widget.corTexto,
                       fontSize: 20,

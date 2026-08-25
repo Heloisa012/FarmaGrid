@@ -30,7 +30,7 @@ class _TelaIAInsightsState extends State<TelaIAInsights> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: medicoFundo,
+    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
     body: Column(
       children: [
         const MedicoCabecalho(

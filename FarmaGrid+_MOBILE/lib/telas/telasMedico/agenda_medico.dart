@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:farmagridd/app_theme.dart';
 import '../../models/medico_models.dart';
 import '../../services/medico_service.dart';
+import '../../util/formatador_data.dart';
 
 class TelaAgendaMedico extends StatefulWidget {
   const TelaAgendaMedico({super.key});
@@ -87,7 +88,7 @@ class _TelaAgendaMedicoState extends State<TelaAgendaMedico> {
                     ..._consultas.map(
                       (consulta) => _construirCardConsulta(
                         consulta.nomePaciente,
-                        consulta.data,
+                        formatarDataBrasileira(consulta.data),
                         consulta.horario,
                         mostrarBotao:
                             consulta.tipo.toLowerCase().contains('online') ||
@@ -186,7 +187,7 @@ class _TelaAgendaMedicoState extends State<TelaAgendaMedico> {
               ),
               const SizedBox(height: 3),
               Text(
-                "${consulta.data} às ${consulta.horario}",
+                "${formatarDataBrasileira(consulta.data)} às ${consulta.horario}",
                 style: TextStyle(color: corSubtexto, fontSize: 13),
               ),
             ],

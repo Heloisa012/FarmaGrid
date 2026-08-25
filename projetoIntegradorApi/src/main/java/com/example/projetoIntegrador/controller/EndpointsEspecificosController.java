@@ -60,6 +60,7 @@ public class EndpointsEspecificosController {
             r.nome = paciente.getNome();
             r.cpf = paciente.getCpf();
             r.idade = paciente.getIdade();
+            r.fotoPerfil = paciente.getFotoPerfil();
             prontuarioRepo.findFirstByIdPacienteOrderByIdDesc(paciente.getId()).ifPresent(prontuario -> {
                 r.condicao = prontuario.getCondicao();
                 r.ultimaVisita = prontuario.getUltimaVisita();

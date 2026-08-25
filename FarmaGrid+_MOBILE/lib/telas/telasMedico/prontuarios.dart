@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'detalhes_paciente.dart';
 import '../../models/medico_models.dart';
 import '../../services/medico_service.dart';
@@ -14,7 +16,13 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
   final Color corVerdePrimario = const Color(0xFF59AA53);
   final Color corVerdeOliva = const Color(0xFF136A48);
   final Color corTealBotao = const Color(0xFF7FC6BB);
-  final Color corFundoSite = const Color.fromARGB(255, 245, 245, 245);
+  bool get _escuro => Theme.of(context).brightness == Brightness.dark;
+  Color get corFundoSite =>
+      _escuro ? const Color(0xFF121212) : const Color(0xFFF5F5F5);
+  Color get corCard => _escuro ? const Color(0xFF1E1E1E) : Colors.white;
+  Color get corTexto => _escuro ? Colors.white : const Color(0xFF2E2E2E);
+  Color get corCampo =>
+      _escuro ? const Color(0xFF2A2A2A) : Colors.white;
 
   final _buscaController = TextEditingController();
 
@@ -70,10 +78,10 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
+                  Text(
                     "Meus Pacientes",
                     style: TextStyle(
-                      color: Color(0xFF2E2E2E),
+                      color: corTexto,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -89,7 +97,12 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
                       ),
                     )
                   else if (_pacientesFiltrados.isEmpty)
-                    const Center(child: Text('Nenhum paciente encontrado.'))
+                    Center(
+                      child: Text(
+                        'Nenhum paciente encontrado.',
+                        style: TextStyle(color: corTexto),
+                      ),
+                    )
                   else
                     ..._pacientesFiltrados.map(
                       (p) => _construirCardPaciente(context, p),
@@ -153,7 +166,7 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
               hintStyle: TextStyle(color: Colors.grey[400], fontSize: 13),
               prefixIcon: Icon(Icons.search, color: Colors.grey[400]),
               filled: true,
-              fillColor: Colors.white,
+              fillColor: corCampo,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,
@@ -167,11 +180,17 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
   }
 
   Widget _construirCardPaciente(BuildContext context, PacienteMedico p) {
+    Uint8List? foto;
+    if (p.fotoPerfil.isNotEmpty) {
+      try {
+        foto = base64Decode(p.fotoPerfil);
+      } catch (_) {}
+    }
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: corCard,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -186,17 +205,17 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
         children: [
           Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: corTealBotao.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.person_outline,
-                  color: corVerdeOliva,
-                  size: 26,
-                ),
+              CircleAvatar(
+                radius: 23,
+                backgroundColor: corTealBotao.withValues(alpha: 0.2),
+                backgroundImage: foto == null ? null : MemoryImage(foto),
+                child: foto == null
+                    ? Icon(
+                        Icons.person_outline,
+                        color: corVerdeOliva,
+                        size: 26,
+                      )
+                    : null,
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -205,10 +224,10 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
                   children: [
                     Text(
                       p.nomeComIdade,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
-                        color: Color(0xFF2E2E2E),
+                        color: corTexto,
                       ),
                     ),
                     Text(

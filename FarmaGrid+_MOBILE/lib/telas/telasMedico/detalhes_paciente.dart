@@ -45,7 +45,7 @@ class _TelaDetalhesPacienteState extends State<TelaDetalhesPaciente> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: medicoFundo,
+    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
     body: Column(
       children: [
         MedicoCabecalho(

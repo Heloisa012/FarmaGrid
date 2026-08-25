@@ -47,6 +47,7 @@ class PacienteMedico {
   final int totalReceitas;
   final String ultimaVisita;
   final String status;
+  final String fotoPerfil;
 
   const PacienteMedico({
     required this.id,
@@ -58,6 +59,7 @@ class PacienteMedico {
     required this.totalReceitas,
     required this.ultimaVisita,
     required this.status,
+    required this.fotoPerfil,
   });
 
   factory PacienteMedico.fromJson(Map<String, dynamic> json) {
@@ -75,6 +77,7 @@ class PacienteMedico {
       totalReceitas: _int(json['totalReceitas']),
       ultimaVisita: '${json['ultimaVisita'] ?? ''}',
       status: '${json['status'] ?? 'Ativo'}',
+      fotoPerfil: '${json['fotoPerfil'] ?? ''}',
     );
   }
 

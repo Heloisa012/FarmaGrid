@@ -46,7 +46,7 @@ class _TelaExamesState extends State<TelaExames> {
   Widget build(BuildContext context) => DefaultTabController(
     length: 2,
     child: Scaffold(
-      backgroundColor: pacienteFundo,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
         children: [
           PacienteCabecalho(

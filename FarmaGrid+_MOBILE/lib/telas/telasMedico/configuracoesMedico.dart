@@ -264,9 +264,9 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
   Widget _barraAbas() {
     return Container(
       height: 64,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: _corCard,
-        boxShadow: [
+        boxShadow: const [
           BoxShadow(
             color: Color(0x0D000000),
             blurRadius: 8,

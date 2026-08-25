@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/paciente_service.dart';
 import 'paciente_visual.dart';
+import '../../util/formatador_data.dart';
 
 class Teleconsultas extends StatefulWidget {
   const Teleconsultas({super.key});
@@ -80,7 +81,7 @@ class _TeleconsultasState extends State<Teleconsultas> {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    backgroundColor: pacienteFundo,
+    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
     body: Column(
       children: [
         PacienteCabecalho(
@@ -267,7 +268,7 @@ class _TeleconsultasState extends State<Teleconsultas> {
               ),
               const SizedBox(width: 6),
               Text(
-                '${c['data'] ?? ''}',
+                formatarDataBrasileira('${c['data'] ?? ''}'),
                 style: const TextStyle(color: Colors.grey, fontSize: 12),
               ),
               const SizedBox(width: 14),
