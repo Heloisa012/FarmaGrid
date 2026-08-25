@@ -630,6 +630,7 @@
       height: auto;
       display: flex;
       max-width: 500px;
+      scrollbar-width: none;
     }
 
     .icone3 {
@@ -1011,6 +1012,11 @@
       margin-top: 6px;
       font-size: 13px;
       color: #234e2d;
+    }
+
+    #buscaPaciente:focus {
+      border: none;
+      outline-color: #234e2d;
     }
   </style>
 
@@ -1455,6 +1461,10 @@
                 const openModalBtn2 = document.getElementById("openModalBtn2");
                 const closeModalBtn2 = document.getElementById("closeModalBtn2");
 
+                closeModalBtn.addEventListener('click', function () {
+                  modal.style.display = "none";
+                });
+
                 document.getElementById('fecharProntuarioBtn').addEventListener('click', function () {
                   modal.style.display = "none";
                 });
@@ -1481,7 +1491,12 @@
                 salvarProntuarioBtn.onclick = async () => {
                   const tipoSelecionado = document.querySelector('#tipoAtendimentoContainer .opcao-tipo.selecionada')?.dataset.tipo || 'Consulta';
 
+                  const usuarioLogado = JSON.parse(
+                    localStorage.getItem('usuarioLogado') || '{}'
+                  );
+
                   const dadosProntuario = {
+                    idMedico: usuarioLogado.id_medico,
                     idPaciente: p.id,
                     nomePaciente: p.nome_paciente,
                     idade: p.idade,
@@ -1501,7 +1516,7 @@
 
                   try {
                     await window.electronAPI.cadastrarProntuario(dadosProntuario);
-                    alert('Prontuário salvo com sucesso!');
+                    mostrarMensagem('Prontuário salvo com sucesso!');
                     modal2.style.display = 'none';
 
                     // Limpa o formulário
@@ -1524,7 +1539,7 @@
 
                   } catch (error) {
                     console.error('Erro ao salvar prontuário:', error);
-                    alert('Erro ao salvar prontuário.');
+                    mostrarMensagem('Erro ao salvar prontuário.');
                   }
                 };
 
@@ -1534,8 +1549,9 @@
 
                 // carregando os prontuários dentro do container
                 const prontuariosContainer = document.getElementById("prontuariosContainer");
+                const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
 
-                window.electronAPI.buscarProntuariosPaciente(p.id).then(prontuarios => {
+                window.electronAPI.buscarProntuariosPaciente(p.id, usuarioLogado.id_medico).then(prontuarios => {
                   if (prontuarios.length === 0) {
                     prontuariosContainer.innerHTML = `
                     <p style="text-align:center; margin-top:20px; color:#555;">
@@ -1655,11 +1671,11 @@
                   try {
                     const resultado = await window.electronAPI.cadastrarReceita(dadosReceita);
                     if (!resultado.sucesso) {
-                      alert('Erro ao salvar receita: ' + resultado.erro);
+                      mostrarMensagem('Erro ao salvar receita: ' + resultado.erro);
                       return;
                     }
 
-                    alert('Receita prescrita com sucesso!');
+                    mostrarMensagem('Receita prescrita com sucesso!');
                     modal3.style.display = 'none';
 
                     // Limpa o formulário
@@ -1679,7 +1695,7 @@
 
                   } catch (error) {
                     console.error('Erro ao salvar receita:', error);
-                    alert('Erro ao salvar receita.');
+                    mostrarMensagem('Erro ao salvar receita.');
                   }
                 };
 
@@ -1704,8 +1720,9 @@
 
                 // carregando as receitas dentro do container
                 const receitasContainer = document.getElementById("receitasContainer");
+                const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
 
-                window.electronAPI.buscarReceitas(p.id).then(receitas => {
+                window.electronAPI.buscarReceitas(p.id, usuarioLogado.id_medico).then(receitas => {
                   if (receitas.length === 0) {
                     receitasContainer.innerHTML = `
                     <p style="text-align:center; margin-top:20px; color:#555;">
@@ -1714,7 +1731,7 @@
                   } else {
                     let linhas = receitas.map((r, index) => `
                     <tr>
-                      <td>${r.data_prescricao ? formatarDataExtenso(new Date(r.data_prescricao).toLocaleDateString('pt-BR')) : (p.ultima_visita || '—')}</td>
+                      <td>${r.data_prescricao ? formatarDataExtenso(new Date(r.data_prescricao).toLocaleDateString('pt-BR', { timeZone: 'UTC' })) : (p.ultima_visita || '—')}</td>
                       <td>${r.medicamento || '—'}</td>
                       <td>${r.dosagem || '—'}</td>
                       <td>${r.duracao || '—'}</td>
@@ -1778,7 +1795,12 @@
                   </div>
               `;
 
-                const relatorios = await window.electronAPI.buscarRelatorios(p.id);
+                const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+
+                const relatorios = await window.electronAPI.buscarRelatorios(
+                  p.id,
+                  usuarioLogado.id_medico
+                );
 
                 function renderizarRelatorios(lista) {
                   const container = document.getElementById('listaRelatorios');
@@ -1839,11 +1861,15 @@
                     const hoje = new Date();
                     const data = `${String(hoje.getDate()).padStart(2, '0')}/${String(hoje.getMonth() + 1).padStart(2, '0')}/${hoje.getFullYear()}`;
 
-                    await window.electronAPI.salvarRelatorio({
-                      pacienteId: p.id,
-                      nome: titulo,
-                      data,
-                      caminho
+                    const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+
+                    const resultado = await window.electronAPI.salvarRelatorio({
+                      idPaciente: p.id,
+                      idMedico: usuarioLogado.id_medico,
+                      titulo: titulo,
+                      tipo: 'PDF',
+                      data: data,
+                      caminho: caminho
                     });
 
                     const atualizados = await window.electronAPI.buscarRelatorios(p.id);
@@ -2080,6 +2106,28 @@
         paciente.style.display = nome.includes(termo) ? 'flex' : 'none';
       });
     });
+
+    function mostrarMensagem(texto) {
+      const mensagem = document.createElement("div");
+
+      mensagem.textContent = texto;
+      mensagem.style.cssText = `
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        background: #355e3b;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        z-index: 9999;
+      `;
+
+      document.body.appendChild(mensagem);
+
+      setTimeout(() => {
+        mensagem.remove();
+      }, 3000);
+    }
 
   </script>
 

@@ -402,44 +402,93 @@ ipcMain.handle('buscar-prontuarios', async () => {
 ipcMain.handle('cadastrar-prontuario', async (event, dados) => {
   try {
     const {
-      idPaciente, nomePaciente, idade, tipo, dataAtendimento,
-      pa, temperatura, peso, spo2,
-      diagnostico, cid10, anamnese, exameFisico, conduta, dataRetorno
+      idMedico,
+      idPaciente,
+      nomePaciente,
+      idade,
+      tipo,
+      dataAtendimento,
+      pa,
+      temperatura,
+      peso,
+      spo2,
+      diagnostico,
+      cid10,
+      anamnese,
+      exameFisico,
+      conduta,
+      dataRetorno
     } = dados;
 
-    const [result] = await db.promise().query(
-      `INSERT INTO prontuario
-        (id_paciente, nome_paciente, idade, condicao, ultima_visita, status, tipo, cid10, anamnese, exame_fisico, conduta, data_retorno, pa, temperatura, peso, spo2)
-       VALUES (?, ?, ?, ?, ?, 'Ativo', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        idPaciente, nomePaciente, idade, diagnostico, dataAtendimento, tipo,
-        cid10 || null, anamnese, exameFisico || null, conduta || null,
-        dataRetorno || null, pa || null, temperatura || null, peso || null, spo2 || null
-      ]
-    );
+    const [result] = await db.promise().query(`
+      INSERT INTO prontuario (
+        id_medico,
+        id_paciente,
+        nome_paciente,
+        idade,
+        condicao,
+        ultima_visita,
+        status,
+        tipo,
+        cid10,
+        anamnese,
+        exame_fisico,
+        conduta,
+        data_retorno,
+        pa,
+        temperatura,
+        peso,
+        spo2
+      )
+      VALUES (?, ?, ?, ?, ?, ?, 'Ativo', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `, [
+      idMedico,
+      idPaciente,
+      nomePaciente,
+      idade,
+      diagnostico,
+      dataAtendimento,
+      tipo,
+      cid10 || null,
+      anamnese,
+      exameFisico || null,
+      conduta || null,
+      dataRetorno || null,
+      pa || null,
+      temperatura || null,
+      peso || null,
+      spo2 || null
+    ]);
 
-    console.log('Prontuário cadastrado com sucesso!');
-    return { sucesso: true, id: result.insertId };
+    return {
+      sucesso: true,
+      id: result.insertId
+    };
   } catch (err) {
     console.error('Erro ao cadastrar prontuário:', err);
-    return { sucesso: false, erro: err.message };
+
+    return {
+      sucesso: false,
+      erro: err.message
+    };
   }
 });
 
 // === BUSCAR RECEITAS ===
-ipcMain.handle('buscar-receitas', async (event, idPaciente) => {
-  try {
-    const [rows] = await db.promise().query(
-      'SELECT * FROM receita WHERE id_paciente = ?',
-      [idPaciente]
-    );
-    console.log('Receitas buscadas com sucesso:', rows);
+ipcMain.handle(
+  'buscar-receitas',
+  async (event, idPaciente, idMedico) => {
+    const [rows] = await db.promise().query(`
+      SELECT *
+      FROM receita
+      WHERE id_paciente = ?
+        AND id_medico = ?
+      ORDER BY id DESC
+    `, [idPaciente, idMedico]);
+
     return rows;
-  } catch (error) {
-    console.error('Erro ao buscar receitas:', error);
-    throw error;
   }
-});
+);
 
 // === CADASTRAR PARCEIRO ===
 ipcMain.handle('cadastrar-parceiro', async (event, novoParceiro) => {
@@ -963,33 +1012,81 @@ ipcMain.handle('abrir-pdf', async (event, idRelatorio) => {
 });
 
 // === SALVAR RELATORIO NO BANCO ===
-ipcMain.handle('salvar-relatorio', async (event, { pacienteId, nome, data, caminho }) => {
-    try {
-        const arquivoBuffer = fs.readFileSync(caminho);
-        const [result] = await db.promise().query(
-            `INSERT INTO relatorios (id_paciente, titulo, data, arquivo) VALUES (?, ?, ?, ?)`,
-            [pacienteId, nome, data, arquivoBuffer]
-        );
-        return result.insertId;
-    } catch (err) {
-        console.error('Erro no salvar-relatorio:', err);
-        throw err;
+ipcMain.handle('salvar-relatorio', async (event, dados) => {
+  try {
+    const {
+      idPaciente,
+      idMedico,
+      titulo,
+      tipo,
+      data,
+      caminho
+    } = dados;
+
+    if (!caminho) {
+      return {
+        sucesso: false,
+        erro: 'Nenhum arquivo foi selecionado.'
+      };
     }
+
+    if (!fs.existsSync(caminho)) {
+      return {
+        sucesso: false,
+        erro: 'O arquivo selecionado não foi encontrado.'
+      };
+    }
+
+    const arquivoBuffer = fs.readFileSync(caminho);
+
+    const [result] = await db.promise().query(`
+      INSERT INTO relatorios (
+        id_paciente,
+        id_medico,
+        titulo,
+        tipo,
+        data,
+        arquivo
+      )
+      VALUES (?, ?, ?, ?, ?, ?)
+    `, [
+      idPaciente,
+      idMedico,
+      titulo,
+      tipo || 'PDF',
+      data,
+      arquivoBuffer
+    ]);
+
+    return {
+      sucesso: true,
+      id: result.insertId
+    };
+  } catch (err) {
+    console.error('Erro ao salvar relatório:', err);
+
+    return {
+      sucesso: false,
+      erro: err.message
+    };
+  }
 });
 
 // === BUSCAR RELATORIOS DO BANCO ===
-ipcMain.handle('buscar-relatorios', async (event, pacienteId) => {
-    try {
-        const [rows] = await db.promise().query(
-            `SELECT id, id_paciente, titulo, tipo, data FROM relatorios WHERE id_paciente = ?`,
-            [pacienteId]
-        );
-        return rows;
-    } catch (err) {
-        console.error('Erro no buscar-relatorios:', err);
-        throw err;
-    }
-});
+ipcMain.handle(
+  'buscar-relatorios',
+  async (event, idPaciente, idMedico) => {
+    const [rows] = await db.promise().query(`
+      SELECT id, id_paciente, id_medico, titulo, tipo, data
+      FROM relatorios
+      WHERE id_paciente = ?
+        AND id_medico = ?
+      ORDER BY id DESC
+    `, [idPaciente, idMedico]);
+
+    return rows;
+  }
+);
 
 // === DELETAR RELATORIO ===
 ipcMain.handle('deletar-relatorio', async (event, id) => {
@@ -2039,18 +2136,20 @@ ipcMain.handle('buscar-pacientes-prontuario', async (event, idMedico) => {
 });
 
 // === BUSCAR TODOS OS PRONTUÁRIOS DE UM PACIENTE ===
-ipcMain.handle('buscar-prontuarios-paciente', async (event, idPaciente) => {
-  try {
-    const [rows] = await db.promise().query(
-      'SELECT * FROM prontuario WHERE id_paciente = ? ORDER BY id DESC',
-      [idPaciente]
-    );
+ipcMain.handle(
+  'buscar-prontuarios-paciente',
+  async (event, idPaciente, idMedico) => {
+    const [rows] = await db.promise().query(`
+      SELECT *
+      FROM prontuario
+      WHERE id_paciente = ?
+        AND id_medico = ?
+      ORDER BY id DESC
+    `, [idPaciente, idMedico]);
+
     return rows;
-  } catch (err) {
-    console.error('Erro ao buscar prontuários do paciente:', err);
-    throw err;
   }
-});
+);
 
 // === CADASTRAR RECEITA ===
 ipcMain.handle('cadastrar-receita', async (event, dados) => {
