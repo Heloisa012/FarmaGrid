@@ -34,39 +34,6 @@ public class AuthController {
     @Autowired private MedicoClinicaRepository medicoClinicaRepo;
     @Autowired private JwtUtil jwtUtil;
     @Autowired private PasswordEncoder passwordEncoder;
-    @Autowired private jakarta.persistence.EntityManager entityManager;
-
-    @GetMapping("/db-status")
-    public ResponseEntity<?> dbStatus() {
-        try {
-            var result = entityManager.createNativeQuery(
-                "SELECT trx_id, trx_state, trx_started, trx_query, trx_mysql_thread_id FROM information_schema.innodb_trx"
-            ).getResultList();
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Erro ao buscar status: " + e.getMessage());
-        }
-    }
-
-    @GetMapping("/db-processlist")
-    public ResponseEntity<?> dbProcesslist() {
-        try {
-            var result = entityManager.createNativeQuery("SHOW PROCESSLIST").getResultList();
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Erro ao buscar processlist: " + e.getMessage());
-        }
-    }
-
-    @PostMapping("/db-kill/{id}")
-    public ResponseEntity<?> dbKill(@PathVariable Long id) {
-        try {
-            entityManager.createNativeQuery("KILL " + id).executeUpdate();
-            return ResponseEntity.ok("Processo " + id + " finalizado.");
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Erro ao finalizar processo: " + e.getMessage());
-        }
-    }
 
     // ──────────────────────────────────────────────────────────────────────────
     // POST /auth/login
