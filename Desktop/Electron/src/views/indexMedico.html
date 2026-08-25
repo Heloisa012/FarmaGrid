@@ -1087,8 +1087,7 @@
         </div>
 
         <div class="buscar">
-          <input src="buscar.png" type="text" placeholder="Buscar paciente...">
-
+          <input src="buscar.png" type="search" id="buscaPaciente" placeholder="Buscar paciente...">
         </div>
 
 
@@ -2068,6 +2067,19 @@
       if (digitos.length !== 11) return cpf;
       return `***.${digitos.slice(3, 6)}.${digitos.slice(6, 9)}-**`;
     }
+
+    const pesquisaInput = document.getElementById('buscaPaciente');
+
+    pesquisaInput.addEventListener('input', function () {
+      const termo = pesquisaInput.value.toLowerCase();
+      const pacientes = document.querySelectorAll('.infoP');
+
+      pacientes.forEach(paciente => {
+        const nome = paciente.querySelector('.nomeP')?.textContent.toLowerCase() || '';
+
+        paciente.style.display = nome.includes(termo) ? 'flex' : 'none';
+      });
+    });
 
   </script>
 
