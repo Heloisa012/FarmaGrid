@@ -167,14 +167,14 @@ class AuthService {
   }
 
   static Future<bool> restaurarSessao() async {
-    final salvo = await _storage.read(key: _chaveSessao);
-
-    if (salvo == null) {
-      usuarioLogado = null;
-      return false;
-    }
-
     try {
+      final salvo = await _storage.read(key: _chaveSessao);
+
+      if (salvo == null) {
+        usuarioLogado = null;
+        return false;
+      }
+
       final dynamic json = jsonDecode(salvo);
 
       if (json is! Map<String, dynamic>) {
@@ -185,7 +185,11 @@ class AuthService {
 
       return true;
     } catch (_) {
-      await _storage.delete(key: _chaveSessao);
+      try {
+        await _storage.delete(key: _chaveSessao);
+      } catch (_) {
+        // O armazenamento pode estar indisponível nesta plataforma.
+      }
 
       usuarioLogado = null;
 

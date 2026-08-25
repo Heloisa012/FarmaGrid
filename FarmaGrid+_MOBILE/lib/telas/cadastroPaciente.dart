@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'login.dart';
 import '../services/auth_service.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';

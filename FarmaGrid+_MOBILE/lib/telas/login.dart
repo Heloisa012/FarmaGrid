@@ -3,7 +3,6 @@ import 'selecaoCadastro.dart';
 import 'sobreNos.dart';
 import 'telasPaciente/homePaciente.dart';
 import 'telasMedico/home_medico.dart';
-import 'cadastroPaciente.dart';
 import '../services/auth_service.dart';
 import '../services/perfil_service.dart';
 import '../models/usuario_logado.dart';

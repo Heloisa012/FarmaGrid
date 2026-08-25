@@ -1,12 +1,19 @@
 import 'package:farmagridd/telas/login.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+
+import 'services/auth_service.dart';
+import 'telas/telasMedico/home_medico.dart';
+import 'telas/telasPaciente/homePaciente.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, this.restaurarSessao});
+
+  final Future<bool> Function()? restaurarSessao;
 
   @override
   Widget build(BuildContext context) {
@@ -14,7 +21,12 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'FarmaGrid+',
       theme: _criarTema(),
-      home: TelaLogin(),
+      locale: const Locale('pt', 'BR'),
+      supportedLocales: const [Locale('pt', 'BR')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      home: _TelaInicial(
+        restaurarSessao: restaurarSessao ?? AuthService.restaurarSessao,
+      ),
     );
   }
 
@@ -36,6 +48,51 @@ class MyApp extends StatelessWidget {
       navigationBarTheme: const NavigationBarThemeData(
         backgroundColor: Colors.white,
       ),
+    );
+  }
+}
+
+class _TelaInicial extends StatefulWidget {
+  const _TelaInicial({required this.restaurarSessao});
+
+  final Future<bool> Function() restaurarSessao;
+
+  @override
+  State<_TelaInicial> createState() => _TelaInicialState();
+}
+
+class _TelaInicialState extends State<_TelaInicial> {
+  late final Future<bool> _restauracao;
+
+  @override
+  void initState() {
+    super.initState();
+    _restauracao = widget.restaurarSessao();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<bool>(
+      future: _restauracao,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        final usuario = AuthService.usuarioLogado;
+        if (snapshot.data == true && usuario != null) {
+          if (usuario.tipo == TipoLogin.paciente) {
+            return TelaHomePaciente();
+          }
+          if (usuario.tipo == TipoLogin.medico) {
+            return const TelaHomeMedico();
+          }
+        }
+
+        return TelaLogin();
+      },
     );
   }
 }

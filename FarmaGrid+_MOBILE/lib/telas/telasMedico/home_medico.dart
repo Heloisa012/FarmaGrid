@@ -450,7 +450,7 @@ class _TelaHomeMedicoState extends State<TelaHomeMedico> {
         else if (titulo == "Apoio clínico")
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const TelaIAInsights()),
+            MaterialPageRoute(builder: (_) => const TelaIndicadoresClinicos()),
           );
         else if (titulo == "Prescrever")
           Navigator.push(

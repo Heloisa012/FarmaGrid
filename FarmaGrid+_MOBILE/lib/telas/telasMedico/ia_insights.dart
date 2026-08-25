@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import '../../services/medico_service.dart';
 import 'medico_visual.dart';
 
-class TelaIAInsights extends StatefulWidget {
-  const TelaIAInsights({super.key});
+class TelaIndicadoresClinicos extends StatefulWidget {
+  const TelaIndicadoresClinicos({super.key});
   @override
-  State<TelaIAInsights> createState() => _TelaIAInsightsState();
+  State<TelaIndicadoresClinicos> createState() =>
+      _TelaIndicadoresClinicosState();
 }
 
-class _TelaIAInsightsState extends State<TelaIAInsights> {
+class _TelaIndicadoresClinicosState extends State<TelaIndicadoresClinicos> {
   Map<String, dynamic>? _painel;
   String? _erro;
 
@@ -34,8 +35,8 @@ class _TelaIAInsightsState extends State<TelaIAInsights> {
     body: Column(
       children: [
         const MedicoCabecalho(
-          titulo: 'Insights clínicos',
-          subtitulo: 'Uma leitura objetiva dos seus atendimentos',
+          titulo: 'Indicadores clínicos',
+          subtitulo: 'Estatísticas dos atendimentos registrados',
         ),
         Expanded(child: _conteudo()),
       ],
