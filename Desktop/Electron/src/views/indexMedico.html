@@ -1872,7 +1872,7 @@
                       caminho: caminho
                     });
 
-                    const atualizados = await window.electronAPI.buscarRelatorios(p.id);
+                    const atualizados = await window.electronAPI.buscarRelatorios(p.id, usuarioLogado.id_medico);
                     renderizarRelatorios(atualizados);
                   });
                 });

@@ -1725,13 +1725,13 @@
       };
 
       if (!novoParceiro.parceiro || !novoParceiro.tipo) {
-        alert('Preencha ao menos o nome e o tipo do parceiro.');
+        mostrarMensagem('Preencha ao menos o nome e o tipo do parceiro.');
         return;
       }
 
       try {
         await window.electronAPI.cadastrarParceiro(novoParceiro);
-        alert('Parceiro cadastrado com sucesso!');
+        mostrarMensagem('Parceiro cadastrado com sucesso!');
         modal.style.display = 'none';
 
         document.getElementById('nomeParceria').value = '';
@@ -1744,7 +1744,7 @@
         carregarParceiros();
       } catch (error) {
         console.error('Erro ao cadastrar parceiro:', error);
-        alert('Erro ao cadastrar parceiro.');
+        mostrarMensagem('Erro ao cadastrar parceiro.');
       }
     });
 
@@ -1847,7 +1847,7 @@
     document.getElementById('btnAdicionarServicoConfirmar').addEventListener('click', async () => {
       const nomeServico = document.getElementById('nomeServicoInput').value.trim();
       if (!nomeServico) {
-        alert('Digite o nome do serviço.');
+        mostrarMensagem('Digite o nome do serviço.');
         return;
       }
 
@@ -1872,7 +1872,7 @@
 
       } catch (error) {
         console.error('Erro ao adicionar serviço:', error);
-        alert('Erro ao adicionar serviço.');
+        mostrarMensagem('Erro ao adicionar serviço.');
       }
     });
 
@@ -2156,7 +2156,7 @@
 
       } catch (error) {
         console.error('Erro ao encaminhar paciente:', error);
-        alert('Erro ao encaminhar paciente.');
+        mostrarMensagem('Erro ao encaminhar paciente.');
       }
     });
 
@@ -2246,6 +2246,28 @@
       conteudoServicos.style.display = 'none';
 
       popupDetalhesFundo.style.display = 'flex';
+    }
+
+    function mostrarMensagem(texto) {
+      const mensagem = document.createElement("div");
+
+      mensagem.textContent = texto;
+      mensagem.style.cssText = `
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        background: #355e3b;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        z-index: 9999;
+      `;
+
+      document.body.appendChild(mensagem);
+
+      setTimeout(() => {
+        mensagem.remove();
+      }, 3000);
     }
   </script>
 
