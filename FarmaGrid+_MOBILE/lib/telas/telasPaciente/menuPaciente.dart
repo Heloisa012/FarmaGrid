@@ -1,7 +1,7 @@
-import 'package:farmagridd/app_theme.dart';
+import 'package:farmagrid/app_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:farmagridd/telas/telasPaciente/configuracoesPaciente.dart';
-import 'package:farmagridd/telas/sobreNos.dart';
+import 'package:farmagrid/telas/telasPaciente/configuracoesPaciente.dart';
+import 'package:farmagrid/telas/sobreNos.dart';
 import '../../services/perfil_service.dart';
 import '../../services/auth_service.dart';
 import '../login.dart';

@@ -1,8 +1,8 @@
-import 'package:farmagridd/app_theme.dart';
-import 'package:farmagridd/telas/telasPaciente/descontos.dart';
-import 'package:farmagridd/telas/telasPaciente/exames.dart';
-import 'package:farmagridd/telas/telasPaciente/farmaciasprox.dart';
-import 'package:farmagridd/telas/telasPaciente/menuPaciente.dart';
+import 'package:farmagrid/app_theme.dart';
+import 'package:farmagrid/telas/telasPaciente/descontos.dart';
+import 'package:farmagrid/telas/telasPaciente/exames.dart';
+import 'package:farmagrid/telas/telasPaciente/farmaciasprox.dart';
+import 'package:farmagrid/telas/telasPaciente/menuPaciente.dart';
 import 'package:flutter/material.dart';
 import 'receitas_prontuarios.dart';
 import 'teleconsultas.dart';

@@ -1,5 +1,5 @@
-import 'package:farmagridd/app_theme.dart';
-import 'package:farmagridd/telas/login.dart';
+import 'package:farmagrid/app_theme.dart';
+import 'package:farmagrid/telas/login.dart';
 import 'package:flutter/material.dart';
 import 'agenda_medico.dart';
 import 'ia_insights.dart';
@@ -8,7 +8,7 @@ import 'prontuarios.dart';
 import 'relatorios.dart';
 import 'parcerias.dart';
 import 'configuracoesMedico.dart';
-import 'package:farmagridd/telas/sobreNos.dart';
+import 'package:farmagrid/telas/sobreNos.dart';
 import '../../services/perfil_service.dart';
 import '../../services/auth_service.dart';
 import '../../services/medico_service.dart';

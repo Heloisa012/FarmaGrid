@@ -1,4 +1,4 @@
-import 'package:farmagridd/telas/telasPaciente/descontos.dart';
+import 'package:farmagrid/telas/telasPaciente/descontos.dart';
 import 'package:flutter/material.dart';
 import '../../services/paciente_service.dart';
 

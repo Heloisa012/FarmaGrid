@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
-import 'package:farmagridd/app_theme.dart';
+import 'package:farmagrid/app_theme.dart';
 import '../../services/perfil_service.dart';
 import '../../services/paciente_service.dart';
 import 'package:image_picker/image_picker.dart';

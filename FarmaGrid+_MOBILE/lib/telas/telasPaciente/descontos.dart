@@ -1,4 +1,4 @@
-import 'package:farmagridd/telas/login.dart';
+import 'package:farmagrid/telas/login.dart';
 import 'package:flutter/material.dart';
 import '../../models/paciente_models.dart';
 import '../../services/paciente_service.dart';

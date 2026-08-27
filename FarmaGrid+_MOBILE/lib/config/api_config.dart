@@ -1,3 +1,3 @@
 class ApiConfig {
-  static const String baseUrl = 'https://farmagrid.onrender.com/';
+  static const String baseUrl = 'https://farmagrid.onrender.com';
 }
