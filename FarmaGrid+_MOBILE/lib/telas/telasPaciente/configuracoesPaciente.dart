@@ -55,6 +55,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
   final _numeroCartaoCtrl = TextEditingController();
   final _titularCtrl = TextEditingController();
   final _validadeCtrl = TextEditingController();
+  final _cvvCtrl = TextEditingController();
 
   final List<String> _alergias = [];
   List<Map<String, dynamic>> _cartoes = [];
@@ -115,8 +116,6 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
     _cidadeCtrl = TextEditingController();
     _cepCtrl = TextEditingController();
     _numeroCartaoCtrl.addListener(_atualizarCartaoVisual);
-    _titularCtrl.addListener(_atualizarCartaoVisual);
-    _validadeCtrl.addListener(_atualizarCartaoVisual);
     _dependentes.clear();
     _carregarDados();
   }
@@ -172,17 +171,6 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
     }
     return 'Desconhecida';
   }
-
-  Color get _corBandeira => switch (_bandeiraCartao) {
-    'Visa' => const Color(0xFF1A3F8B),
-    'Mastercard' => const Color(0xFFEB5B2A),
-    'Amex' => const Color(0xFF2671B9),
-    'Elo' => const Color(0xFFFFCB05),
-    'Hipercard' => const Color(0xFFB3131B),
-    'Discover' => const Color(0xFFF58220),
-    'JCB' => const Color(0xFF1677B8),
-    _ => Colors.white70,
-  };
 
   Future<void> _carregarDados() async {
     try {
@@ -294,8 +282,9 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
     final numero = _numeroCartaoCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
     if (numero.length < 13 ||
         _titularCtrl.text.trim().isEmpty ||
-        _validadeCtrl.text.trim().isEmpty) {
-      _snack('Preencha número, titular e validade do cartão.');
+        _validadeCtrl.text.trim().length != 5 ||
+        !RegExp(r'^\d{3,4}$').hasMatch(_cvvCtrl.text)) {
+      _snack('Preencha número, titular, validade e CVV corretamente.');
       return false;
     }
     await PacienteService.adicionarCartao({
@@ -307,6 +296,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
     _numeroCartaoCtrl.clear();
     _titularCtrl.clear();
     _validadeCtrl.clear();
+    _cvvCtrl.clear();
     _cartoes = await PacienteService.listarCartoes();
     if (mounted) setState(() {});
     _snack('Cartão salvo no banco de dados!');
@@ -377,6 +367,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
       _numeroCartaoCtrl,
       _titularCtrl,
       _validadeCtrl,
+      _cvvCtrl,
     ])
       c.dispose();
     super.dispose();
@@ -1103,51 +1094,39 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Bandeira:',
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: _isDark
-                                  ? Colors.white70
-                                  : const Color(0xFF444444),
-                            ),
-                          ),
-                          const SizedBox(height: 5),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 12,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _corCampo,
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: _corBordaCampo),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.credit_card,
-                                  color: _corBandeira,
-                                  size: 18,
-                                ),
-                                const SizedBox(width: 8),
-                                Text(
-                                  _bandeiraCartao,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: _corTexto,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+                      child: _campo(
+                        'CVV:',
+                        _cvvCtrl,
+                        true,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [const _CvvFormatter()],
+                        obscureText: true,
                       ),
                     ),
                   ],
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 11,
+                  ),
+                  decoration: BoxDecoration(
+                    color: _corCampo,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: _corBordaCampo),
+                  ),
+                  child: Row(
+                    children: [
+                      _iconeBandeira(largura: 42, altura: 27),
+                      const SizedBox(width: 10),
+                      Text(
+                        _bandeiraCartao,
+                        style: TextStyle(fontSize: 14, color: _corTexto),
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(height: 16),
                 ElevatedButton(
@@ -1673,14 +1652,6 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
   }
 
   Widget _prototipoCartao() {
-    final numero = _numeroCartaoCtrl.text.isEmpty
-        ? '•••• •••• •••• ••••'
-        : _numeroCartaoCtrl.text;
-    final titular = _titularCtrl.text.trim().isEmpty
-        ? 'NOME DO TITULAR'
-        : _titularCtrl.text.trim().toUpperCase();
-    final validade = _validadeCtrl.text.isEmpty ? 'MM/AA' : _validadeCtrl.text;
-
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
       width: double.infinity,
@@ -1719,16 +1690,10 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
               ),
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 180),
-                child: Text(
-                  _bandeiraCartao,
+                child: _iconeBandeira(
                   key: ValueKey(_bandeiraCartao),
-                  style: TextStyle(
-                    color: _corBandeira,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
-                    fontStyle: FontStyle.italic,
-                    shadows: const [Shadow(color: Colors.black26, blurRadius: 2)],
-                  ),
+                  largura: 62,
+                  altura: 38,
                 ),
               ),
             ],
@@ -1738,7 +1703,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
             fit: BoxFit.scaleDown,
             alignment: Alignment.centerLeft,
             child: Text(
-              numero,
+              '•••• •••• •••• ••••',
               style: const TextStyle(
                 color: Colors.white,
                 fontSize: 22,
@@ -1750,9 +1715,9 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
           const SizedBox(height: 22),
           Row(
             children: [
-              Expanded(child: _dadoCartao('TITULAR', titular)),
+              Expanded(child: _dadoCartao('TITULAR', 'NOME DO TITULAR')),
               const SizedBox(width: 16),
-              _dadoCartao('VALIDADE', validade),
+              _dadoCartao('VALIDADE', 'MM/AA'),
             ],
           ),
         ],
@@ -1782,6 +1747,67 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
     ],
   );
 
+  Widget _iconeBandeira({
+    Key? key,
+    required double largura,
+    required double altura,
+  }) {
+    final bandeira = _bandeiraCartao;
+    if (bandeira == 'Mastercard') {
+      return SizedBox(
+        key: key,
+        width: largura,
+        height: altura,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Positioned(left: largura * .12, child: _circuloLogo(altura, const Color(0xFFEB001B))),
+            Positioned(right: largura * .12, child: _circuloLogo(altura, const Color(0xFFF79E1B))),
+          ],
+        ),
+      );
+    }
+
+    final estilo = switch (bandeira) {
+      'Visa' => (const Color(0xFFFFFFFF), const Color(0xFF1434CB), 'VISA'),
+      'Amex' => (const Color(0xFF2E77BC), Colors.white, 'AMEX'),
+      'Elo' => (const Color(0xFF171717), const Color(0xFFFFCB05), 'elo'),
+      'Hipercard' => (const Color(0xFFB3131B), Colors.white, 'hipercard'),
+      'Discover' => (Colors.white, const Color(0xFFF58220), 'DISCOVER'),
+      'JCB' => (const Color(0xFF1677B8), Colors.white, 'JCB'),
+      _ => (Colors.white24, Colors.white70, '••••'),
+    };
+    return Container(
+      key: key,
+      width: largura,
+      height: altura,
+      alignment: Alignment.center,
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      decoration: BoxDecoration(
+        color: estilo.$1,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: Colors.white24),
+      ),
+      child: FittedBox(
+        child: Text(
+          estilo.$3,
+          style: TextStyle(
+            color: estilo.$2,
+            fontSize: 17,
+            fontWeight: FontWeight.w900,
+            fontStyle: bandeira == 'Visa' ? FontStyle.italic : FontStyle.normal,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _circuloLogo(double tamanho, Color cor) => Container(
+    width: tamanho,
+    height: tamanho,
+    decoration: BoxDecoration(color: cor, shape: BoxShape.circle),
+  );
+
   Widget _campo(
     String label,
     TextEditingController ctrl,
@@ -1789,6 +1815,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
     TextInputType? keyboardType,
     List<TextInputFormatter>? inputFormatters,
     TextCapitalization textCapitalization = TextCapitalization.none,
+    bool obscureText = false,
   }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1807,6 +1834,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
           textCapitalization: textCapitalization,
+          obscureText: obscureText,
           style: TextStyle(
             fontSize: 14,
             color: editavel
@@ -2051,6 +2079,23 @@ class _ValidadeCartaoFormatter extends TextInputFormatter {
     return TextEditingValue(
       text: texto,
       selection: TextSelection.collapsed(offset: texto.length),
+    );
+  }
+}
+
+class _CvvFormatter extends TextInputFormatter {
+  const _CvvFormatter();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    var digitos = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digitos.length > 4) digitos = digitos.substring(0, 4);
+    return TextEditingValue(
+      text: digitos,
+      selection: TextSelection.collapsed(offset: digitos.length),
     );
   }
 }
