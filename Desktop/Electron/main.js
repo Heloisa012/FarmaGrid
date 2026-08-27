@@ -1612,6 +1612,111 @@ ipcMain.handle('buscar-dashboard', async (event, idFarmacia) => {
 const XLSX = require('xlsx');
 const PDFDocument = require('pdfkit');
 
+function gerarPDF(dados, caminho, titulo) {
+  return new Promise((resolve, reject) => {
+    const doc = new PDFDocument({
+      margin: 40,
+      size: 'A4'
+    });
+
+    const arquivo = fs.createWriteStream(caminho);
+
+    arquivo.on('finish', resolve);
+    arquivo.on('error', reject);
+    doc.on('error', reject);
+
+    doc.pipe(arquivo);
+
+    doc
+      .fontSize(18)
+      .text(titulo || 'Relatório FarmaGrid', {
+        align: 'center'
+      });
+
+    doc.moveDown();
+    doc.fontSize(10).text(
+      `Gerado em: ${new Date().toLocaleString('pt-BR')}`
+    );
+    doc.moveDown();
+
+    if (!dados || dados.length === 0) {
+      doc.fontSize(12).text(
+        'Nenhum dado encontrado para o período selecionado.'
+      );
+    } else {
+      dados.forEach((item, indice) => {
+        doc
+          .fontSize(11)
+          .fillColor('#234e2d')
+          .text(`Registro ${indice + 1}`);
+
+        doc.fillColor('#000000').fontSize(9);
+
+        Object.entries(item).forEach(([campo, valor]) => {
+          const texto = valor === null || valor === undefined
+            ? '—'
+            : String(valor);
+
+          doc.text(`${campo}: ${texto}`);
+        });
+
+        doc.moveDown();
+      });
+    }
+
+    doc.end();
+  });
+}
+
+function gerarXLSX(dados, caminho) {
+  const registros = Array.isArray(dados) ? dados : [];
+
+  const planilha = XLSX.utils.json_to_sheet(registros);
+
+  if (registros.length === 0) {
+    XLSX.utils.sheet_add_aoa(
+      planilha,
+      [['Nenhum dado encontrado para o período selecionado.']],
+      { origin: 'A1' }
+    );
+  }
+
+  const arquivoExcel = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(
+    arquivoExcel,
+    planilha,
+    'Relatório'
+  );
+
+  XLSX.writeFile(arquivoExcel, caminho);
+}
+
+function gerarCSV(dados, caminho) {
+  const registros = Array.isArray(dados) ? dados : [];
+
+  let conteudo;
+
+  if (registros.length === 0) {
+    conteudo = 'Mensagem\r\n"Nenhum dado encontrado para o período selecionado."';
+  } else {
+    conteudo = XLSX.utils.sheet_to_csv(
+      XLSX.utils.json_to_sheet(registros),
+      {
+        FS: ';',
+        RS: '\r\n'
+      }
+    );
+  }
+
+  // permite que o Excel reconheça corretamente acentos em UTF-8.
+  fs.writeFileSync(
+    caminho,
+    '\uFEFF' + conteudo,
+    'utf8'
+  );
+}
+
 function calcularPeriodoRelatorio(tipo, periodo) {
   const hoje = new Date();
   const dias = periodo === 'Última Semana' ? 7

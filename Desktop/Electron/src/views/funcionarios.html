@@ -633,7 +633,7 @@
  
                 <p style="margin-top: 6px; font-size: 14px;"><b>CPF</b></p>
                 <input type="text" class="form-control mb-3 busca"
-                placeholder="000.000.000-00" id="cpfEditar" maxlength="14" oninput="formatarCPF(this)" readonly>
+                placeholder="000.000.000-00" id="cpfEditar" maxlength="14" oninput="formatarCPF(this)">
  
                 <p style="margin-top: 6px; font-size: 14px;"><b>E-mail</b></p>
                 <input type="email" class="form-control mb-3 busca"
@@ -702,7 +702,8 @@
  
     // Carrega funcionários do banco ao abrir a página
     async function carregarFuncionarios() {
-    const funcionarios = await window.electronAPI.buscarFuncionarios();
+    const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+    const funcionarios = await window.electronAPI.buscarFuncionarios(usuarioLogado.id_farmacia);
     const tbody = document.getElementById('tabelaFuncionarios');
     tbody.innerHTML = '';
 
@@ -746,7 +747,7 @@
           // Recarrega para atualizar os contadores também
           carregarFuncionarios();
         } else {
-          alert('Erro ao atualizar status: ' + resultado.erro);
+          mostrarMensagem('Erro ao atualizar status: ' + resultado.erro);
         }
       });
 
@@ -792,22 +793,29 @@
  
       // Validação básica
       if (!nome || !cpf || !email || !telefone) {
-        alert('Por favor, preencha todos os campos.');
+        mostrarMensagem('Por favor, preencha todos os campos.');
         return;
       }
  
       const cpfLimpo = cpf.replace(/\D/g, '');
       if (cpfLimpo.length !== 11) {
-        alert('CPF inválido. Digite 11 dígitos.');
+        mostrarMensagem('CPF inválido. Digite 11 dígitos.');
         return;
       }
  
+      const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+
+      if (!usuarioLogado.id_farmacia) {
+        mostrarMensagem('Não foi possível identificar a farmácia logada.');
+        return;
+      }
+
       const resultado = await window.electronAPI.cadastrarFuncionario({
         nome, cpf, email, telefone, funcao, status, idFarmacia: usuarioLogado.id_farmacia
       });
  
       if (resultado.sucesso) {
-        alert('Funcionário cadastrado com sucesso!');
+        mostrarMensagem('Funcionário cadastrado com sucesso!');
         modal.style.display = 'none';
  
         // Recarrega a tabela do banco
@@ -820,7 +828,7 @@
         document.getElementById('telefone').value = '';
  
       } else {
-        alert('Erro: ' + resultado.erro);
+        mostrarMensagem('Erro: ' + resultado.erro);
       }
     });
 
@@ -835,7 +843,7 @@
       const status   = document.getElementById('modalStatusEditar').value;
 
       if (!nome || !email || !telefone) {
-        alert('Por favor, preencha todos os campos.');
+        mostrarMensagem('Por favor, preencha todos os campos.');
         return;
       }
 
@@ -846,11 +854,11 @@
       });
 
       if (resultado.sucesso) {
-        alert('Funcionário atualizado com sucesso!');
+        mostrarMensagem('Funcionário atualizado com sucesso!');
         document.getElementById('myModal2').style.display = 'none';
         carregarFuncionarios();
       } else {
-        alert('Erro ao atualizar: ' + resultado.erro);
+        mostrarMensagem('Erro ao atualizar: ' + resultado.erro);
       }
     });
 
@@ -921,6 +929,28 @@
     document.getElementById('modalFuncaoEditar').value = funcionario.funcao;
     document.getElementById('modalStatusEditar').value = funcionario.status;
   }
+
+  function mostrarMensagem(texto) {
+      const mensagem = document.createElement("div");
+
+      mensagem.textContent = texto;
+      mensagem.style.cssText = `
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        background: #355e3b;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        z-index: 9999;
+      `;
+
+      document.body.appendChild(mensagem);
+
+      setTimeout(() => {
+        mensagem.remove();
+      }, 3000);
+    }
   </script>
  
 </body>
