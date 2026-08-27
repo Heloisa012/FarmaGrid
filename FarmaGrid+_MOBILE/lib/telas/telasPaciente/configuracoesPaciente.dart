@@ -5,6 +5,7 @@ import '../../services/perfil_service.dart';
 import '../../services/paciente_service.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:typed_data';
+import 'package:flutter/services.dart';
 
 class TelaConfiguracoesPaciente extends StatefulWidget {
   final int abaInicial;
@@ -113,9 +114,75 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
     _bairroCtrl = TextEditingController();
     _cidadeCtrl = TextEditingController();
     _cepCtrl = TextEditingController();
+    _numeroCartaoCtrl.addListener(_atualizarCartaoVisual);
+    _titularCtrl.addListener(_atualizarCartaoVisual);
+    _validadeCtrl.addListener(_atualizarCartaoVisual);
     _dependentes.clear();
     _carregarDados();
   }
+
+  void _atualizarCartaoVisual() {
+    if (mounted) setState(() {});
+  }
+
+  String get _numeroCartao =>
+      _numeroCartaoCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
+
+  String get _bandeiraCartao {
+    final numero = _numeroCartao;
+    if (numero.isEmpty) return 'Bandeira';
+
+    const eloPrefixos = [
+      '401178', '401179', '431274', '438935', '451416', '457393',
+      '457631', '457632', '504175', '506699', '506700', '506701',
+      '506702', '506703', '506704', '506705', '506706', '506707',
+      '506708', '506709', '506710', '506711', '506712', '506713',
+      '506714', '506715', '506716', '506717', '506718', '506719',
+      '506720', '506721', '506722', '506723', '506724', '506725',
+      '506726', '506727', '506728', '506729', '506730', '506731',
+      '506732', '506733', '506734', '506735', '506736', '506737',
+      '506738', '506739', '506740', '506741', '506742', '506743',
+      '506744', '506745', '506746', '506747', '506748', '506749',
+      '506750', '506751', '506752', '506753', '506754', '506755',
+      '506756', '506757', '506758', '506759', '506760', '506761',
+      '506762', '506763', '506764', '506765', '506766', '506767',
+      '509000', '627780', '636297', '636368', '650031', '650033',
+      '650035', '650051', '650405', '650439', '650485', '650487',
+      '650901', '650920', '651652', '651679', '655000', '655019',
+    ];
+    if (eloPrefixos.any(numero.startsWith)) return 'Elo';
+    if (numero.startsWith('606282') || numero.startsWith('3841')) {
+      return 'Hipercard';
+    }
+    if (numero.startsWith('34') || numero.startsWith('37')) return 'Amex';
+    if (numero.startsWith('4')) return 'Visa';
+    if (numero.length >= 2) {
+      final dois = int.tryParse(numero.substring(0, 2)) ?? 0;
+      if (dois >= 51 && dois <= 55) return 'Mastercard';
+    }
+    if (numero.length >= 4) {
+      final quatro = int.tryParse(numero.substring(0, 4)) ?? 0;
+      if (quatro >= 2221 && quatro <= 2720) return 'Mastercard';
+      if (quatro >= 3528 && quatro <= 3589) return 'JCB';
+    }
+    if (numero.startsWith('6011') ||
+        numero.startsWith('64') ||
+        numero.startsWith('65')) {
+      return 'Discover';
+    }
+    return 'Desconhecida';
+  }
+
+  Color get _corBandeira => switch (_bandeiraCartao) {
+    'Visa' => const Color(0xFF1A3F8B),
+    'Mastercard' => const Color(0xFFEB5B2A),
+    'Amex' => const Color(0xFF2671B9),
+    'Elo' => const Color(0xFFFFCB05),
+    'Hipercard' => const Color(0xFFB3131B),
+    'Discover' => const Color(0xFFF58220),
+    'JCB' => const Color(0xFF1677B8),
+    _ => Colors.white70,
+  };
 
   Future<void> _carregarDados() async {
     try {
@@ -235,7 +302,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
       'numero': numero,
       'nomeTitular': _titularCtrl.text.trim(),
       'validade': _validadeCtrl.text.trim(),
-      'bandeira': numero.startsWith('4') ? 'Visa' : 'Cartão',
+      'bandeira': _bandeiraCartao,
     });
     _numeroCartaoCtrl.clear();
     _titularCtrl.clear();
@@ -1006,13 +1073,34 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
             subtitulo: 'Gerencie seu método de pagamento',
             child: Column(
               children: [
-                _campo('Número do Cartão:', _numeroCartaoCtrl, true),
+                _prototipoCartao(),
+                const SizedBox(height: 20),
+                _campo(
+                  'Número do Cartão:',
+                  _numeroCartaoCtrl,
+                  true,
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [const _NumeroCartaoFormatter()],
+                ),
                 const SizedBox(height: 12),
-                _campo('Nome do Titular:', _titularCtrl, true),
+                _campo(
+                  'Nome do Titular:',
+                  _titularCtrl,
+                  true,
+                  textCapitalization: TextCapitalization.characters,
+                ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Expanded(child: _campo('Validade:', _validadeCtrl, true)),
+                    Expanded(
+                      child: _campo(
+                        'Validade:',
+                        _validadeCtrl,
+                        true,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [const _ValidadeCartaoFormatter()],
+                      ),
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -1040,14 +1128,14 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                             ),
                             child: Row(
                               children: [
-                                const Icon(
+                                Icon(
                                   Icons.credit_card,
-                                  color: _verde,
+                                  color: _corBandeira,
                                   size: 18,
                                 ),
                                 const SizedBox(width: 8),
                                 Text(
-                                  'Visa',
+                                  _bandeiraCartao,
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: _corTexto,
@@ -1584,7 +1672,124 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
     );
   }
 
-  Widget _campo(String label, TextEditingController ctrl, bool editavel) {
+  Widget _prototipoCartao() {
+    final numero = _numeroCartaoCtrl.text.isEmpty
+        ? '•••• •••• •••• ••••'
+        : _numeroCartaoCtrl.text;
+    final titular = _titularCtrl.text.trim().isEmpty
+        ? 'NOME DO TITULAR'
+        : _titularCtrl.text.trim().toUpperCase();
+    final validade = _validadeCtrl.text.isEmpty ? 'MM/AA' : _validadeCtrl.text;
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      width: double.infinity,
+      constraints: const BoxConstraints(maxWidth: 390),
+      padding: const EdgeInsets.all(22),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [_oliva, _verde, _teal.withValues(alpha: .95)],
+        ),
+        borderRadius: BorderRadius.circular(22),
+        boxShadow: [
+          BoxShadow(
+            color: _oliva.withValues(alpha: .25),
+            blurRadius: 18,
+            offset: const Offset(0, 9),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                width: 43,
+                height: 31,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE8C96A),
+                  borderRadius: BorderRadius.circular(7),
+                  border: Border.all(color: Colors.white38),
+                ),
+                child: const Icon(Icons.memory, size: 21, color: Color(0xFF8A6C1E)),
+              ),
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 180),
+                child: Text(
+                  _bandeiraCartao,
+                  key: ValueKey(_bandeiraCartao),
+                  style: TextStyle(
+                    color: _corBandeira,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    fontStyle: FontStyle.italic,
+                    shadows: const [Shadow(color: Colors.black26, blurRadius: 2)],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 27),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              numero,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 22,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 1.8,
+              ),
+            ),
+          ),
+          const SizedBox(height: 22),
+          Row(
+            children: [
+              Expanded(child: _dadoCartao('TITULAR', titular)),
+              const SizedBox(width: 16),
+              _dadoCartao('VALIDADE', validade),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _dadoCartao(String rotulo, String valor) => Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        rotulo,
+        style: const TextStyle(color: Colors.white60, fontSize: 9, letterSpacing: 1),
+      ),
+      const SizedBox(height: 3),
+      Text(
+        valor,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          letterSpacing: .5,
+        ),
+      ),
+    ],
+  );
+
+  Widget _campo(
+    String label,
+    TextEditingController ctrl,
+    bool editavel, {
+    TextInputType? keyboardType,
+    List<TextInputFormatter>? inputFormatters,
+    TextCapitalization textCapitalization = TextCapitalization.none,
+  }) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1599,6 +1804,9 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
         TextField(
           controller: ctrl,
           enabled: editavel,
+          keyboardType: keyboardType,
+          inputFormatters: inputFormatters,
+          textCapitalization: textCapitalization,
           style: TextStyle(
             fontSize: 14,
             color: editavel
@@ -1787,4 +1995,62 @@ class _SemGlowScroll extends ScrollBehavior {
     PointerDeviceKind.mouse,
     PointerDeviceKind.stylus,
   };
+}
+
+class _NumeroCartaoFormatter extends TextInputFormatter {
+  const _NumeroCartaoFormatter();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    var digitos = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    final amex = digitos.startsWith('34') || digitos.startsWith('37');
+    final limite = amex ? 15 : 19;
+    if (digitos.length > limite) digitos = digitos.substring(0, limite);
+
+    final grupos = <String>[];
+    if (amex) {
+      const tamanhos = [4, 6, 5];
+      var inicio = 0;
+      for (final tamanho in tamanhos) {
+        if (inicio >= digitos.length) break;
+        final fim = (inicio + tamanho).clamp(0, digitos.length);
+        grupos.add(digitos.substring(inicio, fim));
+        inicio = fim;
+      }
+    } else {
+      for (var i = 0; i < digitos.length; i += 4) {
+        grupos.add(
+          digitos.substring(i, (i + 4).clamp(0, digitos.length)),
+        );
+      }
+    }
+    final texto = grupos.join(' ');
+    return TextEditingValue(
+      text: texto,
+      selection: TextSelection.collapsed(offset: texto.length),
+    );
+  }
+}
+
+class _ValidadeCartaoFormatter extends TextInputFormatter {
+  const _ValidadeCartaoFormatter();
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    var digitos = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digitos.length > 4) digitos = digitos.substring(0, 4);
+    final texto = digitos.length > 2
+        ? '${digitos.substring(0, 2)}/${digitos.substring(2)}'
+        : digitos;
+    return TextEditingValue(
+      text: texto,
+      selection: TextSelection.collapsed(offset: texto.length),
+    );
+  }
 }
