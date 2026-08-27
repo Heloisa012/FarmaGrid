@@ -10,7 +10,7 @@ import '../models/usuario_logado.dart';
 const Color corFundoClaro = Color.fromARGB(255, 245, 245, 245);
 const Color corVerdePrimario = Color(0xFF59AA53);
 const Color corVerdeEscuro = Color(0xFF4F8946);
-const Color corTeal = Color(0xFF7FC6BB);
+const Color corTeal = Color(0xFF63BFC4);
 
 const TextStyle estiloTitulo = TextStyle(
   fontFamily: 'Inter',
