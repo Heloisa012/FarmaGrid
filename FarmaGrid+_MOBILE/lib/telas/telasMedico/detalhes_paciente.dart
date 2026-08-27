@@ -1,15 +1,19 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import '../../services/medico_service.dart';
 import 'medico_visual.dart';
 
 class TelaDetalhesPaciente extends StatefulWidget {
   final int idPaciente;
-  final String nome, cpfMascarado;
+  final String nome, cpfMascarado, fotoPerfil;
   const TelaDetalhesPaciente({
     super.key,
     required this.idPaciente,
     required this.nome,
     required this.cpfMascarado,
+    required this.fotoPerfil,
   });
   @override
   State<TelaDetalhesPaciente> createState() => _TelaDetalhesPacienteState();
@@ -19,6 +23,15 @@ class _TelaDetalhesPacienteState extends State<TelaDetalhesPaciente> {
   List<Map<String, dynamic>> _registros = [];
   bool _carregando = true;
   String? _erro;
+
+  Uint8List? get _fotoPaciente {
+    if (widget.fotoPerfil.isEmpty) return null;
+    try {
+      return base64Decode(widget.fotoPerfil);
+    } catch (_) {
+      return null;
+    }
+  }
 
   @override
   void initState() {
@@ -44,7 +57,9 @@ class _TelaDetalhesPacienteState extends State<TelaDetalhesPaciente> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) {
+    final fotoPaciente = _fotoPaciente;
+    return Scaffold(
     backgroundColor: Theme.of(context).scaffoldBackgroundColor,
     body: Column(
       children: [
@@ -53,13 +68,15 @@ class _TelaDetalhesPacienteState extends State<TelaDetalhesPaciente> {
           subtitulo: widget.nome,
           rodape: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: .2),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: const Icon(Icons.person_outline, color: Colors.white),
+              CircleAvatar(
+                radius: 22,
+                backgroundColor: Colors.white.withValues(alpha: .2),
+                backgroundImage: fotoPaciente == null
+                    ? null
+                    : MemoryImage(fotoPaciente),
+                child: fotoPaciente == null
+                    ? const Icon(Icons.person_outline, color: Colors.white)
+                    : null,
               ),
               const SizedBox(width: 11),
               Column(
@@ -84,7 +101,8 @@ class _TelaDetalhesPacienteState extends State<TelaDetalhesPaciente> {
         Expanded(child: _conteudo()),
       ],
     ),
-  );
+    );
+  }
 
   Widget _conteudo() {
     if (_carregando) {

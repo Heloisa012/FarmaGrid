@@ -243,6 +243,7 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
                         idPaciente: p.id,
                         nome: p.nomeComIdade,
                         cpfMascarado: p.cpfFormatado,
+                        fotoPerfil: p.fotoPerfil,
                       ),
                     ),
                   );
