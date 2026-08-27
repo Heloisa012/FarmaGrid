@@ -16,6 +16,9 @@ public class VendaConcluida {
     @Column(length = 50)
     private String id;
 
+    @Column(name = "id_farmacia", nullable = false)
+    private Long idFarmacia;
+
     @Column(length = 255)
     private String cliente;
 

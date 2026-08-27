@@ -214,9 +214,9 @@ public class EndpointsEspecificosController {
     // ──────────────────────────────────────────────────────────────────────────
     @GetMapping("/cupons")
     @Transactional
-    public List<Cupom> listarCupons() {
+    public List<Cupom> listarCupons(@RequestParam Long idFarmacia) {
         LocalDate hoje = LocalDate.now();
-        for (Cupom c : cupomRepo.findByStatus("ativo")) {
+        for (Cupom c : cupomRepo.findByStatusAndIdFarmacia("ativo", idFarmacia)) {
             boolean expiradoPorData = c.getValidade() != null && c.getValidade().isBefore(hoje);
             boolean expiradoPorUso = c.getLimiteUso() != null && c.getLimiteUso() > 0
                     && c.getUsosAtuais() != null && c.getUsosAtuais() >= c.getLimiteUso();
@@ -225,7 +225,7 @@ public class EndpointsEspecificosController {
                 cupomRepo.save(c);
             }
         }
-        return cupomRepo.findAllOrderByStatusAndCodigo();
+        return cupomRepo.findAllOrderByStatusAndCodigo(idFarmacia);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -244,8 +244,8 @@ public class EndpointsEspecificosController {
     // PRODUTO — lista enriquecida (próxima validade + total em lotes) e estoque baixo
     // ──────────────────────────────────────────────────────────────────────────
     @GetMapping("/produtos")
-    public List<Produto> listarProdutos() {
-        List<Produto> produtos = produtoRepo.findAllByOrderByNomeAsc();
+    public List<Produto> listarProdutos(@RequestParam Long idFarmacia) {
+        List<Produto> produtos = produtoRepo.findAllByIdFarmaciaOrderByNomeAsc(idFarmacia);
         for (Produto p : produtos) {
             p.setProximaValidade(loteRepo.proximaValidade(p.getId()));
             p.setTotalLotes(loteRepo.totalLotes(p.getId()));
@@ -254,18 +254,18 @@ public class EndpointsEspecificosController {
     }
 
     @GetMapping("/produtos/estoque-baixo")
-    public List<Produto> produtosEstoqueBaixo() {
-        return produtoRepo.findEstoqueBaixo();
+    public List<Produto> produtosEstoqueBaixo(@RequestParam Long idFarmacia) {
+        return produtoRepo.findEstoqueBaixo(idFarmacia);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
     // LOTE — todos (com nome do produto), por produto, criação (entrada/saída) e remoção
     // ──────────────────────────────────────────────────────────────────────────
     @GetMapping("/lotes")
-    public List<LoteComProdutoResponse> listarLotes() {
-        return loteRepo.findAllByOrderByDataValidadeAsc().stream()
-                .map(this::comNomeProduto)
-                .collect(Collectors.toList());
+        public List<LoteComProdutoResponse> listarLotes(@RequestParam Long idFarmacia) {
+            return loteRepo.findAllByFarmaciaOrderByDataValidadeAsc(idFarmacia).stream()
+                    .map(this::comNomeProduto)
+                    .collect(Collectors.toList());
     }
 
     @GetMapping("/lotes/produto/{idProduto}")

@@ -62,11 +62,11 @@ contextBridge.exposeInMainWorld("electronAPI", {
   cadastrarCupom: (dados) => ipcRenderer.invoke('cadastrar-cupom', dados),
   editarCupom: (dados) => ipcRenderer.invoke('editar-cupom', dados),
   deletarCupom: (id) => ipcRenderer.invoke('deletar-cupom', id),
-  buscarDashboard: () => ipcRenderer.invoke('buscar-dashboard'),
+  buscarDashboard: (idFarmacia) => ipcRenderer.invoke('buscar-dashboard', idFarmacia),
   gerarRelatorioFarmacia: (dados) => ipcRenderer.invoke('gerar-relatorio-farmacia', dados),
-  buscarRelatoriosFarmacia: () => ipcRenderer.invoke('buscar-relatorios-farmacia'),
-  baixarRelatorioFarmacia: (id) => ipcRenderer.invoke('baixar-relatorio-farmacia', id),
-  buscarResumoRelatorios: () => ipcRenderer.invoke('buscar-resumo-relatorios'),
+  buscarRelatoriosFarmacia: (idFarmacia) => ipcRenderer.invoke('buscar-relatorios-farmacia', idFarmacia),
+  baixarRelatorioFarmacia: (dados) => ipcRenderer.invoke('baixar-relatorio-farmacia', dados),
+  buscarResumoRelatorios: (idFarmacia) => ipcRenderer.invoke('buscar-resumo-relatorios', idFarmacia),
   atualizarStatusFuncionario: (dados) => ipcRenderer.invoke('atualizar-status-funcionario', dados),
   atualizarFuncionario: (dados) => ipcRenderer.invoke('atualizar-funcionario', dados),
   cadastrarProntuario: (dados) => ipcRenderer.invoke('cadastrar-prontuario', dados),
@@ -79,5 +79,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   redefinirSenha: (dados) => ipcRenderer.invoke('redefinir-senha', dados),
   cadastrarReceitaControlada: (dados) => ipcRenderer.invoke('cadastrar-receita-controlada', dados),
   buscarLotes: (idProduto) => ipcRenderer.invoke('buscar-lotes', idProduto),
+  buscarDadosFarmacia: (idFarmacia) => ipcRenderer.invoke('buscar-dados-farmacia', idFarmacia),
 });
 

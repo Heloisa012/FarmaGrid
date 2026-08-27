@@ -749,7 +749,7 @@
         <div class="perfil">
           <div class="foto">ADM</div>
           <div class="dados">
-            <span class="nome">Administrador FarmaGrid</span>
+            <span class="nome"></span>
           </div>
         </div>
 
@@ -924,6 +924,24 @@
       await carregarRelatoriosRecentes();
 
       document.getElementById('btnGerarRelatorio').addEventListener('click', gerarRelatorio);
+
+      const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+
+        try {
+          const farmacia = await window.electronAPI.buscarDadosFarmacia(usuarioLogado.id_farmacia);
+          if (farmacia) {
+            document.querySelector('.nome').textContent = farmacia.nome;
+            const fotoBarra = document.querySelector('.foto');
+            if (farmacia.foto_perfil) {
+              fotoBarra.style.backgroundImage = `url(data:image/jpeg;base64,${farmacia.foto_perfil})`;
+              fotoBarra.style.backgroundSize = 'cover';
+              fotoBarra.style.backgroundPosition = 'center';
+              fotoBarra.textContent = '';
+            }
+          }
+        } catch (err) {
+          console.error('Erro ao carregar dados da farmácia logada:', err);
+        }
     });
 
     function configurarSelecaoTipo() {
@@ -941,7 +959,8 @@
     }
 
     async function carregarResumo() {
-      const dados = await window.electronAPI.buscarResumoRelatorios();
+      const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+      const dados = await window.electronAPI.buscarResumoRelatorios(usuarioLogado.id_farmacia);
 
       document.getElementById('resumoEstoque').textContent = `${dados.totalEstoque.toLocaleString('pt-BR')} itens`;
       document.getElementById('resumoVendas').textContent = `R$ ${dados.vendasMesAtual.toFixed(2).replace('.', ',')}`;
@@ -957,7 +976,8 @@
     }
 
     async function carregarRelatoriosRecentes() {
-      const relatorios = await window.electronAPI.buscarRelatoriosFarmacia();
+      const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+      const relatorios = await window.electronAPI.buscarRelatoriosFarmacia(usuarioLogado.id_farmacia);
       const lista = document.getElementById('listaRelatoriosRecentes');
 
       if (relatorios.length === 0) {
@@ -981,11 +1001,14 @@
       }).join('');
 
       lista.querySelectorAll('.btn-baixar').forEach(btn => {
-        btn.addEventListener('click', () => window.electronAPI.baixarRelatorioFarmacia(btn.dataset.id));
+        btn.addEventListener('click', () =>
+          window.electronAPI.baixarRelatorioFarmacia({ id: btn.dataset.id, idFarmacia: usuarioLogado.id_farmacia })
+        );
       });
     }
 
     async function gerarRelatorio() {
+      const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
       const periodo = document.getElementById('selectPeriodo').value;
       const formato = document.getElementById('selectFormato').value;
 
@@ -998,7 +1021,9 @@
       btn.disabled = true;
       btn.textContent = 'Gerando...';
 
-      const resultado = await window.electronAPI.gerarRelatorioFarmacia({ tipo: tipoSelecionado, periodo, formato });
+      const resultado = await window.electronAPI.gerarRelatorioFarmacia({
+        tipo: tipoSelecionado, periodo, formato, idFarmacia: usuarioLogado.id_farmacia
+      });
 
       btn.disabled = false;
       btn.textContent = 'Gerar Relatório';

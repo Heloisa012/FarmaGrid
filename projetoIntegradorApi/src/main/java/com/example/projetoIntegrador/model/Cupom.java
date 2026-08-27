@@ -20,6 +20,9 @@ public class Cupom {
     @Column(nullable = false, unique = true, length = 50)
     private String codigo;
 
+    @Column(name = "id_farmacia", nullable = false)
+    private Long idFarmacia;
+
     @Column(length = 255)
     private String descricao;
 

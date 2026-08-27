@@ -14,6 +14,9 @@ public class Funcionario {
     @Column(name = "CPF", length = 14)
     private String cpf;
 
+    @Column(name = "id_farmacia", nullable = false)
+    private Long idFarmacia;
+
     @Column(nullable = false, length = 80)
     private String nome;
 

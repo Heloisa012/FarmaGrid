@@ -486,7 +486,7 @@
         <div class="perfil">
           <div class="foto">ADM</div>
           <div class="dados">
-            <span class="nome">Administrador FarmaGrid</span>
+            <span class="nome"></span>
           </div>
         </div>
 
@@ -773,6 +773,7 @@
 
   <script>
     let produtoAtual = null;
+    let usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
 
     window.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('bd').addEventListener('click', () => window.electronAPI.abrirJanelaD());
@@ -784,10 +785,26 @@
       document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
 
       await carregarProdutos();
+
+      try {
+        const farmacia = await window.electronAPI.buscarDadosFarmacia(usuarioLogado.id_farmacia);
+        if (farmacia) {
+          document.querySelector('.nome').textContent = farmacia.nome;
+          const fotoBarra = document.querySelector('.foto');
+          if (farmacia.foto_perfil) {
+            fotoBarra.style.backgroundImage = `url(data:image/jpeg;base64,${farmacia.foto_perfil})`;
+            fotoBarra.style.backgroundSize = 'cover';
+            fotoBarra.style.backgroundPosition = 'center';
+            fotoBarra.textContent = '';
+          }
+        }
+      } catch (err) {
+        console.error('Erro ao carregar dados da farmácia logada:', err);
+      }
     });
 
     async function carregarProdutos() {
-      const produtos = await window.electronAPI.buscarProdutos();
+      const produtos = await window.electronAPI.buscarProdutos(usuarioLogado.id_farmacia);
       renderizarLista(produtos);
       renderizarAlerta(produtos);
     }
@@ -935,7 +952,7 @@
 
     if (!nome) return;
 
-    await window.electronAPI.cadastrarProduto({ nome, categoria, quantidade, estoque_min, preco, fornecedor, codigo_barras, tarja_preta });
+    await window.electronAPI.cadastrarProduto({ nome, categoria, quantidade, estoque_min, preco, fornecedor, codigo_barras, tarja_preta, idFarmacia: usuarioLogado.id_farmacia });
     bootstrap.Modal.getInstance(document.getElementById('novoProdutoModal')).hide();
     document.getElementById('formNovoProduto').reset();
     await carregarProdutos();

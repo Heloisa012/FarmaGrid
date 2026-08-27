@@ -849,7 +849,7 @@
         <div class="perfil">
           <div class="foto">ADM</div>
           <div class="dados">
-            <span class="nome">Administrador FarmaGrid</span>
+            <span class="nome"></span>
           </div>
         </div>
 
@@ -1092,6 +1092,7 @@
 
     <script>
       let cupomAtual = null;
+      let usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
 
       window.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('bd').addEventListener('click', () => window.electronAPI.abrirJanelaD());
@@ -1103,10 +1104,26 @@
         document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
 
         await carregarCupons();
+
+        try {
+          const farmacia = await window.electronAPI.buscarDadosFarmacia(usuarioLogado.id_farmacia);
+          if (farmacia) {
+            document.querySelector('.nome').textContent = farmacia.nome;
+            const fotoBarra = document.querySelector('.foto');
+            if (farmacia.foto_perfil) {
+              fotoBarra.style.backgroundImage = `url(data:image/jpeg;base64,${farmacia.foto_perfil})`;
+              fotoBarra.style.backgroundSize = 'cover';
+              fotoBarra.style.backgroundPosition = 'center';
+              fotoBarra.textContent = '';
+            }
+          }
+        } catch (err) {
+          console.error('Erro ao carregar dados da farmácia logada:', err);
+        }
       });
 
       async function carregarCupons() {
-        const cupons = await window.electronAPI.buscarCupons();
+        const cupons = await window.electronAPI.buscarCupons(usuarioLogado.id_farmacia);
         renderizarLista(cupons);
       }
 
@@ -1238,7 +1255,7 @@
 
         if (!codigo || !tipo) return;
 
-        const resultado = await window.electronAPI.cadastrarCupom({ codigo, descricao, tipo, valor, limite_uso, validade });
+        const resultado = await window.electronAPI.cadastrarCupom({ codigo, descricao, tipo, valor, limite_uso, validade, idFarmacia: usuarioLogado.id_farmacia });
         if (resultado.sucesso) {
           bootstrap.Modal.getInstance(document.getElementById('modalNovoCupom')).hide();
           document.getElementById('formNovoCupom').reset();
@@ -1259,7 +1276,7 @@
         const status = document.getElementById('editStatus').value;
 
         await window.electronAPI.editarCupom({
-          id: cupomAtual.id, descricao, tipo, valor, limite_uso, validade, status
+          id: cupomAtual.id, descricao, tipo, valor, limite_uso, validade, status, idFarmacia: usuarioLogado.id_farmacia
         });
 
         bootstrap.Modal.getInstance(document.getElementById('modalEditarCupom')).hide();
@@ -1268,13 +1285,13 @@
 
       // --- Busca por texto ---
       document.querySelector('.buscar input').addEventListener('input', async (e) => {
-        const termo = e.target.value.toLowerCase();
-        const cupons = await window.electronAPI.buscarCupons();
-        const filtrados = cupons.filter(c =>
-          c.codigo.toLowerCase().includes(termo) || (c.descricao || '').toLowerCase().includes(termo)
-        );
-        renderizarLista(filtrados);
-      });
+      const termo = e.target.value.toLowerCase();
+      const cupons = await window.electronAPI.buscarCupons(usuarioLogado.id_farmacia);
+      const filtrados = cupons.filter(c =>
+        c.codigo.toLowerCase().includes(termo) || (c.descricao || '').toLowerCase().includes(termo)
+      );
+      renderizarLista(filtrados);
+    });
   </script>
 
 </body>

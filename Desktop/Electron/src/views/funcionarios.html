@@ -485,7 +485,7 @@
         <div class="perfil">
           <div class="foto">ADM</div>
           <div class="dados">
-            <span class="nome">Administrador FarmaGrid</span>
+            <span class="nome"></span>
           </div>
         </div>
  
@@ -667,7 +667,7 @@
  
  
   <script>
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('bd').addEventListener('click', () => window.electronAPI.abrirJanelaD());
       document.getElementById('be').addEventListener('click', () => window.electronAPI.abrirJanelaE());
       document.getElementById('ba').addEventListener('click', () => window.electronAPI.abrirJanelaV());
@@ -680,6 +680,24 @@
       document.getElementById('filtrFuncao').addEventListener('change', filtrarTabela);
       document.getElementById('filtrStatus').addEventListener('change', filtrarTabela);
       document.getElementById('busca').addEventListener('input', filtrarTabela);
+
+      const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+
+        try {
+          const farmacia = await window.electronAPI.buscarDadosFarmacia(usuarioLogado.id_farmacia);
+          if (farmacia) {
+            document.querySelector('.nome').textContent = farmacia.nome;
+            const fotoBarra = document.querySelector('.foto');
+            if (farmacia.foto_perfil) {
+              fotoBarra.style.backgroundImage = `url(data:image/jpeg;base64,${farmacia.foto_perfil})`;
+              fotoBarra.style.backgroundSize = 'cover';
+              fotoBarra.style.backgroundPosition = 'center';
+              fotoBarra.textContent = '';
+            }
+          }
+        } catch (err) {
+          console.error('Erro ao carregar dados da farmácia logada:', err);
+        }
     });
  
     // Carrega funcionários do banco ao abrir a página
@@ -785,7 +803,7 @@
       }
  
       const resultado = await window.electronAPI.cadastrarFuncionario({
-        nome, cpf, email, telefone, funcao, status
+        nome, cpf, email, telefone, funcao, status, idFarmacia: usuarioLogado.id_farmacia
       });
  
       if (resultado.sucesso) {
@@ -821,8 +839,10 @@
         return;
       }
 
+      const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+      const funcionarios = await window.electronAPI.buscarFuncionarios(usuarioLogado.id_farmacia);
       const resultado = await window.electronAPI.atualizarFuncionario({
-        cpf, nome, email, telefone, funcao, status
+        cpf, nome, email, telefone, funcao, status, idFarmacia: usuarioLogado.id_farmacia
       });
 
       if (resultado.sucesso) {

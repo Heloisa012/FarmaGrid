@@ -169,7 +169,9 @@ public class FarmagridController {
     // FUNCIONÁRIO (funcFarma, chave é o CPF)
     // ──────────────────────────────────────────────────────────────────────────
     @GetMapping("/funcionarios")
-    public List<Funcionario> listarFuncionarios() { return funcionarioRepo.findAll(); }
+    public List<Funcionario> listarFuncionarios(@RequestParam Long idFarmacia) {
+        return funcionarioRepo.findByIdFarmacia(idFarmacia);
+    }
 
     @PostMapping("/funcionarios")
     public ResponseEntity<?> criarFuncionario(@RequestBody Funcionario obj) {
@@ -201,7 +203,9 @@ public class FarmagridController {
     // VENDA CONCLUÍDA
     // ──────────────────────────────────────────────────────────────────────────
     @GetMapping("/vendas")
-    public List<VendaConcluida> listarVendas() { return vendaConcluidaRepo.findAll(); }
+    public List<VendaConcluida> listarVendas(@RequestParam Long idFarmacia) {
+        return vendaConcluidaRepo.findByIdFarmacia(idFarmacia);
+    }
 
     @PostMapping("/vendas")
     public VendaConcluida salvarVenda(@RequestBody VendaConcluida obj) { return vendaConcluidaRepo.save(obj); }

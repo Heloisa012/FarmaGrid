@@ -356,7 +356,7 @@
         <div class="perfil">
           <div class="foto">ADM</div>
           <div class="dados">
-            <span class="nome">Administrador FarmaGrid</span>
+            <span class="nome"></span>
           </div>
         </div>
 
@@ -519,6 +519,24 @@
       document.getElementById('br').addEventListener('click', () => window.electronAPI.abrirJanelaR());
       document.getElementById('fn').addEventListener('click', () => window.electronAPI.abrirJanelaFunc());
       document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
+
+      const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+
+      try {
+        const farmacia = await window.electronAPI.buscarDadosFarmacia(usuarioLogado.id_farmacia);
+        if (farmacia) {
+          document.querySelector('.nome').textContent = farmacia.nome;
+          const fotoBarra = document.querySelector('.foto');
+          if (farmacia.foto_perfil) {
+            fotoBarra.style.backgroundImage = `url(data:image/jpeg;base64,${farmacia.foto_perfil})`;
+            fotoBarra.style.backgroundSize = 'cover';
+            fotoBarra.style.backgroundPosition = 'center';
+            fotoBarra.textContent = '';
+          }
+        }
+      } catch (err) {
+        console.error('Erro ao carregar dados da farmácia logada:', err);
+      }
       
     });
 
@@ -537,7 +555,8 @@
     }
 
     async function carregarDashboard() {
-      const dados = await window.electronAPI.buscarDashboard();
+      const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+      const dados = await window.electronAPI.buscarDashboard(usuarioLogado.id_farmacia);
 
       document.getElementById('totalEstoque').textContent = dados.totalEstoque.toLocaleString('pt-BR');
       document.getElementById('totalAlertas').textContent = dados.totalAlertasValidade;

@@ -565,7 +565,7 @@
         <div class="perfil">
           <div class="foto">ADM</div>
           <div class="dados">
-            <span class="nome">Administrador FarmaGrid</span>
+            <span class="nome"></span>
           </div>
         </div>
 
@@ -700,6 +700,24 @@
         document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
 
         await carregarAlertas();
+
+        const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+
+          try {
+            const farmacia = await window.electronAPI.buscarDadosFarmacia(usuarioLogado.id_farmacia);
+            if (farmacia) {
+              document.querySelector('.nome').textContent = farmacia.nome;
+              const fotoBarra = document.querySelector('.foto');
+              if (farmacia.foto_perfil) {
+                fotoBarra.style.backgroundImage = `url(data:image/jpeg;base64,${farmacia.foto_perfil})`;
+                fotoBarra.style.backgroundSize = 'cover';
+                fotoBarra.style.backgroundPosition = 'center';
+                fotoBarra.textContent = '';
+              }
+            }
+          } catch (err) {
+            console.error('Erro ao carregar dados da farmácia logada:', err);
+          }
       });
 
       function calcularDiasRestantes(dataValidade) {
@@ -739,7 +757,8 @@
       }
 
       async function carregarAlertas() {
-        const lotes = await window.electronAPI.buscarAlertasValidade();
+        const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+        const lotes = await window.electronAPI.buscarAlertasValidade(usuarioLogado.id_farmacia);
 
         const comDias = lotes.map(l => ({
           ...l,
@@ -848,7 +867,8 @@
       // busca por texto
       document.querySelector('.buscar input').addEventListener('input', async (e) => {
         const termo = e.target.value.toLowerCase();
-        const lotes = await window.electronAPI.buscarAlertasValidade();
+        const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+        const lotes = await window.electronAPI.buscarAlertasValidade(usuarioLogado.id_farmacia);
         const comDias = lotes.map(l => ({
             ...l,
             dias: calcularDiasRestantes(l.data_validade)

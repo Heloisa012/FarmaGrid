@@ -20,6 +20,9 @@ public class Produto {
     @Column(nullable = false, length = 150)
     private String nome;
 
+    @Column(name = "id_farmacia", nullable = false)
+    private Long idFarmacia;
+
     @Column(length = 100)
     private String categoria;
 
