@@ -333,22 +333,6 @@ class _TelaLoginState extends State<TelaLogin> {
                           ),
                         ),
 
-                        TextButton(
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => TelaRecuperarSenha(),
-                            ),
-                          ),
-                          child: const Text(
-                            "Esqueceu sua senha?",
-                            style: TextStyle(
-                              color: corVerdeEscuro,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
-                        ),
-
                         const SizedBox(height: 6),
                         const Text(
                           "Entrar como:",
