@@ -21,16 +21,27 @@ class TelaDetalhesPaciente extends StatefulWidget {
 
 class _TelaDetalhesPacienteState extends State<TelaDetalhesPaciente> {
   List<Map<String, dynamic>> _registros = [];
+  Map<String, dynamic> _perfilPaciente = {};
   bool _carregando = true;
   String? _erro;
 
   Uint8List? get _fotoPaciente {
-    if (widget.fotoPerfil.isEmpty) return null;
+    final foto = '${_perfilPaciente['fotoPerfil'] ?? widget.fotoPerfil}';
+    if (foto.isEmpty) return null;
     try {
-      return base64Decode(widget.fotoPerfil);
+      return base64Decode(foto);
     } catch (_) {
       return null;
     }
+  }
+
+  String get _cpfPaciente {
+    final cpf = '${_perfilPaciente['cpf'] ?? widget.cpfMascarado}';
+    final digitos = cpf.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digitos.length != 11) {
+      return cpf.isEmpty ? 'CPF não informado' : cpf;
+    }
+    return '${digitos.substring(0, 3)}.${digitos.substring(3, 6)}.${digitos.substring(6, 9)}-${digitos.substring(9)}';
   }
 
   @override
@@ -45,10 +56,16 @@ class _TelaDetalhesPacienteState extends State<TelaDetalhesPaciente> {
       _erro = null;
     });
     try {
-      final dados = await MedicoService.listarProntuariosPaciente(
-        widget.idPaciente,
-      );
-      if (mounted) setState(() => _registros = dados);
+      final resultados = await Future.wait([
+        MedicoService.listarProntuariosPaciente(widget.idPaciente),
+        MedicoService.buscarPerfilPaciente(widget.idPaciente),
+      ]);
+      if (mounted) {
+        setState(() {
+          _registros = resultados[0] as List<Map<String, dynamic>>;
+          _perfilPaciente = resultados[1] as Map<String, dynamic>;
+        });
+      }
     } catch (e) {
       if (mounted) setState(() => _erro = e.toString());
     } finally {
@@ -87,7 +104,7 @@ class _TelaDetalhesPacienteState extends State<TelaDetalhesPaciente> {
                     style: TextStyle(color: Colors.white70, fontSize: 11),
                   ),
                   Text(
-                    widget.cpfMascarado,
+                    _cpfPaciente,
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w600,

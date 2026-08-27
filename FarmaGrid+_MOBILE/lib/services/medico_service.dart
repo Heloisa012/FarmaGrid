@@ -33,6 +33,13 @@ class MedicoService {
     return _lista(json).map(PacienteMedico.fromJson).toList();
   }
 
+  static Future<Map<String, dynamic>> buscarPerfilPaciente(
+    int idPaciente,
+  ) async {
+    final json = await _get('/api/pacientes/$idPaciente/config');
+    return json is Map ? Map<String, dynamic>.from(json) : {};
+  }
+
   static Future<Map<String, dynamic>> buscarPainel() async {
     final json = await _get('/api/medicos/$_idMedico/painel');
     return json is Map ? Map<String, dynamic>.from(json) : {};
