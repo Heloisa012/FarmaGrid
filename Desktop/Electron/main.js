@@ -789,7 +789,8 @@ ipcMain.handle('cadastrar-cliente', async (_event, cliente) => {
       cpf,
       nome,
       telefone,
-      email
+      email,
+      idFarmacia
     } = cliente;
 
     await apiPost('/api/clientes', {
@@ -797,7 +798,8 @@ ipcMain.handle('cadastrar-cliente', async (_event, cliente) => {
       nome: nome.trim(),
 
       telefone: telefone ? telefone.trim() : '',
-      email: email ? email.trim() : ''
+      email: email ? email.trim() : '',
+      idFarmacia: Number(idFarmacia)
     });
 
     return {
@@ -824,10 +826,11 @@ ipcMain.handle('cadastrar-cliente', async (_event, cliente) => {
 });
 
 // === BUSCAR CLIENTE POR CPF PELA API ===
-ipcMain.handle('buscar-cliente', async (_event, cpf) => {
+ipcMain.handle('buscar-cliente', async (_event, cpf, idFarmacia) => {
   try {
     const cliente = await apiGet(
-      `/api/clientes/${encodeURIComponent(cpf.trim())}`
+      `/api/clientes/${encodeURIComponent(cpf.trim())}` +
+      `?idFarmacia=${encodeURIComponent(idFarmacia)}`
     );
 
     // A tela atual utiliza cliente.CPF em maiúsculas.

@@ -37,7 +37,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   buscarVendas: (filtro) => ipcRenderer.invoke('buscar-vendas', filtro),
   buscarVendasHoje: () => ipcRenderer.invoke('buscar-vendas-hoje'),
   cadastrarCliente: (cliente) => ipcRenderer.invoke('cadastrar-cliente', cliente),
-  buscarCliente: (cpf) => ipcRenderer.invoke('buscar-cliente', cpf),
+  buscarCliente: (cpf, idFarmacia) => ipcRenderer.invoke('buscar-cliente', cpf, idFarmacia),
   salvarConsulta: (consulta) => ipcRenderer.invoke("salvarConsulta", consulta),
   reagendarConsulta: (dados) => ipcRenderer.invoke("reagendarConsulta", dados),
   buscarPacientes: () => ipcRenderer.invoke('buscar-pacientes'),

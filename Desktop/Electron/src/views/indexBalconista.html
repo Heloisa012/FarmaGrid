@@ -1117,7 +1117,14 @@
             return;
           }
 
-          const resultado = await window.electronAPI.cadastrarCliente({ cpf, nome, telefone, email });
+          if (!idFarmaciaLogada) {
+            msg.style.color = 'red';
+            msg.textContent =
+              'Não foi possível identificar a farmácia do balconista.';
+            return;
+          }
+
+          const resultado = await window.electronAPI.cadastrarCliente({ cpf, nome, telefone, email, idFarmacia: idFarmaciaLogada });
 
           if (resultado.sucesso) {
             msg.style.color = 'green';
@@ -1150,7 +1157,15 @@
             return;
           }
 
-          const cliente = await window.electronAPI.buscarCliente(cpf);
+          if (!idFarmaciaLogada) {
+            resultado.innerHTML =
+              '<p style="color:red; font-size:13px;">' +
+              'Não foi possível identificar a farmácia do balconista.' +
+              '</p>';
+            return;
+          }
+
+          const cliente = await window.electronAPI.buscarCliente(cpf, idFarmaciaLogada);
 
           if (cliente) {
             resultado.innerHTML = `

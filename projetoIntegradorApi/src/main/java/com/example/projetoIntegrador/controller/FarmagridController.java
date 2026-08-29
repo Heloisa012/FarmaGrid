@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.example.projetoIntegrador.dto.CadastrarClienteFarmaciaRequest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -29,6 +31,7 @@ public class FarmagridController {
     @Autowired private FarmaPacienteRepository farmaPacienteRepo;
     @Autowired private FuncionarioRepository funcionarioRepo;
     @Autowired private ClienteFarmaRepository clienteFarmaRepo;
+    @Autowired private ClienteFarmaciaRepository clienteFarmaciaRepo;
     @Autowired private VendaConcluidaRepository vendaConcluidaRepo;
     @Autowired private RelatorioFarmaciaRepository relatorioFarmaciaRepo;
     @Autowired private DependenteRepository dependenteRepo;
@@ -36,6 +39,7 @@ public class FarmagridController {
     @Autowired private PacienteAlergiaRepository pacienteAlergiaRepo;
     @Autowired private CartaoRepository cartaoRepo;
     @Autowired private DisponibilidadeMedicoRepository disponibilidadeMedicoRepo;
+    
 
     // ──────────────────────────────────────────────────────────────────────────
     // PACIENTE
@@ -192,19 +196,80 @@ public class FarmagridController {
     // CLIENTE (clienteFarma, chave é o CPF)
     // ──────────────────────────────────────────────────────────────────────────
     @GetMapping("/clientes/{cpf}")
-    public ResponseEntity<ClienteFarma> buscarCliente(@PathVariable String cpf) {
-        return clienteFarmaRepo.findById(cpf)
+    public ResponseEntity<ClienteFarma> buscarCliente(
+            @PathVariable String cpf,
+            @RequestParam Long idFarmacia) {
+
+        String cpfFormatado = cpf.trim();
+
+        ClienteFarmaciaId relacaoId = new ClienteFarmaciaId();
+        relacaoId.setCpfCliente(cpfFormatado);
+        relacaoId.setIdFarmacia(idFarmacia);
+
+        if (!clienteFarmaciaRepo.existsById(relacaoId)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return clienteFarmaRepo.findById(cpfFormatado)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/clientes")
-    public ResponseEntity<?> criarCliente(@RequestBody ClienteFarma obj) {
-        if (clienteFarmaRepo.existsById(obj.getCpf())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("CPF já cadastrado.");
+        @Transactional
+        public ResponseEntity<?> criarCliente(
+                @RequestBody CadastrarClienteFarmaciaRequest req) {
+
+            if (req.getCpf() == null || req.getCpf().isBlank()) {
+                return ResponseEntity.badRequest()
+                        .body("CPF é obrigatório.");
+            }
+
+            if (req.getNome() == null || req.getNome().isBlank()) {
+                return ResponseEntity.badRequest()
+                        .body("Nome é obrigatório.");
+            }
+
+            if (req.getIdFarmacia() == null) {
+                return ResponseEntity.badRequest()
+                        .body("Farmácia é obrigatória.");
+            }
+
+            String cpf = req.getCpf().trim();
+
+            ClienteFarmaciaId relacaoId = new ClienteFarmaciaId();
+            relacaoId.setCpfCliente(cpf);
+            relacaoId.setIdFarmacia(req.getIdFarmacia());
+
+            if (clienteFarmaciaRepo.existsById(relacaoId)) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body("Cliente já cadastrado nesta farmácia.");
+            }
+
+            ClienteFarma cliente = clienteFarmaRepo.findById(cpf)
+                    .orElseGet(() -> {
+                        ClienteFarma novo = new ClienteFarma();
+                        novo.setCpf(cpf);
+                        novo.setNome(req.getNome().trim());
+                        novo.setTelefone(
+                                req.getTelefone() == null
+                                        ? ""
+                                        : req.getTelefone().trim()
+                        );
+                        novo.setEmail(
+                                req.getEmail() == null
+                                        ? ""
+                                        : req.getEmail().trim()
+                        );
+                        return clienteFarmaRepo.save(novo);
+                    });
+
+            ClienteFarmacia relacao = new ClienteFarmacia();
+            relacao.setId(relacaoId);
+            clienteFarmaciaRepo.save(relacao);
+
+            return ResponseEntity.ok(cliente);
         }
-        return ResponseEntity.ok(clienteFarmaRepo.save(obj));
-    }
 
     // ──────────────────────────────────────────────────────────────────────────
     // VENDA CONCLUÍDA
