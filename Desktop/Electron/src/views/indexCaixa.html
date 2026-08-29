@@ -931,7 +931,8 @@
  
     <!--SCRIPT-->
     <script>
-
+      const usuarioCaixa = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+      let idFarmaciaCaixa = null;
       let vendaAtual = null;
       let produtos = [];
  
@@ -977,22 +978,32 @@
           const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
 
           try {
-            const funcionario = await window.electronAPI.buscarDadosFuncionario(usuarioLogado.id_caixa);
+            const funcionario = await window.electronAPI.buscarDadosFuncionario(
+              usuarioLogado.id_caixa
+            );
+
             if (funcionario) {
               document.querySelector('.nome').textContent = funcionario.nome;
+
+              idFarmaciaCaixa = Number(
+                funcionario.idFarmacia || funcionario.id_farmacia
+              );
+
+              console.log('Farmácia identificada para o caixa:', idFarmaciaCaixa);
             }
           } catch (err) {
             console.error('Erro ao carregar dados do caixa logado:', err);
           }
 
           document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
-          const vendas = JSON.parse(localStorage.getItem("vendas")) || [];
+          const todasAsVendas = JSON.parse(localStorage.getItem("vendas")) || [];
           produtos = JSON.parse(localStorage.getItem("produtos")) || [];
-  
-          vendas.forEach(venda => {
+          
+          const vendasDaFarmacia = todasAsVendas.filter(venda =>Number(venda.idFarmacia) === idFarmaciaCaixa);
+
+          vendasDaFarmacia.forEach(venda => {
             adicionarVendaNaTela(venda);
           });
-  
   
           carregarVendasConcluidas();
           atualizarContador();
@@ -1008,7 +1019,10 @@
             const vendasConcluidas = JSON.parse(localStorage.getItem("vendasConcluidas")) || [];
             
             // Filtra apenas as de hoje para mostrar na tela
-            const vendasHoje = vendasConcluidas.filter(v => v.dataVenda === hoje);
+            const vendasHoje = vendasConcluidas.filter(v =>
+              v.dataVenda === hoje &&
+              Number(v.idFarmacia) === idFarmaciaCaixa
+            );
             
             concluidaContainer.innerHTML = ""; // Limpa antes de carregar
             
@@ -1038,15 +1052,37 @@
         }
  
         window.addEventListener("storage", (event) => {
-        if (event.key === "vendas") {
-            const vendas = JSON.parse(event.newValue) || [];
-            const ultimaVenda = vendas[vendas.length - 1];
-            if(ultimaVenda) {
-                adicionarVendaNaTela(ultimaVenda);
-                atualizarContador();
-            }
-        }
-        });
+            if (event.key !== "vendas") return;
+
+            const vendas = JSON.parse(event.newValue || "[]");
+
+            const vendasDaFarmacia = vendas.filter(venda =>
+              Number(venda.idFarmacia) === idFarmaciaCaixa
+            );
+
+            const idsExibidos = new Set(
+              Array.from(document.querySelectorAll(".venda-card"))
+                .map(card => card.dataset.id)
+            );
+
+            vendasDaFarmacia.forEach(venda => {
+              if (!idsExibidos.has(String(venda.id))) {
+                adicionarVendaNaTela(venda);
+              }
+            });
+            
+            document.querySelectorAll(".venda-card").forEach(card => {
+              const aindaExiste = vendasDaFarmacia.some(
+                venda => String(venda.id) === card.dataset.id
+              );
+
+              if (!aindaExiste) {
+                card.remove();
+              }
+            });
+
+            atualizarContador();
+          });
  
         function adicionarVendaNaTela(venda) {
         const container = document.getElementById("caixaContainer");
@@ -1198,9 +1234,17 @@
  
         function atualizarContador2() {
           const hoje = new Date().toLocaleDateString();
-          const vendasConcluidas = JSON.parse(localStorage.getItem("vendasConcluidas")) || [];
-          const vendasHoje = vendasConcluidas.filter(v => v.dataVenda === hoje);
-          document.getElementById("totalVendaConcluida").innerText = vendasHoje.length;
+
+          const vendasConcluidas =
+            JSON.parse(localStorage.getItem("vendasConcluidas")) || [];
+
+          const vendasHojeDaFarmacia = vendasConcluidas.filter(v =>
+            v.dataVenda === hoje &&
+            Number(v.idFarmacia) === idFarmaciaCaixa
+          );
+
+          document.getElementById("totalVendaConcluida").innerText =
+            vendasHojeDaFarmacia.length;
         }
  
         window.addEventListener("storage", (event) => {
@@ -1277,28 +1321,59 @@
       document.getElementById("myModal").style.display = "none";
     }
  
-      function vendasDoDia(){
+      function vendasDoDia() {
         const hoje = new Date().toLocaleDateString();
-        const vendasConcluidas = JSON.parse(localStorage.getItem("vendasConcluidas")) || [];
-        const vendasHoje = vendasConcluidas.filter(v => v.dataVenda === hoje);
-        document.getElementById("vendasDeHoje").innerText = vendasHoje.length;
+
+        const vendasConcluidas =
+          JSON.parse(localStorage.getItem("vendasConcluidas")) || [];
+
+        const vendasHojeDaFarmacia = vendasConcluidas.filter(v =>
+          v.dataVenda === hoje &&
+          Number(v.idFarmacia) === idFarmaciaCaixa
+        );
+
+        document.getElementById("vendasDeHoje").innerText =
+          vendasHojeDaFarmacia.length;
       }
  
       function calcularTotalVendas() {
         const hoje = new Date().toLocaleDateString();
-        const vendasConcluidas = JSON.parse(localStorage.getItem("vendasConcluidas")) || [];
-        const vendasHoje = vendasConcluidas.filter(v => v.dataVenda === hoje);
- 
-        let total = 0;
-        vendasHoje.forEach(venda => {
+
+        const vendasConcluidas =
+          JSON.parse(localStorage.getItem("vendasConcluidas")) || [];
+
+        const vendasHojeDaFarmacia = vendasConcluidas.filter(v =>
+          v.dataVenda === hoje &&
+          Number(v.idFarmacia) === idFarmaciaCaixa
+        );
+
+        const total = vendasHojeDaFarmacia.reduce((soma, venda) => {
           let valor = venda.total;
+
           if (typeof valor === "string") {
-            valor = parseFloat(valor.replace("R$", "").replace(",", "."));
+            let valorLimpo = valor
+              .replace("R$", "")
+              .trim();
+
+            // Formato brasileiro: 1.250,90
+            if (valorLimpo.includes(",")) {
+              valorLimpo = valorLimpo
+                .replace(/\./g, "")
+                .replace(",", ".");
+            }
+
+            // Formato com ponto decimal: 22.90
+            valor = parseFloat(valorLimpo);
           }
-          total += valor;
-        });
- 
-        document.getElementById("totalDoDia").innerText = total.toFixed(2);
+
+          return soma + (Number(valor) || 0);
+        }, 0);
+
+        document.getElementById("totalDoDia").innerText =
+          total.toLocaleString("pt-BR", {
+            style: "currency",
+            currency: "BRL"
+          });
       }
 
       const data = document.getElementById('datas');
@@ -1332,7 +1407,51 @@
 
     async function carregarHistorico() {
       const filtro = getFiltroAtual();
-      const vendas  = await window.electronAPI.buscarVendas(filtro);
+
+      filtro.idFarmacia = idFarmaciaCaixa;
+
+      if (!filtro.idFarmacia || Number.isNaN(filtro.idFarmacia)) {
+        console.error('Não foi possível identificar a farmácia do caixa.');
+        return;
+      }
+
+      const vendas = await window.electronAPI.buscarVendas(filtro);
+
+      // Ordena da venda mais recente para a mais antiga.
+      vendas.sort((vendaA, vendaB) => {
+        function converterData(data) {
+          if (!data) return 0;
+
+          // Formato brasileiro: dd/mm/aaaa
+          if (data.includes('/')) {
+            const [dia, mes, ano] = data.split('/');
+            return new Date(
+              Number(ano),
+              Number(mes) - 1,
+              Number(dia)
+            ).getTime();
+          }
+
+          // Também aceita datas no formato ISO.
+          const timestamp = new Date(data).getTime();
+          return Number.isNaN(timestamp) ? 0 : timestamp;
+        }
+
+        const diferenca =
+          converterData(vendaB.data_venda) -
+          converterData(vendaA.data_venda);
+
+        if (diferenca !== 0) {
+          return diferenca;
+        }
+
+        // Se forem do mesmo dia, usa o ID, que contém o horário da venda.
+        return String(vendaB.id).localeCompare(
+          String(vendaA.id),
+          'pt-BR',
+          { numeric: true }
+        );
+      });
 
       // Cards da lista
       const listaEl = document.querySelector('.historicoVendas');

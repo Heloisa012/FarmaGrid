@@ -998,27 +998,30 @@
 <script>
 
   let clienteSelecionado = null;
+  const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+  let idFarmaciaLogada = null;
 
     window.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
-
-      const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
 
       try {
         const funcionario = await window.electronAPI.buscarDadosFuncionario(usuarioLogado.id_balconista);
         if (funcionario) {
           document.querySelector('.nome').textContent = funcionario.nome;
+          idFarmaciaLogada = funcionario.idFarmacia;
         }
       } catch (err) {
         console.error('Erro ao carregar dados do balconista logado:', err);
       }
+
+      await carregarProdutosBalconista();
     });
 
     const adicionarLista = document.querySelector('.lista-produtos');
 
     async function carregarProdutosBalconista() {
       try {
-        const produtos = await window.electronAPI.buscarProdutos();
+        const produtos = await window.electronAPI.buscarProdutos(idFarmaciaLogada);
 
         localStorage.setItem("produtos", JSON.stringify(produtos));
 
@@ -1046,8 +1049,6 @@
         console.error('Erro ao carregar produtos:', err);
       }
     }
-
-    carregarProdutosBalconista();
 
 
     //MODAL DE CLIENTE
@@ -1313,47 +1314,48 @@
     // ========== MANDAR PARA O CAIXA ==========
     function enviarParaCaixa(){
 
-    const itensPendentes = Array.from(document.querySelectorAll('.divCarrinho'))
-    .filter(item => item.dataset.tarja === "true" && item.dataset.receita !== "true");
+      const itensPendentes = Array.from(document.querySelectorAll('.divCarrinho'))
+      .filter(item => item.dataset.tarja === "true" && item.dataset.receita !== "true");
 
-    if(itensPendentes.length > 0){
-      alert("Não é possível enviar para o caixa: existem medicamentos controlados sem receita registrada.");
-      return;
+      if(itensPendentes.length > 0){
+        alert("Não é possível enviar para o caixa: existem medicamentos controlados sem receita registrada.");
+        return;
+      }
+
+      const hoje = new Date();
+      const agora = new Date();
+      const dia = hoje.getDate();
+      const mes = hoje.getMonth() + 1;
+      const ano = hoje.getFullYear();
+      const horas = String(agora.getHours()).padStart(2, '0');
+      const minutos = String(agora.getMinutes()).padStart(2, '0');
+      const segundos = String(agora.getSeconds()).padStart(2, '0');
+
+      const dataFormatada = `${dia}${mes}${ano}${horas}${minutos}${segundos}`;
+
+      const clienteNome = clienteSelecionado ? clienteSelecionado.nome : "Cliente não informado";
+      const enviar = document.getElementById('envioCaixa');
+
+      const totalConta = document.querySelector('.total').textContent;
+      const quantidadeTotal = calcularQuantidadeTotal();
+
+      const dadosVenda = {
+        id: `VENDA-${dataFormatada}`,
+        cliente: clienteNome,
+        total: totalConta,
+        quantidade: quantidadeTotal,
+        produtos: pegarProdutosCarrinho(),
+        idFarmacia: idFarmaciaLogada
+      };
+
+      let vendas = JSON.parse(localStorage.getItem("vendas")) || [];
+      vendas.push(dadosVenda);
+      localStorage.setItem("vendas", JSON.stringify(vendas));
+
+      adicionarVendaBalconista(dadosVenda);
+
+      limparCarrinho();
     }
-
-    const hoje = new Date();
-    const agora = new Date();
-    const dia = hoje.getDate();
-    const mes = hoje.getMonth() + 1;
-    const ano = hoje.getFullYear();
-    const horas = String(agora.getHours()).padStart(2, '0');
-    const minutos = String(agora.getMinutes()).padStart(2, '0');
-    const segundos = String(agora.getSeconds()).padStart(2, '0');
-
-    const dataFormatada = `${dia}${mes}${ano}${horas}${minutos}${segundos}`;
-
-    const clienteNome = clienteSelecionado ? clienteSelecionado.nome : "Cliente não informado"; // 👈 MUDOU
-    const enviar = document.getElementById('envioCaixa');
-    
-    const totalConta = document.querySelector('.total').textContent;
-    const quantidadeTotal = calcularQuantidadeTotal();
-
-    const dadosVenda = {
-      id: `VENDA-${dataFormatada}`,
-      cliente: clienteNome,
-      total: totalConta,
-      quantidade: quantidadeTotal,
-      produtos: pegarProdutosCarrinho()
-    };
-
-    let vendas = JSON.parse(localStorage.getItem("vendas")) || [];
-    vendas.push(dadosVenda);
-    localStorage.setItem("vendas", JSON.stringify(vendas));
-
-    adicionarVendaBalconista(dadosVenda);
-
-    limparCarrinho();
-  }
 
     function adicionarVendaBalconista(venda){
       const container = document.getElementById('envioCaixa');
