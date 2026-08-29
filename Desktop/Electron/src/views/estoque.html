@@ -625,6 +625,17 @@
                               <input type="number" id="novoEstoqueMin" class="form-control" min="0" value="0">
                           </div>
                       </div>
+                      <div class="row">
+                        <div class="col mb-3">
+                          <label class="form-label fw-semibold">Número do Lote</label>
+                          <input type="text" id="novoNumeroLote" class="form-control" placeholder="Ex: LOT-2026-001">
+                        </div>
+
+                        <div class="col mb-3">
+                          <label class="form-label fw-semibold">Data de Validade</label>
+                          <input type="date" id="novaDataValidade" class="form-control">
+                        </div>
+                      </div>
                       <div class="mb-3">
                           <label class="form-label fw-semibold">Preço Unitário</label>
                           <input type="number" step="0.01" id="novoPreco" class="form-control" value="0.00">
@@ -941,22 +952,92 @@
 
     // --- Salvar novo produto ---
     document.getElementById('salvarProduto').addEventListener('click', async () => {
-    const nome = document.getElementById('novoNome').value.trim();
-    const categoria = document.getElementById('novoCategoria').value.trim();
-    const quantidade = parseInt(document.getElementById('novoQuantidade').value) || 0;
-    const estoque_min = parseInt(document.getElementById('novoEstoqueMin').value) || 0;
-    const preco = parseFloat(document.getElementById('novoPreco').value) || 0;
-    const fornecedor = document.getElementById('novoFornecedor').value.trim();
-    const codigo_barras = document.getElementById('codigoBarras').value.trim();
-    const tarja_preta = document.querySelector('input[name="remedioControlado"]:checked')?.value === 'sim';
+      const nome = document.getElementById('novoNome').value.trim();
+      const categoria = document.getElementById('novoCategoria').value.trim();
+      const quantidadeInicial =
+        parseInt(document.getElementById('novoQuantidade').value) || 0;
+      const estoque_min =
+        parseInt(document.getElementById('novoEstoqueMin').value) || 0;
+      const preco =
+        parseFloat(document.getElementById('novoPreco').value) || 0;
+      const fornecedor =
+        document.getElementById('novoFornecedor').value.trim();
+      const codigo_barras =
+        document.getElementById('codigoBarras').value.trim();
+      const numero_lote =
+        document.getElementById('novoNumeroLote').value.trim();
+      const data_validade =
+        document.getElementById('novaDataValidade').value || null;
 
-    if (!nome) return;
+      const tarja_preta =
+        document.querySelector(
+          'input[name="remedioControlado"]:checked'
+        )?.value === 'sim';
 
-    await window.electronAPI.cadastrarProduto({ nome, categoria, quantidade, estoque_min, preco, fornecedor, codigo_barras, tarja_preta, idFarmacia: usuarioLogado.id_farmacia });
-    bootstrap.Modal.getInstance(document.getElementById('novoProdutoModal')).hide();
-    document.getElementById('formNovoProduto').reset();
-    await carregarProdutos();
-  });
+      if (!nome || !categoria) {
+        alert('Preencha o nome e a categoria do produto.');
+        return;
+      }
+
+      if (quantidadeInicial > 0 && (!numero_lote || !data_validade)) {
+        alert(
+          'Informe o número do lote e a data de validade para o estoque inicial.'
+        );
+        return;
+      }
+
+      const resultadoProduto =
+        await window.electronAPI.cadastrarProduto({
+          nome,
+          categoria,
+          quantidade: 0,
+
+          estoque_min,
+          preco,
+          fornecedor,
+          codigo_barras,
+          tarja_preta,
+          idFarmacia: usuarioLogado.id_farmacia
+        });
+
+      if (!resultadoProduto.sucesso) {
+        alert(
+          'Erro ao cadastrar produto: ' +
+          (resultadoProduto.erro || 'Erro desconhecido.')
+        );
+        return;
+      }
+
+      if (quantidadeInicial > 0) {
+        const resultadoLote =
+          await window.electronAPI.atualizarEstoque({
+            id_produto: resultadoProduto.id,
+            tipo: 'entrada',
+            quantidade: quantidadeInicial,
+            numero_lote,
+            data_validade,
+            prateleira: null
+          });
+
+        if (!resultadoLote.sucesso) {
+          alert(
+            'O produto foi cadastrado, mas não foi possível cadastrar o lote: ' +
+            (resultadoLote.erro || 'Erro desconhecido.')
+          );
+          await carregarProdutos();
+          return;
+        }
+      }
+
+      bootstrap.Modal
+        .getInstance(document.getElementById('novoProdutoModal'))
+        .hide();
+
+      document.getElementById('formNovoProduto').reset();
+      await carregarProdutos();
+
+      alert('Produto e lote cadastrados com sucesso!');
+    });
 
     // --- Confirmar atualização de estoque ---
     document.getElementById('confirmarAtualizacao').addEventListener('click', async () => {
