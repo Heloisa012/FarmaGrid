@@ -975,12 +975,12 @@
         )?.value === 'sim';
 
       if (!nome || !categoria) {
-        alert('Preencha o nome e a categoria do produto.');
+        mostrarMensagem('Preencha o nome e a categoria do produto.');
         return;
       }
 
       if (quantidadeInicial > 0 && (!numero_lote || !data_validade)) {
-        alert(
+        mostrarMensagem(
           'Informe o número do lote e a data de validade para o estoque inicial.'
         );
         return;
@@ -1001,7 +1001,7 @@
         });
 
       if (!resultadoProduto.sucesso) {
-        alert(
+        mostrarMensagem(
           'Erro ao cadastrar produto: ' +
           (resultadoProduto.erro || 'Erro desconhecido.')
         );
@@ -1020,7 +1020,7 @@
           });
 
         if (!resultadoLote.sucesso) {
-          alert(
+          mostrarMensagem(
             'O produto foi cadastrado, mas não foi possível cadastrar o lote: ' +
             (resultadoLote.erro || 'Erro desconhecido.')
           );
@@ -1036,7 +1036,7 @@
       document.getElementById('formNovoProduto').reset();
       await carregarProdutos();
 
-      alert('Produto e lote cadastrados com sucesso!');
+      mostrarMensagem('Produto e lote cadastrados com sucesso!');
     });
 
     // --- Confirmar atualização de estoque ---
@@ -1071,6 +1071,28 @@
       bootstrap.Modal.getInstance(document.getElementById('editarProdutoModal')).hide();
       await carregarProdutos();
     });
+
+    function mostrarMensagem(texto) {
+      const mensagem = document.createElement("div");
+
+      mensagem.textContent = texto;
+      mensagem.style.cssText = `
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        background: #355e3b;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        z-index: 9999;
+      `;
+
+      document.body.appendChild(mensagem);
+
+      setTimeout(() => {
+        mensagem.remove();
+      }, 3000);
+    }
 </script>
 
 
