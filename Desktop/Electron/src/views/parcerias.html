@@ -1580,8 +1580,7 @@
           placeholder="contato@parceiro.com">
 
           <p style="margin-top: 6px; color: #59aa53; font-size: 14px;"><b>Telefone</b></p>
-          <input type="text" id="telefoneParceria" class="form-control mb-3 busca"
-          placeholder="(19) 99390-1111">
+          <input type="text" id="telefoneParceria" class="form-control mb-3 busca" placeholder="(19) 99390-1111" maxlength="15" inputmode="numeric" oninput="formatarTelefoneParceria(this)">
 
           <p style="margin-top: 6px; color: #59aa53; font-size: 14px;"><b>Descontos Oferecidos (%)</b></p>
           <input type="number" id="descontoParceria" class="form-control mb-3 busca" min="0" placeholder="0%">
@@ -2251,6 +2250,37 @@
       setTimeout(() => {
         mensagem.remove();
       }, 3000);
+    }
+
+    function formatarTelefoneParceria(campo) {
+      let numero = campo.value.replace(/\D/g, '');
+
+      // Limita a DDD + nove dígitos.
+      numero = numero.slice(0, 11);
+
+      if (numero.length <= 2) {
+        campo.value = numero;
+        return;
+      }
+
+      if (numero.length <= 6) {
+        campo.value =
+          `(${numero.slice(0, 2)}) ${numero.slice(2)}`;
+        return;
+      }
+
+      if (numero.length <= 10) {
+        // Telefone fixo
+        campo.value =
+          `(${numero.slice(0, 2)}) ` +
+          `${numero.slice(2, 6)}-${numero.slice(6)}`;
+        return;
+      }
+
+      // Celular
+      campo.value =
+        `(${numero.slice(0, 2)}) ` +
+        `${numero.slice(2, 7)}-${numero.slice(7)}`;
     }
   </script>
 
