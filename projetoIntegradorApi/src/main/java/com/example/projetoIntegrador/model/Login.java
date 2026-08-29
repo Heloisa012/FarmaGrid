@@ -35,9 +35,9 @@ public class Login {
     @Column(name = "id_farmacia")
     private Long idFarmacia;
 
-    @Column(name = "id_balconista")
-    private Long idBalconista;
+    @Column(name = "id_balconista", length = 14)
+    private String idBalconista;
 
-    @Column(name = "id_caixa")
-    private Long idCaixa;
+    @Column(name = "id_caixa", length = 14)
+    private String idCaixa;
 }

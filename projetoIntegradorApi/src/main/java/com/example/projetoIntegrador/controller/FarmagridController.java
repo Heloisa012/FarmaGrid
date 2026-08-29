@@ -181,6 +181,13 @@ public class FarmagridController {
         return ResponseEntity.ok(funcionarioRepo.save(obj));
     }
 
+    @GetMapping("/funcionarios/{cpf}")
+    public ResponseEntity<Funcionario> buscarFuncionario(@PathVariable String cpf) {
+        return funcionarioRepo.findById(cpf)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     // ──────────────────────────────────────────────────────────────────────────
     // CLIENTE (clienteFarma, chave é o CPF)
     // ──────────────────────────────────────────────────────────────────────────

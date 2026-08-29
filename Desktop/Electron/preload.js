@@ -80,5 +80,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   cadastrarReceitaControlada: (dados) => ipcRenderer.invoke('cadastrar-receita-controlada', dados),
   buscarLotes: (idProduto) => ipcRenderer.invoke('buscar-lotes', idProduto),
   buscarDadosFarmacia: (idFarmacia) => ipcRenderer.invoke('buscar-dados-farmacia', idFarmacia),
+  buscarDadosFuncionario: (cpf) => ipcRenderer.invoke('buscar-dados-funcionario', cpf),
 });
 

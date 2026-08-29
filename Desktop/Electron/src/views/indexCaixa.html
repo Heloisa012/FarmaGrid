@@ -973,21 +973,32 @@
         }
       }
  
-        window.addEventListener("DOMContentLoaded", () => {
-        document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
-        const vendas = JSON.parse(localStorage.getItem("vendas")) || [];
-        produtos = JSON.parse(localStorage.getItem("produtos")) || [];
- 
-        vendas.forEach(venda => {
-          adicionarVendaNaTela(venda);
-        });
- 
- 
-        carregarVendasConcluidas();
-        atualizarContador();
-        atualizarContador2();
-        vendasDoDia();
-        calcularTotalVendas();
+        window.addEventListener("DOMContentLoaded", async () => {
+          const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+
+          try {
+            const funcionario = await window.electronAPI.buscarDadosFuncionario(usuarioLogado.id_caixa);
+            if (funcionario) {
+              document.querySelector('.nome').textContent = funcionario.nome;
+            }
+          } catch (err) {
+            console.error('Erro ao carregar dados do caixa logado:', err);
+          }
+
+          document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
+          const vendas = JSON.parse(localStorage.getItem("vendas")) || [];
+          produtos = JSON.parse(localStorage.getItem("produtos")) || [];
+  
+          vendas.forEach(venda => {
+            adicionarVendaNaTela(venda);
+          });
+  
+  
+          carregarVendasConcluidas();
+          atualizarContador();
+          atualizarContador2();
+          vendasDoDia();
+          calcularTotalVendas();
       });
  
         // Renderiza as vendas concluídas do dia ao abrir a página

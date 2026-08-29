@@ -999,8 +999,19 @@
 
   let clienteSelecionado = null;
 
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
+
+      const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+
+      try {
+        const funcionario = await window.electronAPI.buscarDadosFuncionario(usuarioLogado.id_balconista);
+        if (funcionario) {
+          document.querySelector('.nome').textContent = funcionario.nome;
+        }
+      } catch (err) {
+        console.error('Erro ao carregar dados do balconista logado:', err);
+      }
     });
 
     const adicionarLista = document.querySelector('.lista-produtos');

@@ -8,8 +8,8 @@ public class LoginResponse {
     public Long idMedico;
     public Long idPaciente;
     public Long idFarmacia;
-    public Long idBalconista;
-    public Long idCaixa;
+    public String idBalconista;
+    public String idCaixa;
     public String perfil;
 
     public LoginResponse(String token, com.example.projetoIntegrador.model.Login login, String perfil) {

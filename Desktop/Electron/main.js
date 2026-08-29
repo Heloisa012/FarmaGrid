@@ -1917,6 +1917,17 @@ ipcMain.handle('atualizar-funcionario', async (event, dados) => {
   }
 });
 
+// === BUSCAR DADOS DO PRÓPRIO FUNCIONÁRIO (SIDEBAR BALCONISTA/CAIXA) ===
+ipcMain.handle('buscar-dados-funcionario', async (event, cpf) => {
+  try {
+    const funcionario = await apiGet(`/api/funcionarios/${encodeURIComponent(cpf)}`);
+    return funcionario;
+  } catch (err) {
+    console.error('Erro ao buscar dados do funcionário:', err);
+    return null;
+  }
+});
+
 // === ATUALIZAR STATUS DO PARCEIRO ===
 ipcMain.handle('atualizar-status-parceiro', async (event, dados) => {
   try {
