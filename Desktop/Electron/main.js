@@ -22,7 +22,7 @@ const createWindow = () => {
     height: 720,
     icon: './src/public/img/LogoFarmaGrid.png',
     resizable: false,
-    autoHideMenuBar: false,
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },
