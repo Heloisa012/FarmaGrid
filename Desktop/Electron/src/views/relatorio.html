@@ -565,6 +565,25 @@
     }
 
     /* Relatórios recentes */
+    #listaRelatoriosRecentes {
+      max-height: 300px;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+
+    #listaRelatoriosRecentes {
+      max-height: 300px;
+      overflow-y: auto;
+      padding-right: 8px;
+
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    #listaRelatoriosRecentes::-webkit-scrollbar {
+      display: none;
+    }
+
     .relatorio-item {
     background: #fff;
     border: 1px solid #e0e0e0;
