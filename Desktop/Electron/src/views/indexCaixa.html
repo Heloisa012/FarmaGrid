@@ -1300,7 +1300,7 @@
       const container = document.getElementById("detalhesVenda");
 
       if (!metodoSelecionado) {
-        alert("Selecione uma forma de pagamento!");
+        mostrarMensagem("Selecione uma forma de pagamento!");
         return;
       }
 
@@ -1312,7 +1312,7 @@
           valorTotalVenda = parseFloat(valorTotalVenda.replace("R$", "").replace(",", ".").trim());
         }
         if (valorRecebido < valorTotalVenda) {
-          alert(`Pagamento insuficiente! Faltam R$ ${(valorTotalVenda - valorRecebido).toFixed(2)}`);
+          mostrarMensagem(`Pagamento insuficiente! Faltam R$ ${(valorTotalVenda - valorRecebido).toFixed(2)}`);
           return;
         }
       }
@@ -1329,7 +1329,7 @@
       if (!resultadoVenda || !resultadoVenda.ok) {
         pagamentoEmProcessamento = false;
 
-        alert(
+        mostrarMensagem(
           'Não foi possível finalizar a venda: ' +
           (resultadoVenda?.erro || 'Erro desconhecido.')
         );
@@ -1637,6 +1637,28 @@
       const modal = document.getElementById('modalDetalhes');
       if (e.target === modal) fecharModalDetalhes();
     });
+
+    function mostrarMensagem(texto) {
+      const mensagem = document.createElement("div");
+
+      mensagem.textContent = texto;
+      mensagem.style.cssText = `
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        background: #355e3b;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        z-index: 9999;
+      `;
+
+      document.body.appendChild(mensagem);
+
+      setTimeout(() => {
+        mensagem.remove();
+      }, 3000);
+    }
 
     </script>
  
