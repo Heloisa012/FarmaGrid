@@ -1095,7 +1095,7 @@
           <input type="text" id="nomeCadastro" class="form-control mb-3" placeholder="Digite o nome">
 
           <p style="margin-top: 6px; color: #000000; font-size: 14px;"><b>Telefone</b></p>
-          <input type="text" id="telefoneCadastro" class="form-control mb-3" placeholder="Digite o telefone">
+          <input type="text" id="telefoneCadastro" class="form-control mb-3" placeholder="(11) 99999-9999" maxlength="15" inputmode="numeric" oninput="formatarTelefoneCliente(this)">
 
           <p style="margin-top: 6px; color: #000000; font-size: 14px;"><b>Email</b></p>
           <input type="text" id="emailCadastro" class="form-control mb-3" placeholder="Digite o email">
@@ -1110,6 +1110,20 @@
           const telefone = document.getElementById('telefoneCadastro').value.trim();
           const email    = document.getElementById('emailCadastro').value.trim();
           const msg      = document.getElementById('msgCadastro');
+
+          const telefoneLimpo = telefone.replace(/\D/g, '');
+
+          if (
+            telefone &&
+            telefoneLimpo.length !== 10 &&
+            telefoneLimpo.length !== 11
+          ) {
+            msg.style.color = 'red';
+            msg.textContent =
+              'Informe um telefone com DDD e 10 ou 11 números.';
+
+            return;
+          }
 
           if (!cpf || !nome) {
             msg.style.color = 'red';
@@ -1755,6 +1769,43 @@
       setTimeout(() => {
         mensagem.remove();
       }, 3000);
+    }
+
+    function formatarTelefoneCliente(campo) {
+      let numero = campo.value.replace(/\D/g, '');
+
+      // Telefone brasileiro: no máximo 11 números.
+      numero = numero.slice(0, 11);
+
+      if (numero.length <= 2) {
+        campo.value = numero
+          ? `(${numero}`
+          : '';
+
+        return;
+      }
+
+      const ddd = numero.slice(0, 2);
+
+      // Celular: (11) 99999-9999
+      if (numero.length > 10) {
+        const primeiraParte = numero.slice(2, 7);
+        const segundaParte = numero.slice(7, 11);
+
+        campo.value =
+          `(${ddd}) ${primeiraParte}` +
+          (segundaParte ? `-${segundaParte}` : '');
+
+        return;
+      }
+
+      // Telefone fixo: (11) 9999-9999
+      const primeiraParte = numero.slice(2, 6);
+      const segundaParte = numero.slice(6, 10);
+
+      campo.value =
+        `(${ddd}) ${primeiraParte}` +
+        (segundaParte ? `-${segundaParte}` : '');
     }
 </script>
 
