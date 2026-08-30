@@ -33,6 +33,7 @@ public class SecurityConfig {
                             "/auth/login",
                             "/auth/cadastro/paciente",
                             "/auth/cadastro/medico").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/ping").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().authenticated()
                 )
