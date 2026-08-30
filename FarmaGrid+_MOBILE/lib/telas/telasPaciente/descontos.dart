@@ -26,23 +26,7 @@ class _TelaDescontosState extends State<TelaDescontos> {
   @override
   void initState() {
     super.initState();
-    PacienteService.listarCupons()
-        .then((cupons) {
-          if (mounted) {
-            setState(() {
-              _cupons = cupons;
-              _carregandoCupons = false;
-            });
-          }
-        })
-        .catchError((erro) {
-          if (mounted) {
-            setState(() {
-              _erroCupons = '$erro';
-              _carregandoCupons = false;
-            });
-          }
-        });
+    _carregarCupons();
     PerfilService.carregar(atualizar: true)
         .then((p) {
           if (mounted) {
@@ -53,6 +37,24 @@ class _TelaDescontosState extends State<TelaDescontos> {
           }
         })
         .catchError((_) {});
+  }
+
+  Future<void> _carregarCupons() async {
+    try {
+      final cupons = await PacienteService.listarCupons();
+      if (!mounted) return;
+      setState(() {
+        _cupons = cupons;
+        _erroCupons = null;
+        _carregandoCupons = false;
+      });
+    } catch (erro) {
+      if (!mounted) return;
+      setState(() {
+        _erroCupons = erro.toString();
+        _carregandoCupons = false;
+      });
+    }
   }
 
   @override

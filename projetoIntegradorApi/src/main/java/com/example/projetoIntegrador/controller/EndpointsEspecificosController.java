@@ -251,6 +251,17 @@ public class EndpointsEspecificosController {
         return cupomRepo.findAllOrderByStatusAndCodigo(idFarmacia);
     }
 
+    // Vitrine do mobile: reúne os cupons cadastrados por todas as farmácias.
+    @GetMapping("/cupons/disponiveis")
+    public List<Cupom> listarCuponsDisponiveis() {
+        LocalDate hoje = LocalDate.now();
+        return cupomRepo.findCuponsAtivos().stream()
+            .filter(c -> c.getValidade() == null || !c.getValidade().isBefore(hoje))
+            .filter(c -> c.getLimiteUso() == null || c.getLimiteUso() <= 0
+                || c.getUsosAtuais() == null || c.getUsosAtuais() < c.getLimiteUso())
+            .toList();
+    }
+
     // ──────────────────────────────────────────────────────────────────────────
     // FUNCIONÁRIO — atualizar status
     // ──────────────────────────────────────────────────────────────────────────
