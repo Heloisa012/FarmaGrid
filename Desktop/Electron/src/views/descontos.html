@@ -1061,6 +1061,8 @@
         document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
 
         await carregarCupons();
+        // Sincroniza a barra com resgates feitos no aplicativo enquanto a tela estiver aberta.
+        window.setInterval(() => carregarCupons().catch(console.error), 5000);
 
         try {
           const farmacia = await window.electronAPI.buscarDadosFarmacia(usuarioLogado.id_farmacia);

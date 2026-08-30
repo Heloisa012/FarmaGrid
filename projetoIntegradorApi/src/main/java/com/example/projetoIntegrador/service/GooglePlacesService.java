@@ -12,6 +12,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.*;
+import java.time.*;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class GooglePlacesService {
@@ -40,6 +42,9 @@ public class GooglePlacesService {
             item.put("latitude", p.path("location").path("latitude").asDouble());
             item.put("longitude", p.path("location").path("longitude").asDouble());
             item.put("aberto", p.path("currentOpeningHours").path("openNow").isMissingNode() ? null : p.path("currentOpeningHours").path("openNow").asBoolean());
+            item.put("horario", p.path("currentOpeningHours").path("weekdayDescriptions").isArray()
+                ? p.path("currentOpeningHours").path("weekdayDescriptions").toString() : "Horário não informado");
+            item.put("fonte", "Google Places");
             item.put("googleMapsUri", p.path("googleMapsUri").asText()); result.add(item);
         }
         return result;
@@ -64,8 +69,9 @@ public class GooglePlacesService {
             if (tags.path("name").asText().isBlank()) continue;
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("id", "osm-" + p.path("id").asText()); item.put("nome", tags.path("name").asText());
-            item.put("endereco", montarEndereco(tags)); item.put("aberto", null);
-            item.put("horario", tags.path("opening_hours").asText("Horário não informado")); item.put("fonte", "OpenStreetMap");
+            String horario = tags.path("opening_hours").asText("");
+            item.put("endereco", montarEndereco(tags)); item.put("aberto", estaAberto(horario));
+            item.put("horario", horario.isBlank() ? "Horário não informado" : horario); item.put("fonte", "OpenStreetMap");
             result.add(item); if (result.size() == 15) break;
         }
         return result;
@@ -74,5 +80,49 @@ public class GooglePlacesService {
     private String montarEndereco(JsonNode tags) {
         return java.util.stream.Stream.of(tags.path("addr:street").asText(), tags.path("addr:housenumber").asText(), tags.path("addr:suburb").asText())
             .filter(v -> v != null && !v.isBlank()).collect(java.util.stream.Collectors.joining(", "));
+    }
+
+    // Avalia os formatos mais comuns do opening_hours; regras complexas ficam como desconhecidas.
+    private Boolean estaAberto(String openingHours) {
+        if (openingHours == null || openingHours.isBlank()) return null;
+        if ("24/7".equals(openingHours.trim())) return true;
+        ZonedDateTime agora = ZonedDateTime.now(ZoneId.of("America/Sao_Paulo"));
+        String dia = switch (agora.getDayOfWeek()) {
+            case MONDAY -> "Mo"; case TUESDAY -> "Tu"; case WEDNESDAY -> "We";
+            case THURSDAY -> "Th"; case FRIDAY -> "Fr"; case SATURDAY -> "Sa"; case SUNDAY -> "Su";
+        };
+        try {
+            for (String regra : openingHours.split(";")) {
+                String[] partes = regra.trim().split("\\s+", 2);
+                if (partes.length != 2 || !incluiDia(partes[0], dia)) continue;
+                if ("off".equalsIgnoreCase(partes[1])) return false;
+                for (String faixa : partes[1].split(",")) {
+                    String[] horas = faixa.trim().split("-");
+                    if (horas.length != 2) continue;
+                    LocalTime inicio = LocalTime.parse(horas[0], DateTimeFormatter.ofPattern("H:mm"));
+                    LocalTime fim = LocalTime.parse(horas[1], DateTimeFormatter.ofPattern("H:mm"));
+                    LocalTime atual = agora.toLocalTime();
+                    if ((fim.isAfter(inicio) && !atual.isBefore(inicio) && atual.isBefore(fim))
+                        || (!fim.isAfter(inicio) && (!atual.isBefore(inicio) || atual.isBefore(fim)))) return true;
+                }
+                return false;
+            }
+            return false;
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
+    private boolean incluiDia(String expressao, String dia) {
+        List<String> dias = List.of("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su");
+        for (String parte : expressao.split(",")) {
+            String[] faixa = parte.split("-");
+            if (faixa.length == 1 && faixa[0].equals(dia)) return true;
+            if (faixa.length == 2) {
+                int inicio = dias.indexOf(faixa[0]), fim = dias.indexOf(faixa[1]), atual = dias.indexOf(dia);
+                if (inicio >= 0 && fim >= 0 && (inicio <= fim ? atual >= inicio && atual <= fim : atual >= inicio || atual <= fim)) return true;
+            }
+        }
+        return false;
     }
 }

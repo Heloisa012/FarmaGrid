@@ -140,6 +140,7 @@ class CupomPaciente {
   final double valor;
   final String validade;
   final String status;
+  final bool resgatado;
 
   const CupomPaciente({
     required this.id,
@@ -149,6 +150,7 @@ class CupomPaciente {
     required this.valor,
     required this.validade,
     required this.status,
+    required this.resgatado,
   });
 
   factory CupomPaciente.fromJson(Map<String, dynamic> json) => CupomPaciente(
@@ -159,5 +161,6 @@ class CupomPaciente {
     valor: _asDouble(json['valor']),
     validade: '${json['validade'] ?? ''}',
     status: '${json['status'] ?? ''}',
+    resgatado: json['resgatado'] == true,
   );
 }

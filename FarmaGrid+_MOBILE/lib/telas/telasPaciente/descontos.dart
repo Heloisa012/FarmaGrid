@@ -19,6 +19,7 @@ class _TelaDescontosState extends State<TelaDescontos> {
   final Color corTeal = Color(0xFF7FC6BB);
   List<CupomPaciente> _cupons = const [];
   bool _premium = false;
+  final Set<int> _resgatando = {};
 
   @override
   void initState() {
@@ -68,14 +69,7 @@ class _TelaDescontosState extends State<TelaDescontos> {
                     ..._cupons.map(
                       (cupom) => Padding(
                         padding: const EdgeInsets.only(bottom: 15),
-                        child: _buildCardDesconto(
-                          cupom.codigo,
-                          cupom.descricao,
-                          cupom.tipo.toLowerCase().contains('percent')
-                              ? '${cupom.valor.toStringAsFixed(0)}%'
-                              : 'R\$ ${cupom.valor.toStringAsFixed(2)}',
-                          cupom.validade,
-                        ),
+                        child: _buildCardDesconto(cupom),
                       ),
                     ),
                 ],
@@ -202,12 +196,11 @@ class _TelaDescontosState extends State<TelaDescontos> {
     );
   }
 
-  Widget _buildCardDesconto(
-    String farmacia,
-    String categoria,
-    String porcentagem,
-    String validade,
-  ) {
+  Widget _buildCardDesconto(CupomPaciente cupom) {
+    final porcentagem = cupom.tipo.toLowerCase().contains('percent')
+        ? '${cupom.valor.toStringAsFixed(0)}%'
+        : 'R\$ ${cupom.valor.toStringAsFixed(2)}';
+    final processando = _resgatando.contains(cupom.id);
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -257,7 +250,7 @@ class _TelaDescontosState extends State<TelaDescontos> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  farmacia,
+                  cupom.codigo,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -269,7 +262,7 @@ class _TelaDescontosState extends State<TelaDescontos> {
                     Icon(Icons.local_offer, size: 14, color: corVerdePrimario),
                     const SizedBox(width: 5),
                     Text(
-                      categoria,
+                      cupom.descricao,
                       style: const TextStyle(color: Colors.grey, fontSize: 13),
                     ),
                   ],
@@ -279,7 +272,7 @@ class _TelaDescontosState extends State<TelaDescontos> {
                     const Icon(Icons.access_time, size: 14, color: Colors.grey),
                     const SizedBox(width: 5),
                     Text(
-                      "Válido até $validade",
+                      "Válido até ${cupom.validade}",
                       style: const TextStyle(color: Colors.grey, fontSize: 13),
                     ),
                   ],
@@ -293,11 +286,21 @@ class _TelaDescontosState extends State<TelaDescontos> {
                     minimumSize: const Size(double.infinity, 40),
                     shape: StadiumBorder(),
                   ),
-                  onPressed: () {},
-                  child: const Text(
-                    "Ativar Desconto",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
+                  onPressed: cupom.resgatado || processando
+                      ? null
+                      : () => _resgatar(cupom),
+                  child: processando
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(
+                          cupom.resgatado
+                              ? "Desconto ativado"
+                              : "Ativar desconto",
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                 ),
               ],
             ),
@@ -305,6 +308,29 @@ class _TelaDescontosState extends State<TelaDescontos> {
         ],
       ),
     );
+  }
+
+  Future<void> _resgatar(CupomPaciente cupom) async {
+    setState(() => _resgatando.add(cupom.id));
+    try {
+      final atualizado = await PacienteService.resgatarCupom(cupom.id);
+      if (!mounted) return;
+      setState(() {
+        final indice = _cupons.indexWhere((c) => c.id == cupom.id);
+        if (indice >= 0) _cupons = [..._cupons]..[indice] = atualizado;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Cupom ${cupom.codigo} ativado com sucesso.')),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('$e')));
+      }
+    } finally {
+      if (mounted) setState(() => _resgatando.remove(cupom.id));
+    }
   }
 }
 
