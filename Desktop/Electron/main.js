@@ -1830,12 +1830,31 @@ ipcMain.handle('gerar-relatorio-farmacia', async (event, { tipo, periodo, format
     else if (formato === 'XLSX') gerarXLSX(rows, caminho);
     else if (formato === 'PDF') await gerarPDF(rows, caminho, titulos[tipo]);
 
-    const tamanhoKb = Math.round(fs.statSync(caminho).size / 1024);
+    const arquivoBuffer = fs.readFileSync(caminho);
+    const tamanhoKb = Math.round(arquivoBuffer.length / 1024);
 
     await db.promise().query(
-      `INSERT INTO relatorios_farmacia (tipo, periodo, formato, nome_arquivo, caminho, tamanho_kb, id_farmacia)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [tipo, periodo, formato, nomeArquivo, caminho, tamanhoKb, idFarmacia]
+      `INSERT INTO relatorios_farmacia (
+        tipo,
+        periodo,
+        formato,
+        nome_arquivo,
+        caminho,
+        tamanho_kb,
+        id_farmacia,
+        arquivo
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        tipo,
+        periodo,
+        formato,
+        nomeArquivo,
+        caminho,
+        tamanhoKb,
+        idFarmacia,
+        arquivoBuffer
+      ]
     );
 
     return { sucesso: true };
@@ -1858,20 +1877,68 @@ ipcMain.handle('buscar-relatorios-farmacia', async (event, idFarmacia) => {
   }
 });
 
-ipcMain.handle('baixar-relatorio-farmacia', async (event, { id, idFarmacia }) => {
-  try {
-    const [rows] = await db.promise().query(
-      'SELECT caminho FROM relatorios_farmacia WHERE id = ? AND id_farmacia = ?',
-      [id, idFarmacia]
-    );
-    if (rows.length === 0) return { sucesso: false };
-    await shell.openPath(rows[0].caminho);
-    return { sucesso: true };
-  } catch (err) {
-    console.error('Erro ao abrir relatório:', err);
-    return { sucesso: false };
+ipcMain.handle(
+  'baixar-relatorio-farmacia',
+  async (_event, { id, idFarmacia }) => {
+    try {
+      const [rows] = await db.promise().query(
+        `SELECT nome_arquivo, caminho, arquivo
+         FROM relatorios_farmacia
+         WHERE id = ? AND id_farmacia = ?`,
+        [id, idFarmacia]
+      );
+
+      if (rows.length === 0) {
+        return {
+          sucesso: false,
+          erro: 'Relatório não encontrado.'
+        };
+      }
+
+      const relatorio = rows[0];
+      let caminhoArquivo = relatorio.caminho;
+
+      // Se o arquivo não existir mais, recria usando o conteúdo do banco.
+      if (!caminhoArquivo || !fs.existsSync(caminhoArquivo)) {
+        if (!relatorio.arquivo) {
+          return {
+            sucesso: false,
+            erro: 'O arquivo deste relatório antigo não está mais disponível.'
+          };
+        }
+
+        const nomeSeguro = path.basename(relatorio.nome_arquivo);
+        caminhoArquivo = path.join(
+          app.getPath('downloads'),
+          nomeSeguro
+        );
+
+        fs.writeFileSync(caminhoArquivo, relatorio.arquivo);
+      }
+
+      const erroAoAbrir = await shell.openPath(caminhoArquivo);
+
+      if (erroAoAbrir) {
+        return {
+          sucesso: false,
+          erro: erroAoAbrir
+        };
+      }
+
+      return {
+        sucesso: true,
+        caminho: caminhoArquivo
+      };
+    } catch (err) {
+      console.error('Erro ao baixar relatório:', err);
+
+      return {
+        sucesso: false,
+        erro: err.message
+      };
+    }
   }
-});
+);
 
 ipcMain.handle('buscar-resumo-relatorios', async (event, idFarmacia) => {
   try {

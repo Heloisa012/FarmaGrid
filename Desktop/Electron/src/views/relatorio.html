@@ -1020,9 +1020,24 @@
       }).join('');
 
       lista.querySelectorAll('.btn-baixar').forEach(btn => {
-        btn.addEventListener('click', () =>
-          window.electronAPI.baixarRelatorioFarmacia({ id: btn.dataset.id, idFarmacia: usuarioLogado.id_farmacia })
-        );
+        btn.addEventListener('click', async () => {
+          btn.disabled = true;
+
+          const resultado =
+            await window.electronAPI.baixarRelatorioFarmacia({
+              id: btn.dataset.id,
+              idFarmacia: usuarioLogado.id_farmacia
+            });
+
+          btn.disabled = false;
+
+          if (!resultado?.sucesso) {
+            alert(
+              resultado?.erro ||
+              'Não foi possível baixar este relatório.'
+            );
+          }
+        });
       });
     }
 
