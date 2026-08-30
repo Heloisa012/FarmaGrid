@@ -308,6 +308,23 @@ public class EndpointsEspecificosController {
         return ResponseEntity.ok().build();
     }
 
+    @PatchMapping("/lotes/{id}/prateleira")
+    public ResponseEntity<?> atualizarPrateleira(
+            @PathVariable Long id,
+            @RequestBody Lote dados) {
+
+        Lote lote = loteRepo.findById(id).orElse(null);
+
+        if (lote == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        lote.setPrateleira(dados.getPrateleira());
+        loteRepo.save(lote);
+
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/lotes/{id}")
     public void removerLote(@PathVariable Long id) {
         loteRepo.deleteById(id);

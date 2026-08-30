@@ -601,6 +601,10 @@
                           <input type="date" id="novaDataValidade" class="form-control">
                         </div>
                       </div>
+                      <div class="col mb-3">
+                        <label class="form-label fw-semibold">Prateleira</label>
+                        <input type="text" id="novaPrateleira" class="form-control" placeholder="Ex: A-03">
+                      </div>
                       <div class="mb-3">
                           <label class="form-label fw-semibold">Preço Unitário</label>
                           <input type="number" step="0.01" id="novoPreco" class="form-control" value="0.00">
@@ -714,6 +718,26 @@
                         <label class="form-label fw-semibold">Estoque Mínimo</label>
                         <input type="number" id="editEstoqueMinimo" class="form-control" min="0" required>
                         </div>
+                    </div>
+
+                    <div class="row">
+                      <div class="col mb-3">
+                        <label class="form-label fw-semibold">Lote</label>
+                        <select id="editLote" class="form-select">
+                          <option value="">Selecione um lote</option>
+                        </select>
+                      </div>
+
+                      <div class="col mb-3">
+                        <label class="form-label fw-semibold">Prateleira do Lote</label>
+                        <input
+                          type="text"
+                          id="editPrateleira"
+                          class="form-control"
+                          placeholder="Ex: A-03"
+                          disabled
+                        >
+                      </div>
                     </div>
 
                     <div class="mb-3">
@@ -955,6 +979,37 @@
       document.getElementById('editFornecedor').value = p.fornecedor || '';
       document.getElementById('editCodigoBarras').value = p.codigo_barras || ''; 
       document.getElementById(p.tarja_preta ? 'editTarjaSim' : 'editTarjaNao').checked = true;
+
+      const seletorLote = document.getElementById('editLote');
+      const campoPrateleira = document.getElementById('editPrateleira');
+
+      seletorLote.innerHTML = `
+        <option value="">Selecione um lote</option>
+        ${lotes.map(lote => `
+          <option value="${lote.id}">
+            ${lote.numero_lote || `Lote ${lote.id}`}
+          </option>
+        `).join('')}
+      `;
+
+      campoPrateleira.value = '';
+      campoPrateleira.disabled = true;
+
+      seletorLote.onchange = () => {
+        const loteSelecionado = lotes.find(
+          lote => String(lote.id) === String(seletorLote.value)
+        );
+
+        if (!loteSelecionado) {
+          campoPrateleira.value = '';
+          campoPrateleira.disabled = true;
+          return;
+        }
+
+        campoPrateleira.value = loteSelecionado.prateleira || '';
+        campoPrateleira.disabled = false;
+      };
+
       new bootstrap.Modal(document.getElementById('editarProdutoModal')).show();
     });
     }
@@ -977,7 +1032,8 @@
         document.getElementById('novoNumeroLote').value.trim();
       const data_validade =
         document.getElementById('novaDataValidade').value || null;
-
+      const prateleira =
+        document.getElementById('novaPrateleira').value.trim() || null;  
       const tarja_preta =
         document.querySelector(
           'input[name="remedioControlado"]:checked'
@@ -1025,7 +1081,7 @@
             quantidade: quantidadeInicial,
             numero_lote,
             data_validade,
-            prateleira: null
+            prateleira
           });
 
         if (!resultadoLote.sucesso) {
@@ -1068,17 +1124,58 @@
     // --- Salvar edição do produto ---
     document.getElementById('salvarEdicao').addEventListener('click', async () => {
       if (!produtoAtual) return;
+
       const nome = document.getElementById('editNome').value.trim();
       const categoria = document.getElementById('editCategoria').value.trim();
-      const estoque_min = parseInt(document.getElementById('editEstoqueMinimo').value) || 0;
-      const preco = parseFloat(document.getElementById('editPreco').value) || 0;
-      const fornecedor = document.getElementById('editFornecedor').value.trim();
-      const codigo_barras = document.getElementById('editCodigoBarras').value.trim();
-      const tarja_preta = document.querySelector('input[name="editRemedioControlado"]:checked')?.value === 'sim';
+      const estoque_min =
+        parseInt(document.getElementById('editEstoqueMinimo').value) || 0;
+      const preco =
+        parseFloat(document.getElementById('editPreco').value) || 0;
+      const fornecedor =
+        document.getElementById('editFornecedor').value.trim();
+      const codigo_barras =
+        document.getElementById('editCodigoBarras').value.trim();
+      const tarja_preta =
+        document.querySelector(
+          'input[name="editRemedioControlado"]:checked'
+        )?.value === 'sim';
 
-      await window.electronAPI.editarProduto({ id: produtoAtual.id, nome, categoria, estoque_min, preco, fornecedor, codigo_barras, tarja_preta });
-      bootstrap.Modal.getInstance(document.getElementById('editarProdutoModal')).hide();
+      const idLote = document.getElementById('editLote').value;
+      const prateleira =
+        document.getElementById('editPrateleira').value.trim();
+
+      await window.electronAPI.editarProduto({
+        id: produtoAtual.id,
+        nome,
+        categoria,
+        estoque_min,
+        preco,
+        fornecedor,
+        codigo_barras,
+        tarja_preta
+      });
+
+      if (idLote) {
+        const resultadoLote =
+          await window.electronAPI.editarPrateleiraLote({
+            idLote,
+            prateleira
+          });
+
+        if (!resultadoLote.sucesso) {
+          mostrarMensagem(
+            resultadoLote.erro || 'Não foi possível atualizar a prateleira.'
+          );
+          return;
+        }
+      }
+
+      bootstrap.Modal
+        .getInstance(document.getElementById('editarProdutoModal'))
+        .hide();
+
       await carregarProdutos();
+      mostrarMensagem('Produto atualizado com sucesso!');
     });
 
     function mostrarMensagem(texto) {

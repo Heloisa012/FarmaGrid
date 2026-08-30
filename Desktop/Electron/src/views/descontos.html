@@ -874,14 +874,14 @@
 
         <!-- Campo de busca -->
         <div class="buscar mb-4 d-flex justify-content-center">
-            <input type="text" placeholder="Buscar cupom..." />
+            <input id="buscarCupom" type="text" placeholder="Buscar por código, descrição, tipo ou status..." autocomplete="off"/>
         </div>
 
         <!-- Grid principal -->
         <div class="row g-3">
             
             <!-- Painel esquerdo: Lista de cupons -->
-            <div class="col-5">
+          <div class="col-5">
             <div class="painel-lista p-3">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                 <div>
@@ -894,59 +894,20 @@
                 </div>
 
                 <div class="lista-cupons">
-                <div class="cupom-item">
-                    <div>
-                    <div class="codigo">BEMVINDO20</div>
-                    <div class="descricao">Desconto de boas-vindas</div>
-                    <div class="valor">20% OFF</div>
-                    <div class="barra">
-                        <div class="preenchido" style="width:45%;"></div>
-                    </div>
-                    <small>45/100 usos</small>
-                    </div>
-                    <span class="status ativo">Ativo</span>
+                  <div class="cupom-item">
+                      <div>
+                      <div class="codigo"></div>
+                      <div class="descricao"></div>
+                      <div class="valor"></div>
+                      <div class="barra">
+                          <div class="preenchido" style="width:45%;"></div>
+                      </div>
+                      <small></small>
+                      </div>
+                      <span class="status ativo"></span>
+                  </div>
                 </div>
-
-                <div class="cupom-item">
-                    <div>
-                    <div class="codigo">MEDICAMENTOS15</div>
-                    <div class="descricao">Desconto em medicamentos</div>
-                    <div class="valor">15% OFF</div>
-                    <div class="barra">
-                        <div class="preenchido" style="width:60%;"></div>
-                    </div>
-                    <small>120/200 usos</small>
-                    </div>
-                    <span class="status ativo">Ativo</span>
-                </div>
-
-                <div class="cupom-item">
-                    <div>
-                    <div class="codigo">CONSULTA50</div>
-                    <div class="descricao">R$ 50 de desconto em consultas</div>
-                    <div class="valor">R$ 50,00 OFF</div>
-                    <div class="barra">
-                        <div class="preenchido" style="width:25%;"></div>
-                    </div>
-                    <small>12/50 usos</small>
-                    </div>
-                    <span class="status ativo">Ativo</span>
-                </div>
-
-                <div class="cupom-item">
-                    <div>
-                    <div class="codigo">FAMILIA30</div>
-                    <div class="descricao">Desconto para plano família</div>
-                    <div class="valor">30% OFF</div>
-                    <div class="barra">
-                        <div class="preenchido" style="width:100%;"></div>
-                    </div>
-                    <small>30/30 usos</small>
-                    </div>
-                    <span class="status expirado">Expirado</span>
-                </div>
-                </div>
-            </div>
+              </div>
             </div>
 
             <!-- div da direita: Detalhes -->
@@ -1056,11 +1017,6 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Categoria</label>
-                    <input type="text" class="form-control" id="editCategoria">
-                </div>
-
-                <div class="mb-3">
                     <label class="form-label">Válido até</label>
                     <input type="text" class="form-control" id="editValidade">
                 </div>
@@ -1093,6 +1049,7 @@
     <script>
       let cupomAtual = null;
       let usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+      let todosOsCupons = [];
 
       window.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('bd').addEventListener('click', () => window.electronAPI.abrirJanelaD());
@@ -1123,8 +1080,11 @@
       });
 
       async function carregarCupons() {
-        const cupons = await window.electronAPI.buscarCupons(usuarioLogado.id_farmacia);
-        renderizarLista(cupons);
+        todosOsCupons = await window.electronAPI.buscarCupons(
+          usuarioLogado.id_farmacia
+        );
+
+        renderizarLista(todosOsCupons);
       }
 
       function formatarValor(c) {
@@ -1136,6 +1096,15 @@
         const lista = document.querySelector('.lista-cupons');
         const subtitulo = document.querySelector('.painel-lista .subtitulo');
         subtitulo.textContent = `${cupons.length} Cupom(ns)`;
+
+        if (cupons.length === 0) {
+          lista.innerHTML = `
+            <div class="text-center text-muted py-4">
+              Nenhum cupom encontrado.
+            </div>
+          `;
+          return;
+        }
 
         lista.innerHTML = cupons.map(c => {
           const usos = c.usos_atuais || 0;
@@ -1284,14 +1253,34 @@
       });
 
       // --- Busca por texto ---
-      document.querySelector('.buscar input').addEventListener('input', async (e) => {
-      const termo = e.target.value.toLowerCase();
-      const cupons = await window.electronAPI.buscarCupons(usuarioLogado.id_farmacia);
-      const filtrados = cupons.filter(c =>
-        c.codigo.toLowerCase().includes(termo) || (c.descricao || '').toLowerCase().includes(termo)
-      );
-      renderizarLista(filtrados);
-    });
+      document.getElementById('buscarCupom').addEventListener('input', (e) => {
+        const normalizar = valor =>
+          String(valor || '')
+            .trim()
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+
+        const termo = normalizar(e.target.value);
+
+        const cuponsFiltrados = todosOsCupons.filter(cupom => {
+          const validadeFormatada = cupom.validade
+            ? new Date(`${cupom.validade}T00:00:00`).toLocaleDateString('pt-BR')
+            : '';
+
+          return (
+            normalizar(cupom.codigo).includes(termo) ||
+            normalizar(cupom.descricao).includes(termo) ||
+            normalizar(cupom.tipo).includes(termo) ||
+            normalizar(cupom.status).includes(termo) ||
+            normalizar(cupom.valor).includes(termo) ||
+            normalizar(cupom.validade).includes(termo) ||
+            normalizar(validadeFormatada).includes(termo)
+          );
+        });
+
+        renderizarLista(cuponsFiltrados);
+      });
   </script>
 
 </body>

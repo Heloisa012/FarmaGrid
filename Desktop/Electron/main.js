@@ -1242,6 +1242,36 @@ ipcMain.handle('buscar-lotes', async (event, idProduto) => {
   }
 });
 
+// === ATUALIZAR PRATELEIRA DE UM LOTE PELA API ===
+ipcMain.handle('editar-prateleira-lote', async (_event, dados) => {
+  try {
+    const { idLote, prateleira } = dados;
+
+    if (!idLote) {
+      return {
+        sucesso: false,
+        erro: 'Selecione um lote.'
+      };
+    }
+
+    await apiPatch(
+      `/api/lotes/${encodeURIComponent(idLote)}/prateleira`,
+      {
+        prateleira: prateleira?.trim() || null
+      }
+    );
+
+    return { sucesso: true };
+  } catch (err) {
+    console.error('Erro ao editar prateleira do lote:', err);
+
+    return {
+      sucesso: false,
+      erro: err.message
+    };
+  }
+});
+
 // === CADASTRAR PRODUTO PELA API ===
 ipcMain.handle('cadastrar-produto', async (event, dados) => {
   try {

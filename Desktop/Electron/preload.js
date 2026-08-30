@@ -54,6 +54,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   buscarLotes: (idProduto) => ipcRenderer.invoke('buscar-lotes', idProduto),
   cadastrarProduto: (dados) => ipcRenderer.invoke('cadastrar-produto', dados),
   editarProduto: (dados) => ipcRenderer.invoke('editar-produto', dados),
+  editarPrateleiraLote: (dados) => ipcRenderer.invoke('editar-prateleira-lote', dados),
   atualizarEstoque: (dados) => ipcRenderer.invoke('atualizar-estoque', dados),
   deletarProduto: (id) => ipcRenderer.invoke('deletar-produto', id),
   buscarAlertasValidade: (idFarmacia) => ipcRenderer.invoke('buscar-alertas-validade', idFarmacia),
