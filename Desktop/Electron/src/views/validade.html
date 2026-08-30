@@ -604,7 +604,7 @@
                 <div class="iconC"><img src="calendar.png"></div>
                 <div>
                 <h2></h2>
-                <p>Total de Alertas</p>
+                  <p>Dentro de validade +30 dias</p>
                 </div>
             </div>
             </div>
@@ -613,7 +613,7 @@
         <!-- Campo de busca -->
         <div class="row mb-3">
             <div class="buscar">
-                <input src="buscar.png" type="text" placeholder="Buscar produto...">
+                <input id="buscarValidade" type="text" placeholder="Buscar por produto, lote ou localização..." autocomplete="off">
             </div>
         </div>
 
@@ -654,6 +654,8 @@
     </div>
 
     <script>
+      let todosOsAlertas = [];
+
       window.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('bd').addEventListener('click', () => window.electronAPI.abrirJanelaD());
         document.getElementById('be').addEventListener('click', () => window.electronAPI.abrirJanelaE());
@@ -724,19 +726,21 @@
         const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
         const lotes = await window.electronAPI.buscarAlertasValidade(usuarioLogado.id_farmacia);
 
-        const comDias = lotes.map(l => ({
+        todosOsAlertas = lotes.map(l => ({
           ...l,
           dias: calcularDiasRestantes(l.data_validade)
         }));
 
-        const criticos  = comDias.filter(l => l.dias <= 7);
-        const atencao   = comDias.filter(l => l.dias > 7 && l.dias <= 30);
-        const total     = comDias.length;
+        const comDias = todosOsAlertas;
+
+        const criticos = comDias.filter(l => l.dias <= 7);
+        const atencao = comDias.filter(l => l.dias > 7 && l.dias <= 30);
+        const dentroDaValidade = comDias.filter(l => l.dias > 30);
 
         // atualiza os cards de resumo
-        document.querySelector('.card-resumo.critico h2').textContent  = criticos.length;
-        document.querySelector('.card-resumo.atencao h2').textContent  = atencao.length;
-        document.querySelector('.card-resumo.total h2').textContent    = total;
+        document.querySelector('.card-resumo.critico h2').textContent = criticos.length;
+        document.querySelector('.card-resumo.atencao h2').textContent = atencao.length;
+        document.querySelector('.card-resumo.total h2').textContent = dentroDaValidade.length;
 
         renderizarLista(comDias);
       }
@@ -751,6 +755,15 @@
         const lista    = document.querySelector('.lista-alertas');
         const subtitulo = document.querySelector('.painel-alertas .subtitulo');
         subtitulo.textContent = `${lotes.length} Alerta(s) Ativo(s)`;
+
+        if (lotes.length === 0) {
+          lista.innerHTML = `
+            <div class="text-center text-muted py-4">
+              Nenhum produto ou lote encontrado.
+            </div>
+          `;
+          return;
+        }
 
         lista.innerHTML = lotes.map(l => {
           const { classe } = classificar(l.dias);
@@ -828,22 +841,31 @@
         });
       }
 
-      // busca por texto
-      document.querySelector('.buscar input').addEventListener('input', async (e) => {
-        const termo = e.target.value.toLowerCase();
-        const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
-        const lotes = await window.electronAPI.buscarAlertasValidade(usuarioLogado.id_farmacia);
-        const comDias = lotes.map(l => ({
-            ...l,
-            dias: calcularDiasRestantes(l.data_validade)
-          }))
-          .filter(l =>
-            l.nome_produto
+      // Busca por produto, lote, localização ou data de validade
+        document.getElementById('buscarValidade').addEventListener('input', (e) => {
+          const normalizar = valor =>
+            String(valor || '')
+              .trim()
               .toLowerCase()
-              .includes(termo)
-          );
-          renderizarLista(comDias);
-      });
+              .normalize('NFD')
+              .replace(/[\u0300-\u036f]/g, '');
+
+          const termo = normalizar(e.target.value);
+
+          const alertasFiltrados = todosOsAlertas.filter(lote => {
+            const dataFormatada = formatarDataBrasileira(lote.data_validade);
+
+            return (
+              normalizar(lote.nome_produto).includes(termo) ||
+              normalizar(lote.numero_lote).includes(termo) ||
+              normalizar(lote.prateleira).includes(termo) ||
+              normalizar(lote.data_validade).includes(termo) ||
+              normalizar(dataFormatada).includes(termo)
+            );
+          });
+
+          renderizarLista(alertasFiltrados);
+        });
     </script>
 
 </body>
