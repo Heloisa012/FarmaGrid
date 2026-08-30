@@ -75,6 +75,15 @@ public class Paciente {
     @Column(name = "assinatura_validade", length = 20)
     private String assinaturaValidade;
 
+    @Column(name = "assinatura_tipo", length = 20)
+    private String assinaturaTipo;
+
+    @Column(name = "assinatura_comprovante_id", length = 40)
+    private String assinaturaComprovanteId;
+
+    @Column(name = "assinatura_valor", precision = 10, scale = 2)
+    private java.math.BigDecimal assinaturaValor;
+
     @Column(name = "plano_saude", length = 100)
     private String planoSaude;
 

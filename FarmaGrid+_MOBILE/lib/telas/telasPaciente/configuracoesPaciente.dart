@@ -69,6 +69,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
   String _idioma = 'Português (BR)';
   String _tipoSanguineo = 'O+';
   String _planoAssinatura = 'Plano Básico';
+  String _tipoAssinatura = 'MENSAL';
 
   final List<Map<String, String>> _dependentes = [
     {'nome': 'Maria Silva', 'parentesco': 'Cônjuge', 'cpf': '***.***.***-10'},
@@ -132,22 +133,102 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
     if (numero.isEmpty) return 'Bandeira';
 
     const eloPrefixos = [
-      '401178', '401179', '431274', '438935', '451416', '457393',
-      '457631', '457632', '504175', '506699', '506700', '506701',
-      '506702', '506703', '506704', '506705', '506706', '506707',
-      '506708', '506709', '506710', '506711', '506712', '506713',
-      '506714', '506715', '506716', '506717', '506718', '506719',
-      '506720', '506721', '506722', '506723', '506724', '506725',
-      '506726', '506727', '506728', '506729', '506730', '506731',
-      '506732', '506733', '506734', '506735', '506736', '506737',
-      '506738', '506739', '506740', '506741', '506742', '506743',
-      '506744', '506745', '506746', '506747', '506748', '506749',
-      '506750', '506751', '506752', '506753', '506754', '506755',
-      '506756', '506757', '506758', '506759', '506760', '506761',
-      '506762', '506763', '506764', '506765', '506766', '506767',
-      '509000', '627780', '636297', '636368', '650031', '650033',
-      '650035', '650051', '650405', '650439', '650485', '650487',
-      '650901', '650920', '651652', '651679', '655000', '655019',
+      '401178',
+      '401179',
+      '431274',
+      '438935',
+      '451416',
+      '457393',
+      '457631',
+      '457632',
+      '504175',
+      '506699',
+      '506700',
+      '506701',
+      '506702',
+      '506703',
+      '506704',
+      '506705',
+      '506706',
+      '506707',
+      '506708',
+      '506709',
+      '506710',
+      '506711',
+      '506712',
+      '506713',
+      '506714',
+      '506715',
+      '506716',
+      '506717',
+      '506718',
+      '506719',
+      '506720',
+      '506721',
+      '506722',
+      '506723',
+      '506724',
+      '506725',
+      '506726',
+      '506727',
+      '506728',
+      '506729',
+      '506730',
+      '506731',
+      '506732',
+      '506733',
+      '506734',
+      '506735',
+      '506736',
+      '506737',
+      '506738',
+      '506739',
+      '506740',
+      '506741',
+      '506742',
+      '506743',
+      '506744',
+      '506745',
+      '506746',
+      '506747',
+      '506748',
+      '506749',
+      '506750',
+      '506751',
+      '506752',
+      '506753',
+      '506754',
+      '506755',
+      '506756',
+      '506757',
+      '506758',
+      '506759',
+      '506760',
+      '506761',
+      '506762',
+      '506763',
+      '506764',
+      '506765',
+      '506766',
+      '506767',
+      '509000',
+      '627780',
+      '636297',
+      '636368',
+      '650031',
+      '650033',
+      '650035',
+      '650051',
+      '650405',
+      '650439',
+      '650485',
+      '650487',
+      '650901',
+      '650920',
+      '651652',
+      '651679',
+      '655000',
+      '655019',
     ];
     if (eloPrefixos.any(numero.startsWith)) return 'Elo';
     if (numero.startsWith('606282') || numero.startsWith('3841')) {
@@ -201,6 +282,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
       _planoAssinatura = _perfil['planoPremium'] == true
           ? 'Clube FarmaGrid+'
           : 'Plano Básico';
+      _tipoAssinatura = '${_perfil['assinaturaTipo'] ?? 'MENSAL'}';
       _foto = PerfilService.foto(_perfil);
       _dependentes
         ..clear()
@@ -303,7 +385,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
     return true;
   }
 
-  Future<void> _alterarPlano(bool premium) async {
+  Future<void> _alterarPlano(bool premium, {String tipo = 'MENSAL'}) async {
     if (premium && _cartoes.isEmpty) {
       _snack('Cadastre um cartão abaixo antes de assinar o Premium.');
       return;
@@ -312,13 +394,18 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
     final finalCartao = numero.length >= 4
         ? numero.substring(numero.length - 4)
         : numero;
+    const precos = {
+      'MENSAL': 'R\$ 19,90/mês',
+      'ANUAL': 'R\$ 149,90/ano',
+      'PERMANENTE': 'R\$ 199,00 (pagamento único)',
+    };
     final confirmar = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(premium ? 'Confirmar assinatura' : 'Cancelar Premium'),
         content: Text(
           premium
-              ? 'Assinar o Clube FarmaGrid+ por R\$ 19,90/mês usando o cartão final $finalCartao?'
+              ? 'Assinar o Clube FarmaGrid+ por ${precos[tipo]} usando o cartão final $finalCartao?'
               : 'Você perderá os benefícios Premium ao confirmar o cancelamento.',
         ),
         actions: [
@@ -334,12 +421,13 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
       ),
     );
     if (confirmar != true) return;
-    await PacienteService.alterarAssinatura(premium);
+    await PacienteService.alterarAssinatura(premium, tipo: tipo);
     final atualizado = await PerfilService.carregar(atualizar: true);
     if (mounted) {
       setState(() {
         _perfil = atualizado;
         _planoAssinatura = premium ? 'Clube FarmaGrid+' : 'Plano Básico';
+        _tipoAssinatura = premium ? tipo : 'MENSAL';
       });
     }
     _snack(premium ? 'Assinatura Premium ativada!' : 'Assinatura cancelada.');
@@ -988,8 +1076,12 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                               fontSize: 16,
                             ),
                           ),
-                          const Text(
-                            'Ativo · Renova em 15/07/2025',
+                          Text(
+                            _perfil['planoPremium'] == true
+                                ? (_tipoAssinatura == 'PERMANENTE'
+                                      ? 'Ativo · acesso permanente'
+                                      : 'Ativo · válido até ${_perfil['assinaturaValidade'] ?? '—'}')
+                                : 'Plano gratuito',
                             style: TextStyle(
                               color: Colors.white70,
                               fontSize: 12,
@@ -1009,13 +1101,33 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                ...['Plano Básico', 'Clube FarmaGrid+'].map((plano) {
-                  final sel = _planoAssinatura == plano;
+                ...[
+                  ('Plano Básico', false, 'MENSAL', 'Grátis'),
+                  ('Clube Mensal', true, 'MENSAL', 'R\$ 19,90/mês'),
+                  (
+                    'Clube Anual',
+                    true,
+                    'ANUAL',
+                    'R\$ 149,90/ano · economize R\$ 88,90',
+                  ),
+                  (
+                    'Clube Permanente',
+                    true,
+                    'PERMANENTE',
+                    'R\$ 199,00 · pagamento único',
+                  ),
+                ].map((opcao) {
+                  final plano = opcao.$1;
+                  final premium = opcao.$2;
+                  final tipo = opcao.$3;
+                  final sel = premium
+                      ? _planoAssinatura == 'Clube FarmaGrid+' &&
+                            _tipoAssinatura == tipo
+                      : _planoAssinatura == 'Plano Básico';
                   return GestureDetector(
                     onTap: () async {
-                      final premium = plano == 'Clube FarmaGrid+';
                       if (sel) return;
-                      await _alterarPlano(premium);
+                      await _alterarPlano(premium, tipo: tipo);
                     },
                     child: Container(
                       margin: const EdgeInsets.only(bottom: 8),
@@ -1041,13 +1153,27 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                             size: 20,
                           ),
                           const SizedBox(width: 10),
-                          Text(
-                            plano,
-                            style: TextStyle(
-                              fontWeight: sel
-                                  ? FontWeight.bold
-                                  : FontWeight.normal,
-                              color: sel ? _oliva : _corTexto,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  plano,
+                                  style: TextStyle(
+                                    fontWeight: sel
+                                        ? FontWeight.bold
+                                        : FontWeight.normal,
+                                    color: sel ? _oliva : _corTexto,
+                                  ),
+                                ),
+                                Text(
+                                  opcao.$4,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: _corSubtexto,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ],
@@ -1686,7 +1812,11 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                   borderRadius: BorderRadius.circular(7),
                   border: Border.all(color: Colors.white38),
                 ),
-                child: const Icon(Icons.memory, size: 21, color: Color(0xFF8A6C1E)),
+                child: const Icon(
+                  Icons.memory,
+                  size: 21,
+                  color: Color(0xFF8A6C1E),
+                ),
               ),
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 180),
@@ -1730,7 +1860,11 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
     children: [
       Text(
         rotulo,
-        style: const TextStyle(color: Colors.white60, fontSize: 9, letterSpacing: 1),
+        style: const TextStyle(
+          color: Colors.white60,
+          fontSize: 9,
+          letterSpacing: 1,
+        ),
       ),
       const SizedBox(height: 3),
       Text(
@@ -1761,8 +1895,14 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
         child: Stack(
           alignment: Alignment.center,
           children: [
-            Positioned(left: largura * .12, child: _circuloLogo(altura, const Color(0xFFEB001B))),
-            Positioned(right: largura * .12, child: _circuloLogo(altura, const Color(0xFFF79E1B))),
+            Positioned(
+              left: largura * .12,
+              child: _circuloLogo(altura, const Color(0xFFEB001B)),
+            ),
+            Positioned(
+              right: largura * .12,
+              child: _circuloLogo(altura, const Color(0xFFF79E1B)),
+            ),
           ],
         ),
       );
@@ -2050,9 +2190,7 @@ class _NumeroCartaoFormatter extends TextInputFormatter {
       }
     } else {
       for (var i = 0; i < digitos.length; i += 4) {
-        grupos.add(
-          digitos.substring(i, (i + 4).clamp(0, digitos.length)),
-        );
+        grupos.add(digitos.substring(i, (i + 4).clamp(0, digitos.length)));
       }
     }
     final texto = grupos.join(' ');

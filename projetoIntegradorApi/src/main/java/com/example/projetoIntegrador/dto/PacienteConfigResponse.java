@@ -23,4 +23,7 @@ public class PacienteConfigResponse {
     public Boolean planoPremium;
     public String assinaturaStatus;
     public String assinaturaValidade;
+    public String assinaturaTipo;
+    public String assinaturaComprovanteId;
+    public java.math.BigDecimal assinaturaValor;
 }

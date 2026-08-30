@@ -47,6 +47,8 @@ public class PerfilController {
         r.contatoEmergenciaTelefone = p.getContatoEmergenciaTelefone(); r.fotoPerfil = p.getFotoPerfil();
         r.planoPremium = p.getPlanoPremium(); r.assinaturaStatus = p.getAssinaturaStatus();
         r.assinaturaValidade = p.getAssinaturaValidade();
+        r.assinaturaTipo = p.getAssinaturaTipo(); r.assinaturaComprovanteId = p.getAssinaturaComprovanteId();
+        r.assinaturaValor = p.getAssinaturaValor();
         loginRepo.findByIdPaciente(id).ifPresent(login -> r.email = login.getEmail());
         return ResponseEntity.ok(r);
     }

@@ -76,10 +76,13 @@ class PacienteService {
   });
   static Future<List<Map<String, dynamic>>> listarFarmaciasProximas() =>
       ApiService.getList('/api/pacientes/$idPaciente/farmacias-proximas');
-  static Future<void> alterarAssinatura(bool premium) => ApiService.put(
-    '/api/pacientes/$idPaciente/assinatura',
-    {'premium': premium},
-  );
+  static Future<void> alterarAssinatura(
+    bool premium, {
+    String tipo = 'MENSAL',
+  }) => ApiService.put('/api/pacientes/$idPaciente/assinatura', {
+    'premium': premium,
+    'tipo': tipo,
+  });
 
   static Future<void> atualizarPerfil(Map<String, dynamic> dados) async =>
       ApiService.put('/api/pacientes/$idPaciente', dados);

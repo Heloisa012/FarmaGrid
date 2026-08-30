@@ -19,7 +19,7 @@ public interface CupomRepository extends JpaRepository<Cupom, Long> {
     @Query("SELECT c FROM Cupom c WHERE c.id = :id")
     Optional<Cupom> findByIdForUpdate(@Param("id") Long id);
 
-    @Query("SELECT c FROM Cupom c WHERE c.status = 'ativo' ORDER BY c.codigo ASC")
+    @Query("SELECT c FROM Cupom c WHERE LOWER(COALESCE(c.status, 'ativo')) = 'ativo' ORDER BY c.codigo ASC")
     List<Cupom> findCuponsAtivos();
 
     @Query("SELECT c FROM Cupom c WHERE c.idFarmacia = :idFarmacia ORDER BY c.status ASC, c.codigo ASC")

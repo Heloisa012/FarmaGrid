@@ -14,9 +14,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.math.BigDecimal;
+import java.util.Locale;
+import java.util.UUID;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api")
@@ -130,9 +132,30 @@ public class EndpointsEspecificosController {
         if (p == null) return ResponseEntity.notFound().build();
         p.setPlanoPremium(req.premium);
         p.setAssinaturaStatus(req.premium ? "ATIVA" : "CANCELADA");
-        p.setAssinaturaValidade(req.premium ? LocalDate.now().plusMonths(1).toString() : null);
+        if (req.premium) {
+            String tipo = req.tipo == null ? "MENSAL" : req.tipo.toUpperCase(Locale.ROOT);
+            LocalDate validade;
+            BigDecimal valor;
+            switch (tipo) {
+                case "ANUAL" -> { validade = LocalDate.now().plusYears(1); valor = new BigDecimal("149.90"); }
+                case "PERMANENTE" -> { validade = LocalDate.of(9999, 12, 31); valor = new BigDecimal("199.00"); }
+                default -> { tipo = "MENSAL"; validade = LocalDate.now().plusMonths(1); valor = new BigDecimal("19.90"); }
+            }
+            p.setAssinaturaTipo(tipo);
+            p.setAssinaturaValidade(validade.toString());
+            p.setAssinaturaValor(valor);
+            p.setAssinaturaComprovanteId("FG-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT));
+        } else {
+            p.setAssinaturaTipo(null); p.setAssinaturaValidade(null);
+            p.setAssinaturaValor(null); p.setAssinaturaComprovanteId(null);
+        }
         pacienteRepo.save(p);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(java.util.Map.of(
+            "premium", p.getPlanoPremium(), "status", p.getAssinaturaStatus(),
+            "tipo", p.getAssinaturaTipo() == null ? "" : p.getAssinaturaTipo(),
+            "validade", p.getAssinaturaValidade() == null ? "" : p.getAssinaturaValidade(),
+            "comprovanteId", p.getAssinaturaComprovanteId() == null ? "" : p.getAssinaturaComprovanteId(),
+            "valor", p.getAssinaturaValor() == null ? BigDecimal.ZERO : p.getAssinaturaValor()));
     }
 
     @GetMapping("/receitas/medico/{idMedico}")

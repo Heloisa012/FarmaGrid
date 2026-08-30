@@ -170,7 +170,7 @@ class _TelaDescontosState extends State<TelaDescontos> {
                         context,
                         MaterialPageRoute(
                           builder: (_) =>
-                              const TelaConfiguracoesPaciente(abaInicial: 4),
+                              const TelaConfiguracoesPaciente(abaInicial: 3),
                         ),
                       );
                     } else {
@@ -334,8 +334,30 @@ class _TelaDescontosState extends State<TelaDescontos> {
   }
 }
 
-class TelaClube extends StatelessWidget {
+class TelaClube extends StatefulWidget {
+  const TelaClube({super.key});
+
+  @override
+  State<TelaClube> createState() => _TelaClubeState();
+}
+
+class _TelaClubeState extends State<TelaClube> {
   final Color corVerdePrimario = const Color(0xFF59AA53);
+  Map<String, dynamic>? _perfil;
+
+  @override
+  void initState() {
+    super.initState();
+    PerfilService.carregar(atualizar: true).then((p) {
+      if (mounted) setState(() => _perfil = p);
+    });
+  }
+
+  String _dataBr(String? data) {
+    if (data == null || data.isEmpty) return '—';
+    final partes = data.split('-');
+    return partes.length == 3 ? '${partes[2]}/${partes[1]}/${partes[0]}' : data;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -421,8 +443,8 @@ class TelaClube extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 10),
-                          const Text(
-                            "FG-2025-1234",
+                          Text(
+                            '${_perfil?['assinaturaComprovanteId'] ?? 'Carregando...'}',
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -430,8 +452,10 @@ class TelaClube extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 10),
-                          const Text(
-                            "Válido até 31/12/2025",
+                          Text(
+                            _perfil?['assinaturaTipo'] == 'PERMANENTE'
+                                ? 'Acesso permanente'
+                                : 'Válido até ${_dataBr(_perfil?['assinaturaValidade']?.toString())}',
                             style: TextStyle(fontSize: 12, color: Colors.grey),
                           ),
                         ],

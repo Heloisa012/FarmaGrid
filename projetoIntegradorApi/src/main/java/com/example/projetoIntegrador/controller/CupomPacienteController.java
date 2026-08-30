@@ -70,7 +70,7 @@ public class CupomPacienteController {
 
     private boolean disponivel(Cupom c) {
         int usos = Optional.ofNullable(c.getUsosAtuais()).orElse(0);
-        return "ativo".equalsIgnoreCase(c.getStatus())
+        return (c.getStatus() == null || "ativo".equalsIgnoreCase(c.getStatus()))
             && (c.getValidade() == null || !c.getValidade().isBefore(LocalDate.now()))
             && (c.getLimiteUso() == null || c.getLimiteUso() <= 0 || usos < c.getLimiteUso());
     }
