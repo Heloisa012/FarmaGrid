@@ -30,6 +30,11 @@ async function apiGet(path) {
 }
 
 async function apiSend(method, path, body) {
+  console.log('Requisição API:', {
+    method,
+    path,
+    tokenPresente: Boolean(token)
+  });
   const res = await fetch(`${BASE_URL}${path}`, {
     method,
     headers: { 'Content-Type': 'application/json', ...authHeaders() },

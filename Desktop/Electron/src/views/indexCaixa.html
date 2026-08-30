@@ -935,6 +935,7 @@
       let idFarmaciaCaixa = null;
       let vendaAtual = null;
       let produtos = [];
+      let pagamentoEmProcessamento = false;
  
       function trocarAba(aba) {
         // Atualiza botões
@@ -997,7 +998,19 @@
 
           document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
           const todasAsVendas = JSON.parse(localStorage.getItem("vendas")) || [];
-          produtos = JSON.parse(localStorage.getItem("produtos")) || [];
+
+          try {
+            produtos = await window.electronAPI.buscarProdutos(
+              idFarmaciaCaixa
+            );
+          } catch (erro) {
+            console.error(
+              'Erro ao carregar produtos da farmácia do caixa:',
+              erro
+            );
+
+            produtos = [];
+          }
           
           const vendasDaFarmacia = todasAsVendas.filter(venda =>Number(venda.idFarmacia) === idFarmaciaCaixa);
 
@@ -1247,12 +1260,20 @@
             vendasHojeDaFarmacia.length;
         }
  
-        window.addEventListener("storage", (event) => {
-          if (event.key === "produtos") {
-            const novosProdutos = JSON.parse(event.newValue) || [];
-            produtos.length = 0;
-            produtos.push(...novosProdutos);
+        window.addEventListener("storage", async (event) => {
+          if (event.key !== "produtos") return;
+
+          try {
+            produtos = await window.electronAPI.buscarProdutos(
+              idFarmaciaCaixa
+            );
+
             listarProdutosDisponiveis();
+          } catch (erro) {
+            console.error(
+              'Erro ao atualizar produtos da farmácia do caixa:',
+              erro
+            );
           }
         });
  
@@ -1271,6 +1292,11 @@
       }
  
       async function finalizarPagamento() {
+        
+      if (pagamentoEmProcessamento) {
+        return;
+      }
+      
       const container = document.getElementById("detalhesVenda");
 
       if (!metodoSelecionado) {
@@ -1295,11 +1321,32 @@
       vendaAtual.metodoPago = metodoSelecionado;
       vendaAtual.troco      = resultado;
 
-      //  Salva no banco 
-      await window.electronAPI.salvarVenda(vendaAtual);
+      pagamentoEmProcessamento = true;
 
-      let vendasConcluidas = JSON.parse(localStorage.getItem("vendasConcluidas")) || [];
-      vendasConcluidas.push(vendaAtual);
+      const resultadoVenda =
+        await window.electronAPI.salvarVenda(vendaAtual);
+
+      if (!resultadoVenda || !resultadoVenda.ok) {
+        pagamentoEmProcessamento = false;
+
+        alert(
+          'Não foi possível finalizar a venda: ' +
+          (resultadoVenda?.erro || 'Erro desconhecido.')
+        );
+
+        return;
+      }
+
+      let vendasConcluidas =JSON.parse(localStorage.getItem("vendasConcluidas")) || [];
+
+      const vendaJaConcluida = vendasConcluidas.some(
+        venda => String(venda.id) === String(vendaAtual.id)
+      );
+
+      if (!vendaJaConcluida) {
+        vendasConcluidas.push(vendaAtual);
+      }
+
       localStorage.setItem("vendasConcluidas", JSON.stringify(vendasConcluidas));
 
       // Remove da fila de pendentes
@@ -1319,6 +1366,7 @@
       vendasDoDia();
       calcularTotalVendas();
       document.getElementById("myModal").style.display = "none";
+      pagamentoEmProcessamento = false;
     }
  
       function vendasDoDia() {
