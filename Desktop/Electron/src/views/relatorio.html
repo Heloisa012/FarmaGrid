@@ -1032,7 +1032,7 @@
           btn.disabled = false;
 
           if (!resultado?.sucesso) {
-            alert(
+            mostrarMensagem(
               resultado?.erro ||
               'Não foi possível baixar este relatório.'
             );
@@ -1047,7 +1047,7 @@
       const formato = document.getElementById('selectFormato').value;
 
       if (periodo === 'Selecione o período' || formato === 'Selecione o formato') {
-        alert('Selecione o período e o formato antes de gerar.');
+        mostrarMensagem('Selecione o período e o formato antes de gerar.');
         return;
       }
 
@@ -1065,8 +1065,30 @@
       if (resultado.sucesso) {
         await carregarRelatoriosRecentes();
       } else {
-        alert('Erro ao gerar relatório: ' + resultado.erro);
+        mostrarMensagem('Erro ao gerar relatório: ' + resultado.erro);
       }
+    }
+
+    function mostrarMensagem(texto) {
+      const mensagem = document.createElement("div");
+
+      mensagem.textContent = texto;
+      mensagem.style.cssText = `
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        background: #355e3b;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        z-index: 9999;
+      `;
+
+      document.body.appendChild(mensagem);
+
+      setTimeout(() => {
+        mensagem.remove();
+      }, 3000);
     }
   </script>
 

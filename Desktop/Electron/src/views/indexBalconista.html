@@ -1095,7 +1095,7 @@
           <input type="text" id="nomeCadastro" class="form-control mb-3" placeholder="Digite o nome">
 
           <p style="margin-top: 6px; color: #000000; font-size: 14px;"><b>Telefone</b></p>
-          <input type="text" id="telefoneCadastro" class="form-control mb-3" placeholder="Digite o telefone">
+          <input type="text" id="telefoneCadastro" class="form-control mb-3" placeholder="(11) 99999-9999" maxlength="15" inputmode="numeric" oninput="formatarTelefoneCliente(this)">
 
           <p style="margin-top: 6px; color: #000000; font-size: 14px;"><b>Email</b></p>
           <input type="text" id="emailCadastro" class="form-control mb-3" placeholder="Digite o email">
@@ -1110,6 +1110,20 @@
           const telefone = document.getElementById('telefoneCadastro').value.trim();
           const email    = document.getElementById('emailCadastro').value.trim();
           const msg      = document.getElementById('msgCadastro');
+
+          const telefoneLimpo = telefone.replace(/\D/g, '');
+
+          if (
+            telefone &&
+            telefoneLimpo.length !== 10 &&
+            telefoneLimpo.length !== 11
+          ) {
+            msg.style.color = 'red';
+            msg.textContent =
+              'Informe um telefone com DDD e 10 ou 11 números.';
+
+            return;
+          }
 
           if (!cpf || !nome) {
             msg.style.color = 'red';
@@ -1333,7 +1347,7 @@
       .filter(item => item.dataset.tarja === "true" && item.dataset.receita !== "true");
 
       if(itensPendentes.length > 0){
-        alert("Não é possível enviar para o caixa: existem medicamentos controlados sem receita registrada.");
+        mostrarMensagem("Não é possível enviar para o caixa: existem medicamentos controlados sem receita registrada.");
         return;
       }
 
@@ -1564,7 +1578,7 @@
 
     function registrarReceita(botao){
       if(!clienteSelecionado){
-        alert("Selecione um cliente antes de registrar a receita.");
+        mostrarMensagem("Selecione um cliente antes de registrar a receita.");
         return;
       }
 
@@ -1604,7 +1618,7 @@
 
       const alerta = document.createElement('div');
       alerta.id = 'alertaControlado';
-      alerta.className = 'alert alert-danger p-2';
+      alerta.className = 'mostrarMensagem mostrarMensagem-danger p-2';
       alerta.style.fontSize = '13px';
       alerta.innerHTML = `
         <strong>⚠ Atenção:</strong> ${itensControlados.length} medicamento(s) controlado(s) no carrinho.
@@ -1659,27 +1673,27 @@
 
       // Validações básicas
       if (!nomeMedico || !crm || !ufCrm || !tipoSelecionado) {
-        alert("Preencha o nome do médico, CRM, UF e selecione o tipo de receita.");
+        mostrarMensagem("Preencha o nome do médico, CRM, UF e selecione o tipo de receita.");
         return;
       }
 
       if (!/^\d{4,6}$/.test(crm)) {
-        alert("CRM inválido. Digite apenas os números (ex: 123456).");
+        mostrarMensagem("CRM inválido. Digite apenas os números (ex: 123456).");
         return;
       }
 
       if (!nomePaciente) {
-        alert("Informe o nome do paciente.");
+        mostrarMensagem("Informe o nome do paciente.");
         return;
       }
 
       if (!conf1 || !conf2) {
-        alert("Confirme a conferência da receita original e do documento de identificação do paciente.");
+        mostrarMensagem("Confirme a conferência da receita original e do documento de identificação do paciente.");
         return;
       }
 
       if (!itemReceitaAtual || !botaoReceitaAtual) {
-        alert("Nenhum item selecionado para registrar receita.");
+        mostrarMensagem("Nenhum item selecionado para registrar receita.");
         return;
       }
 
@@ -1710,7 +1724,7 @@
         const resultado = await window.electronAPI.cadastrarReceitaControlada(dadosReceita);
 
         if (!resultado.sucesso) {
-          alert("Erro ao registrar receita: " + resultado.erro);
+          mostrarMensagem("Erro ao registrar receita: " + resultado.erro);
           return;
         }
 
@@ -1728,14 +1742,71 @@
 
       } catch (error) {
         console.error('Erro ao registrar receita:', error);
-        alert("Erro ao registrar receita.");
+        mostrarMensagem("Erro ao registrar receita.");
       } finally {
         botaoConfirmar.disabled = false;
         botaoConfirmar.textContent = "Registrar Receita";
       }
     });
      
+    function mostrarMensagem(texto) {
+      const mensagem = document.createElement("div");
 
+      mensagem.textContent = texto;
+      mensagem.style.cssText = `
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        background: #355e3b;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        z-index: 9999;
+      `;
+
+      document.body.appendChild(mensagem);
+
+      setTimeout(() => {
+        mensagem.remove();
+      }, 3000);
+    }
+
+    function formatarTelefoneCliente(campo) {
+      let numero = campo.value.replace(/\D/g, '');
+
+      // Telefone brasileiro: no máximo 11 números.
+      numero = numero.slice(0, 11);
+
+      if (numero.length <= 2) {
+        campo.value = numero
+          ? `(${numero}`
+          : '';
+
+        return;
+      }
+
+      const ddd = numero.slice(0, 2);
+
+      // Celular: (11) 99999-9999
+      if (numero.length > 10) {
+        const primeiraParte = numero.slice(2, 7);
+        const segundaParte = numero.slice(7, 11);
+
+        campo.value =
+          `(${ddd}) ${primeiraParte}` +
+          (segundaParte ? `-${segundaParte}` : '');
+
+        return;
+      }
+
+      // Telefone fixo: (11) 9999-9999
+      const primeiraParte = numero.slice(2, 6);
+      const segundaParte = numero.slice(6, 10);
+
+      campo.value =
+        `(${ddd}) ${primeiraParte}` +
+        (segundaParte ? `-${segundaParte}` : '');
+    }
 </script>
 
 </body>
