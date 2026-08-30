@@ -14,7 +14,10 @@ public class FarmaciasController {
     public ResponseEntity<?> proximas(@PathVariable Long id) {
         Paciente p = pacientes.findById(id).orElse(null);
         if (p == null) return ResponseEntity.notFound().build();
-        String endereco = String.join(", ", java.util.stream.Stream.of(p.getRua(), p.getBairro(), p.getCidade(), p.getEstado(), p.getCep()).filter(v -> v != null && !v.isBlank()).toList());
+        String numero = p.getNumCasa() == null ? null : p.getNumCasa().toString();
+        String endereco = String.join(", ", java.util.stream.Stream.of(
+            p.getRua(), numero, p.getBairro(), p.getCidade(), p.getEstado(), p.getCep()
+        ).filter(v -> v != null && !v.isBlank()).toList());
         if (endereco.isBlank()) return ResponseEntity.badRequest().body("Complete seu endereço nas configurações.");
         try { return ResponseEntity.ok(google.buscarFarmacias(endereco)); }
         catch (IllegalStateException e) { return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(e.getMessage()); }

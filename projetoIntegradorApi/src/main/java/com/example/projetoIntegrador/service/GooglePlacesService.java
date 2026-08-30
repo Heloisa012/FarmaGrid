@@ -51,11 +51,7 @@ public class GooglePlacesService {
     }
 
     private List<Map<String, Object>> buscarOpenStreetMap(String endereco) throws Exception {
-        String q = URLEncoder.encode(endereco, StandardCharsets.UTF_8);
-        HttpRequest geoReq = HttpRequest.newBuilder(URI.create("https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&q=" + q))
-            .header("User-Agent", "FarmaGrid/1.0 contato@farmagrid.app").GET().build();
-        JsonNode geo = mapper.readTree(client.send(geoReq, HttpResponse.BodyHandlers.ofString()).body());
-        if (!geo.isArray() || geo.isEmpty()) throw new IllegalStateException("Endereço não localizado. Confira cidade e CEP nas configurações.");
+        JsonNode geo = geocodificar(endereco);
         double lat = geo.get(0).path("lat").asDouble(), lon = geo.get(0).path("lon").asDouble();
         String overpass = "[out:json];(node[amenity=pharmacy](around:10000," + lat + "," + lon + ");way[amenity=pharmacy](around:10000," + lat + "," + lon + "););out center tags;";
         HttpRequest osmReq = HttpRequest.newBuilder(URI.create("https://overpass-api.de/api/interpreter"))
@@ -75,6 +71,37 @@ public class GooglePlacesService {
             result.add(item); if (result.size() == 15) break;
         }
         return result;
+    }
+
+    private JsonNode geocodificar(String endereco) throws Exception {
+        // Nominatim pode rejeitar uma busca muito específica mesmo quando o CEP é
+        // válido. Tenta primeiro o endereço completo e depois versões mais amplas.
+        List<String> partes = Arrays.stream(endereco.split(","))
+            .map(String::trim).filter(v -> !v.isBlank()).toList();
+        LinkedHashSet<String> consultas = new LinkedHashSet<>();
+        consultas.add(endereco);
+
+        String cep = partes.stream()
+            .filter(v -> v.replaceAll("[^0-9]", "").length() == 8)
+            .findFirst().orElse(null);
+        if (cep != null) consultas.add(cep + ", Brasil");
+        if (partes.size() >= 3) {
+            consultas.add(String.join(", ", partes.subList(Math.max(0, partes.size() - 3), partes.size())));
+        }
+
+        for (String consulta : consultas) {
+            String q = URLEncoder.encode(consulta, StandardCharsets.UTF_8);
+            HttpRequest geoReq = HttpRequest.newBuilder(URI.create(
+                "https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=br&q=" + q))
+                .header("User-Agent", "FarmaGrid/1.0 contato@farmagrid.app")
+                .header("Accept-Language", "pt-BR")
+                .GET().build();
+            HttpResponse<String> response = client.send(geoReq, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() / 100 != 2) continue;
+            JsonNode resultado = mapper.readTree(response.body());
+            if (resultado.isArray() && !resultado.isEmpty()) return resultado;
+        }
+        throw new IllegalStateException("Endereço não localizado. Confira cidade e CEP nas configurações.");
     }
 
     private String montarEndereco(JsonNode tags) {
