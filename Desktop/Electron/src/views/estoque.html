@@ -512,7 +512,7 @@
 
         <!-- Campo de busca -->
         <div class="buscar">
-            <input src="buscar.png" type="text" placeholder="Buscar produto...">
+            <input id="buscarProduto" type="text" placeholder="Buscar produto..." autocomplete="off">
         </div>
 
 
@@ -750,6 +750,7 @@
   <script>
     let produtoAtual = null;
     let usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+    let todosOsProdutos = [];
 
     window.addEventListener('DOMContentLoaded', async () => {
       document.getElementById('bd').addEventListener('click', () => window.electronAPI.abrirJanelaD());
@@ -761,6 +762,37 @@
       document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
 
       await carregarProdutos();
+      const campoBusca = document.getElementById('buscarProduto');
+
+      campoBusca.addEventListener('input', () => {
+        const termo = campoBusca.value
+          .trim()
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '');
+
+        const produtosFiltrados = todosOsProdutos.filter(produto => {
+          const nome = String(produto.nome || '')
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+
+          const categoria = String(produto.categoria || '')
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '');
+
+          const codigoBarras = String(produto.codigo_barras || '').toLowerCase();
+
+          return (
+            nome.includes(termo) ||
+            categoria.includes(termo) ||
+            codigoBarras.includes(termo)
+          );
+        });
+
+        renderizarLista(produtosFiltrados);
+      });
 
       try {
         const farmacia = await window.electronAPI.buscarDadosFarmacia(usuarioLogado.id_farmacia);
@@ -780,9 +812,12 @@
     });
 
     async function carregarProdutos() {
-      const produtos = await window.electronAPI.buscarProdutos(usuarioLogado.id_farmacia);
-      renderizarLista(produtos);
-      renderizarAlerta(produtos);
+      todosOsProdutos = await window.electronAPI.buscarProdutos(
+        usuarioLogado.id_farmacia
+      );
+
+      renderizarLista(todosOsProdutos);
+      renderizarAlerta(todosOsProdutos);
     }
 
     function renderizarAlerta(produtos) {
@@ -801,6 +836,15 @@
       const lista = document.querySelector('.list-group');
       const contador = document.querySelector('.card-body small.text-muted');
       contador.textContent = `${produtos.length} Produto(s)`;
+
+      if (produtos.length === 0) {
+        lista.innerHTML = `
+          <div class="text-center text-muted py-4">
+            Nenhum produto encontrado.
+          </div>
+        `;
+        return;
+      }
 
       lista.innerHTML = produtos.map(p => {
         const estoqueBaixo = p.quantidade < p.estoque_min;
