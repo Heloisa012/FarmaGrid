@@ -6,8 +6,9 @@ import 'auth_service.dart';
 class PacienteService {
   static int get idPaciente {
     final id = AuthService.usuarioLogado?.idPaciente;
-    if (id == null)
+    if (id == null) {
       throw ApiException('Sessão de paciente inválida. Faça login novamente.');
+    }
     return id;
   }
 
@@ -35,10 +36,48 @@ class PacienteService {
         '/api/produtos',
       )).map(ProdutoPaciente.fromJson).toList();
 
-  static Future<List<CupomPaciente>> listarCupons() async =>
-      (await ApiService.getList(
+  static Future<List<CupomPaciente>> listarCupons() async {
+    List<Map<String, dynamic>> cuponsPaciente = const [];
+    try {
+      cuponsPaciente = await ApiService.getList(
         '/api/pacientes/$idPaciente/cupons',
-      )).map(CupomPaciente.fromJson).toList();
+      );
+    } on ApiException {
+      // A API publicada pode ainda não possuir o endpoint específico do paciente.
+    }
+    if (cuponsPaciente.isNotEmpty) {
+      return cuponsPaciente.map(CupomPaciente.fromJson).toList();
+    }
+
+    // O desktop lista por farmácia. Este fallback usa exatamente os mesmos
+    // endpoints para também contemplar APIs publicadas antes do endpoint do paciente.
+    final farmacias = await ApiService.getList('/api/farmacias');
+    final listas = await Future.wait(
+      farmacias.map((farmacia) {
+        final id = farmacia['id'];
+        if (id == null) return Future.value(<Map<String, dynamic>>[]);
+        return ApiService.getList('/api/cupons?idFarmacia=$id');
+      }),
+    );
+
+    final hoje = DateTime.now();
+    final unicos = <int, CupomPaciente>{};
+    for (final json in listas.expand((lista) => lista)) {
+      final status = '${json['status'] ?? 'ativo'}'.toLowerCase();
+      final validade = DateTime.tryParse('${json['validade'] ?? ''}');
+      final limite = int.tryParse('${json['limiteUso'] ?? 0}') ?? 0;
+      final usos = int.tryParse('${json['usosAtuais'] ?? 0}') ?? 0;
+      final validoNaData =
+          validade == null ||
+          !validade.isBefore(DateTime(hoje.year, hoje.month, hoje.day));
+      final temUso = limite <= 0 || usos < limite;
+      if ((status == 'ativo' || status.isEmpty) && validoNaData && temUso) {
+        final cupom = CupomPaciente.fromJson({...json, 'resgatado': false});
+        unicos[cupom.id] = cupom;
+      }
+    }
+    return unicos.values.toList();
+  }
 
   static Future<CupomPaciente> resgatarCupom(int idCupom) async =>
       CupomPaciente.fromJson(

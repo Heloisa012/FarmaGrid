@@ -19,6 +19,8 @@ class _TelaDescontosState extends State<TelaDescontos> {
   final Color corTeal = Color(0xFF7FC6BB);
   List<CupomPaciente> _cupons = const [];
   bool _premium = false;
+  bool _carregandoCupons = true;
+  String? _erroCupons;
   final Set<int> _resgatando = {};
 
   @override
@@ -26,9 +28,21 @@ class _TelaDescontosState extends State<TelaDescontos> {
     super.initState();
     PacienteService.listarCupons()
         .then((cupons) {
-          if (mounted) setState(() => _cupons = cupons);
+          if (mounted) {
+            setState(() {
+              _cupons = cupons;
+              _carregandoCupons = false;
+            });
+          }
         })
-        .catchError((_) {});
+        .catchError((erro) {
+          if (mounted) {
+            setState(() {
+              _erroCupons = '$erro';
+              _carregandoCupons = false;
+            });
+          }
+        });
     PerfilService.carregar(atualizar: true)
         .then((p) {
           if (mounted) {
@@ -63,7 +77,16 @@ class _TelaDescontosState extends State<TelaDescontos> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  if (_cupons.isEmpty)
+                  if (_carregandoCupons)
+                    const Center(child: CircularProgressIndicator())
+                  else if (_erroCupons != null)
+                    Center(
+                      child: Text(
+                        'Não foi possível carregar os descontos.\n$_erroCupons',
+                        textAlign: TextAlign.center,
+                      ),
+                    )
+                  else if (_cupons.isEmpty)
                     const Center(child: Text('Nenhum desconto disponível.'))
                   else
                     ..._cupons.map(
