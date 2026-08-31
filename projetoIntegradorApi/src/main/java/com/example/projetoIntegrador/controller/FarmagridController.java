@@ -12,7 +12,7 @@ import com.example.projetoIntegrador.dto.CadastrarClienteFarmaciaRequest;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.projetoIntegrador.dto.CadastroFuncionarioRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.transaction.annotation.Transactional;
+import com.example.projetoIntegrador.dto.AtualizarFuncionarioRequest;
 
 import java.util.List;
 
@@ -278,11 +278,95 @@ public class FarmagridController {
                 .body(funcionarioSalvo);
     }
 
-    @GetMapping("/funcionarios/{cpf}")
-    public ResponseEntity<Funcionario> buscarFuncionario(@PathVariable String cpf) {
-        return funcionarioRepo.findById(cpf)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    @PutMapping("/funcionarios/{cpf}")
+    @Transactional
+    public ResponseEntity<?> atualizarFuncionario(
+            @PathVariable String cpf,
+            @RequestBody AtualizarFuncionarioRequest req) {
+
+        Funcionario funcionario =
+                funcionarioRepo.findById(cpf).orElse(null);
+
+        if (funcionario == null) {
+            return ResponseEntity
+                    .notFound()
+                    .build();
+        }
+
+        if (
+            !"balconista".equals(req.funcao) &&
+            !"caixa".equals(req.funcao)
+        ) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Função inválida.");
+        }
+
+        Login login = loginRepo
+                .findByIdBalconistaOrIdCaixa(cpf, cpf)
+                .orElse(null);
+
+        if (login == null) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body(
+                        "O funcionário não possui um login associado."
+                    );
+        }
+
+        String emailNovo =
+                req.email.trim().toLowerCase();
+
+        // Impede que o novo e-mail pertença a outro login.
+        var loginMesmoEmail =
+                loginRepo.findByEmailAndTipo(emailNovo, 2);
+
+        if (
+            loginMesmoEmail.isPresent() &&
+            !loginMesmoEmail.get()
+                    .getId()
+                    .equals(login.getId())
+        ) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body("E-mail já cadastrado.");
+        }
+
+        // Atualiza funcFarma.
+        funcionario.setNome(req.nome.trim());
+        funcionario.setEmail(emailNovo);
+        funcionario.setTelefone(req.telefone);
+        funcionario.setFuncao(req.funcao);
+        funcionario.setStatus(req.status);
+
+        if (req.idFarmacia != null) {
+            funcionario.setIdFarmacia(req.idFarmacia);
+        }
+
+        funcionarioRepo.save(funcionario);
+
+        // Atualiza os dados correspondentes em login.
+        login.setEmail(emailNovo);
+        login.setTipo(2);
+
+        if (req.idFarmacia != null) {
+            login.setIdFarmacia(req.idFarmacia);
+        }
+
+        // Primeiro limpa os dois vínculos.
+        login.setIdBalconista(null);
+        login.setIdCaixa(null);
+
+        // Depois grava apenas o vínculo da nova função.
+        if ("balconista".equals(req.funcao)) {
+            login.setIdBalconista(cpf);
+        } else {
+            login.setIdCaixa(cpf);
+        }
+
+        loginRepo.save(login);
+
+        return ResponseEntity.ok(funcionario);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
