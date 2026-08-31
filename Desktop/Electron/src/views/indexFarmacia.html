@@ -510,7 +510,6 @@
 </div>
   <script>
     window.addEventListener('DOMContentLoaded', async () => {
-      await carregarDashboard();
       document.getElementById('bd').addEventListener('click', () => window.electronAPI.abrirJanelaD());
       document.getElementById('be').addEventListener('click', () => window.electronAPI.abrirJanelaE());
       document.getElementById('ba').addEventListener('click', () => window.electronAPI.abrirJanelaV());
@@ -521,6 +520,12 @@
       document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
 
       const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
+
+      try {
+        await carregarDashboard();
+      } catch (err) {
+        console.error('Erro ao carregar o dashboard da farmácia:', err);
+      }
 
       try {
         const farmacia = await window.electronAPI.buscarDadosFarmacia(usuarioLogado.id_farmacia);
@@ -556,7 +561,13 @@
 
     async function carregarDashboard() {
       const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
-      const dados = await window.electronAPI.buscarDashboard(usuarioLogado.id_farmacia);
+      const idFarmacia = Number(usuarioLogado.id_farmacia);
+
+      if (!Number.isFinite(idFarmacia) || idFarmacia <= 0) {
+        throw new Error('Login da farmácia sem identificador válido.');
+      }
+
+      const dados = await window.electronAPI.buscarDashboard(idFarmacia);
 
       document.getElementById('totalEstoque').textContent = dados.totalEstoque.toLocaleString('pt-BR');
       document.getElementById('totalAlertas').textContent = dados.totalAlertasValidade;
