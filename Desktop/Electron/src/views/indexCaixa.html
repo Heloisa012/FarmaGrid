@@ -999,17 +999,22 @@
           document.getElementById('Sair').addEventListener('click', () => window.electronAPI.abrirJanelaL());
           const todasAsVendas = JSON.parse(localStorage.getItem("vendas")) || [];
 
-          try {
-            produtos = await window.electronAPI.buscarProdutos(
-              idFarmaciaCaixa
-            );
-          } catch (erro) {
-            console.error(
-              'Erro ao carregar produtos da farmácia do caixa:',
-              erro
-            );
-
+          if (!Number.isFinite(idFarmaciaCaixa) || idFarmaciaCaixa <= 0) {
+            console.error('Não foi possível identificar a farmácia do caixa.');
             produtos = [];
+          } else {
+            try {
+              produtos = await window.electronAPI.buscarProdutos(
+                idFarmaciaCaixa
+              );
+            } catch (erro) {
+              console.error(
+                'Erro ao carregar produtos da farmácia do caixa:',
+                erro
+              );
+
+              produtos = [];
+            }
           }
           
           const vendasDaFarmacia = todasAsVendas.filter(venda =>Number(venda.idFarmacia) === idFarmaciaCaixa);

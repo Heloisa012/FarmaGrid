@@ -182,6 +182,13 @@ public class FarmagridController {
         return funcionarioRepo.findByIdFarmacia(idFarmacia);
     }
 
+    @GetMapping("/funcionarios/{cpf}")
+    public ResponseEntity<Funcionario> buscarFuncionario(@PathVariable String cpf) {
+        return funcionarioRepo.findById(cpf)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     @PostMapping("/funcionarios")
     @Transactional
     public ResponseEntity<?> criarFuncionario(

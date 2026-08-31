@@ -2087,8 +2087,13 @@ ipcMain.handle('atualizar-funcionario', async (event, dados) => {
 
 // === BUSCAR DADOS DO PRÓPRIO FUNCIONÁRIO (SIDEBAR BALCONISTA/CAIXA) ===
 ipcMain.handle('buscar-dados-funcionario', async (event, cpf) => {
+  if (typeof cpf !== 'string' || !cpf.trim()) {
+    console.error('CPF do funcionário não foi informado.');
+    return null;
+  }
+
   try {
-    const funcionario = await apiGet(`/api/funcionarios/${encodeURIComponent(cpf)}`);
+    const funcionario = await apiGet(`/api/funcionarios/${encodeURIComponent(cpf.trim())}`);
     return funcionario;
   } catch (err) {
     console.error('Erro ao buscar dados do funcionário:', err);

@@ -1008,7 +1008,7 @@
         const funcionario = await window.electronAPI.buscarDadosFuncionario(usuarioLogado.id_balconista);
         if (funcionario) {
           document.querySelector('.nome').textContent = funcionario.nome;
-          idFarmaciaLogada = funcionario.idFarmacia;
+          idFarmaciaLogada = Number(funcionario.idFarmacia ?? funcionario.id_farmacia);
         }
       } catch (err) {
         console.error('Erro ao carregar dados do balconista logado:', err);
@@ -1020,6 +1020,12 @@
     const adicionarLista = document.querySelector('.lista-produtos');
 
     async function carregarProdutosBalconista() {
+      if (!Number.isFinite(idFarmaciaLogada) || idFarmaciaLogada <= 0) {
+        console.error('Não foi possível identificar a farmácia do balconista.');
+        adicionarLista.innerHTML = '<p class="text-muted text-center">Funcionário sem farmácia vinculada.</p>';
+        return;
+      }
+
       try {
         const produtos = await window.electronAPI.buscarProdutos(idFarmaciaLogada);
 
