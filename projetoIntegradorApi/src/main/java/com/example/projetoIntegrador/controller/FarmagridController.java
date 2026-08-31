@@ -10,6 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.example.projetoIntegrador.dto.CadastrarClienteFarmaciaRequest;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.projetoIntegrador.dto.CadastroFuncionarioRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -39,6 +42,8 @@ public class FarmagridController {
     @Autowired private PacienteAlergiaRepository pacienteAlergiaRepo;
     @Autowired private CartaoRepository cartaoRepo;
     @Autowired private DisponibilidadeMedicoRepository disponibilidadeMedicoRepo;
+    @Autowired private LoginRepository loginRepo;
+    @Autowired private PasswordEncoder passwordEncoder;
     
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -178,11 +183,99 @@ public class FarmagridController {
     }
 
     @PostMapping("/funcionarios")
-    public ResponseEntity<?> criarFuncionario(@RequestBody Funcionario obj) {
-        if (funcionarioRepo.existsById(obj.getCpf())) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("CPF já cadastrado.");
+    @Transactional
+    public ResponseEntity<?> criarFuncionario(
+            @RequestBody CadastroFuncionarioRequest req) {
+
+        if (
+            req.cpf == null ||
+            req.cpf.isBlank() ||
+            req.nome == null ||
+            req.nome.isBlank() ||
+            req.email == null ||
+            req.email.isBlank() ||
+            req.senha == null ||
+            req.senha.isBlank() ||
+            req.idFarmacia == null
+        ) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(
+                        "CPF, nome, e-mail, senha e farmácia são obrigatórios."
+                    );
         }
-        return ResponseEntity.ok(funcionarioRepo.save(obj));
+
+        if (
+            !"balconista".equals(req.funcao) &&
+            !"caixa".equals(req.funcao)
+        ) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("Função inválida.");
+        }
+
+        String cpf = req.cpf.trim();
+        String email = req.email.trim().toLowerCase();
+
+        if (funcionarioRepo.existsById(cpf)) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body("CPF já cadastrado.");
+        }
+
+        if (
+            loginRepo
+                .findByEmailAndTipo(email, 2)
+                .isPresent()
+        ) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .body("E-mail já cadastrado.");
+        }
+
+        // Salva os dados pessoais em funcFarma.
+        Funcionario funcionario = new Funcionario();
+
+        funcionario.setCpf(cpf);
+        funcionario.setIdFarmacia(req.idFarmacia);
+        funcionario.setNome(req.nome.trim());
+        funcionario.setEmail(email);
+        funcionario.setTelefone(req.telefone);
+        funcionario.setFuncao(req.funcao);
+        funcionario.setStatus(
+            req.status == null || req.status.isBlank()
+                ? "ativo"
+                : req.status
+        );
+
+        Funcionario funcionarioSalvo =
+                funcionarioRepo.saveAndFlush(funcionario);
+
+        // Salva os dados de acesso em login.
+        Login login = new Login();
+
+        login.setEmail(email);
+        login.setSenha(
+            passwordEncoder.encode(req.senha)
+        );
+
+        // 1 = médico, 2 = farmácia/funcionário, 3 = paciente.
+        login.setTipo(2);
+        login.setIdFarmacia(req.idFarmacia);
+
+        if ("balconista".equals(req.funcao)) {
+            login.setIdBalconista(cpf);
+            login.setIdCaixa(null);
+        } else {
+            login.setIdCaixa(cpf);
+            login.setIdBalconista(null);
+        }
+
+        loginRepo.save(login);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(funcionarioSalvo);
     }
 
     @GetMapping("/funcionarios/{cpf}")

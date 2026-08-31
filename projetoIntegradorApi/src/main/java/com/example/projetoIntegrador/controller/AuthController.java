@@ -66,12 +66,12 @@ public class AuthController {
             perfil = "medico";
         } else if (login.getIdPaciente() != null) {
             perfil = "paciente";
-        } else if (login.getIdFarmacia() != null) {
-            perfil = "farmacia";
         } else if (login.getIdBalconista() != null) {
             perfil = "balconista";
         } else if (login.getIdCaixa() != null) {
             perfil = "caixa";
+        } else if (login.getIdFarmacia() != null) {
+            perfil = "farmacia";
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuário sem perfil associado.");
         }
