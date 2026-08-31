@@ -1,13 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { consultas as consultasMock, medicamentos as medicamentosMock } from '../data/dadosMock.js';
 import { produtosDaLoja as produtosMock } from '../data/produtosDaLoja.js';
-import {
-  farmagridApi,
-  formatarTeleconsulta,
-  formatarReceita,
-  formatarEstoque,
-  formatarVenda,
-} from '../services/farmagridApi.js';
+import { farmagridApi, formatarTeleconsulta, formatarReceita } from '../services/farmagridApi.js';
 
 const DADOS_INICIAIS = {
   consultas: consultasMock.map(c => ({
@@ -21,20 +15,15 @@ const DADOS_INICIAIS = {
     nome: m.nome,
     dose: m.dose,
     freq: m.freq,
-    validade: m.validade,
+    dataPrescricao: '—',
     status: 'Ativa',
   })),
-  medicamentos: medicamentosMock,
+  // ⚠️ Loja: sem endpoint utilizável para o paciente (ver farmagridApi.js) —
+  // fica sempre no catálogo mock até essa decisão de produto ser tomada.
   produtos: produtosMock,
-  pacientes: [],
-  medicos: [],
-  parcerias: [],
-  estoques: [],
-  vendas: [],
-  prontuarios: [],
 };
 
-export function useDadosPainel(usuario, tipoPerfil) {
+export function useDadosPainel(usuario) {
   const [dados, setDados] = useState(DADOS_INICIAIS);
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState('');
@@ -43,7 +32,7 @@ export function useDadosPainel(usuario, tipoPerfil) {
   const recarregar = useCallback(() => setVersao(v => v + 1), []);
 
   useEffect(() => {
-    if (!usuario?.id) return;
+    if (!usuario?.idPaciente) return;
 
     let ativo = true;
 
@@ -51,78 +40,25 @@ export function useDadosPainel(usuario, tipoPerfil) {
       setCarregando(true);
       setErro('');
       try {
-        if (tipoPerfil === 'paciente' && usuario.idPaciente) {
-          const [teleconsultas, receitas, medicamentos] = await Promise.all([
-            farmagridApi.teleconsultasPorPaciente(usuario.idPaciente).catch(() => []),
-            farmagridApi.receitasPorPaciente(usuario.idPaciente).catch(() => []),
-            farmagridApi.listarMedicamentos().catch(() => []),
-          ]);
+        const [teleconsultas, receitas, medicos] = await Promise.all([
+          farmagridApi.teleconsultasPorPaciente(usuario.idPaciente).catch(() => []),
+          farmagridApi.receitasPorPaciente(usuario.idPaciente).catch(() => []),
+          farmagridApi.listarMedicos().catch(() => []),
+        ]);
 
-          if (!ativo) return;
-          setDados(prev => ({
-            ...prev,
-            consultas: teleconsultas.length ? teleconsultas.map(formatarTeleconsulta) : prev.consultas,
-            receitas: receitas.length ? receitas.map(formatarReceita) : prev.receitas,
-            medicamentos: medicamentos.length
-              ? medicamentos.map(m => ({
-                  id: m.id,
-                  nome: m.nome,
-                  dose: m.dosagem || '—',
-                  freq: '—',
-                  validade: m.dataValidade || '—',
-                }))
-              : prev.medicamentos,
-            produtos: medicamentos.length
-              ? medicamentos.map(m => ({
-                  id: m.id,
-                  nome: m.nome,
-                  sub: m.categoria || m.fabricante || '',
-                  orig: Number(m.preco || 0) * 1.5,
-                  desc: Number(m.preco || 0),
-                  badge: 'Clube FarmaGrid',
-                  badgeCls: 'badge-green',
-                }))
-              : prev.produtos,
-          }));
-        }
+        if (!ativo) return;
 
-        if (tipoPerfil === 'profissional' && usuario.idMedico) {
-          const [teleconsultas, pacientes, parcerias, estoques, medicamentos] = await Promise.all([
-            farmagridApi.teleconsultasPorMedico(usuario.idMedico).catch(() => []),
-            farmagridApi.listarPacientes().catch(() => []),
-            farmagridApi.listarParcerias().catch(() => []),
-            farmagridApi.listarEstoques().catch(() => []),
-            farmagridApi.listarMedicamentos().catch(() => []),
-          ]);
+        // Teleconsulta não guarda nome/especialidade do médico, só idMedico
+        // — junta isso aqui usando a lista de médicos disponíveis.
+        const medicosPorId = Object.fromEntries((medicos || []).map(m => [m.id, m]));
 
-          if (!ativo) return;
-          setDados(prev => ({
-            ...prev,
-            consultas: teleconsultas.length ? teleconsultas.map(formatarTeleconsulta) : prev.consultas,
-            pacientes,
-            parcerias,
-            medicamentos,
-            estoques: estoques.length ? estoques.map(formatarEstoque) : prev.estoques,
-          }));
-        }
-
-        if (tipoPerfil === 'farmacia') {
-          const [estoques, vendas, descontos, medicamentos] = await Promise.all([
-            farmagridApi.listarEstoques().catch(() => []),
-            farmagridApi.vendasHoje().catch(() => []),
-            farmagridApi.listarDescontos().catch(() => []),
-            farmagridApi.listarMedicamentos().catch(() => []),
-          ]);
-
-          if (!ativo) return;
-          setDados(prev => ({
-            ...prev,
-            estoques: estoques.length ? estoques.map(formatarEstoque) : prev.estoques,
-            vendas: vendas.length ? vendas.map(formatarVenda) : prev.vendas,
-            descontos,
-            medicamentos,
-          }));
-        }
+        setDados(prev => ({
+          ...prev,
+          consultas: teleconsultas.length
+            ? teleconsultas.map(t => formatarTeleconsulta(t, medicosPorId))
+            : prev.consultas,
+          receitas: receitas.length ? receitas.map(formatarReceita) : prev.receitas,
+        }));
       } catch (e) {
         if (ativo) setErro(e.message || 'Erro ao carregar dados da API.');
       } finally {
@@ -132,7 +68,7 @@ export function useDadosPainel(usuario, tipoPerfil) {
 
     carregar();
     return () => { ativo = false; };
-  }, [usuario?.id, usuario?.idPaciente, usuario?.idMedico, tipoPerfil, versao]);
+  }, [usuario?.idPaciente, versao]);
 
   return { dados, carregando, erro, recarregar };
 }

@@ -1,0 +1,136 @@
+.success-animation-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  width: 100%;
+  margin: 6px auto 18px;
+}
+
+.success-animation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 108px;
+  height: 108px;
+  margin: 0 auto 12px;
+  animation: successFadeIn 0.7s ease-out both;
+}
+
+.success-animation-svg {
+  width: 108px;
+  height: 108px;
+  display: block;
+  overflow: visible;
+}
+
+.success-ring {
+  fill: none;
+  stroke: #18b25c;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 264;
+  stroke-dashoffset: 264;
+  transform-origin: center;
+  animation: ringDraw 0.8s ease-out 0.18s forwards,
+             ringPop 0.5s ease-out 0.9s forwards;
+}
+
+.success-check {
+  fill: none;
+  stroke: #18b25c;
+  stroke-width: 6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  transform-origin: center;
+  animation: checkDraw 0.55s ease-out 0.7s forwards,
+             checkPop 0.42s ease-out 1.15s both;
+}
+
+.success-animation-title {
+  margin: 0;
+  font-size: clamp(1.5rem, 2vw, 2rem);
+  line-height: 1.2;
+  color: var(--gray-800, #1f2937);
+  font-weight: 700;
+}
+
+.success-animation-subtitle {
+  margin: 8px auto 0;
+  max-width: 340px;
+  color: var(--gray-500, #6b7280);
+  font-size: 0.96rem;
+  line-height: 1.5;
+}
+
+@keyframes successFadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ringDraw {
+  0% {
+    stroke-dashoffset: 264;
+    opacity: 0.2;
+    transform: scale(0.8);
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes ringPop {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.04);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes checkDraw {
+  0% {
+    stroke-dashoffset: 100;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes checkPop {
+  0% {
+    transform: scale(0.92);
+  }
+  45% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .success-animation {
+    width: 92px;
+    height: 92px;
+  }
+
+  .success-animation-svg {
+    width: 92px;
+    height: 92px;
+  }
+}

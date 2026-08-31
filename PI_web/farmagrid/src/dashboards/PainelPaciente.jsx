@@ -33,7 +33,7 @@ function VisaoGeral({ acoes, dados, usuario }) {
               <td><SBadge s={c.status} /></td>
               <td>
                 {c.tipo === 'Teleconsulta'
-                  ? <button type="button" className="btn btn-primary btn-sm" onClick={acoes.teleconsulta}>Entrar</button>
+                  ? <button type="button" className="btn btn-primary btn-sm" onClick={() => acoes.teleconsulta(c)}>Entrar</button>
                   : <button type="button" className="btn btn-secondary btn-sm" onClick={() => acoes.detalhes(c)}>Detalhes</button>}
               </td>
             </tr>
@@ -44,9 +44,9 @@ function VisaoGeral({ acoes, dados, usuario }) {
     <div className="card">
       <div className="card-header"><h3>Medicamentos em Uso</h3></div>
       <div className="table-wrap"><table className="table">
-        <thead><tr><th>Medicamento</th><th>Dosagem</th><th>Frequência</th><th>Válido até</th></tr></thead>
+        <thead><tr><th>Medicamento</th><th>Dosagem</th><th>Frequência</th><th>Prescrita em</th></tr></thead>
         <tbody>{receitas.map(m => (
-          <tr key={m.id || m.nome}><td>{m.nome}</td><td>{m.dose}</td><td>{m.freq}</td><td>{m.validade}</td></tr>
+          <tr key={m.id || m.nome}><td>{m.nome}</td><td>{m.dose}</td><td>{m.freq}</td><td>{m.dataPrescricao}</td></tr>
         ))}</tbody>
       </table></div>
     </div>
@@ -71,7 +71,7 @@ function Consultas({ acoes, dados }) {
               <td><SBadge s={c.status} /></td>
               <td>
                 {c.tipo === 'Teleconsulta'
-                  ? <button type="button" className="btn btn-primary btn-sm" onClick={acoes.teleconsulta}>Entrar na Chamada</button>
+                  ? <button type="button" className="btn btn-primary btn-sm" onClick={() => acoes.teleconsulta(c)}>Entrar na Chamada</button>
                   : <button type="button" className="btn btn-secondary btn-sm" onClick={() => acoes.detalhes(c)}>Ver Detalhes</button>}
               </td>
             </tr>
@@ -89,11 +89,11 @@ function Exames({ acoes, dados }) {
     <div className="card">
       <div className="card-header"><h3>Receitas Digitais Ativas</h3></div>
       <div className="table-wrap"><table className="table">
-        <thead><tr><th>Medicamento</th><th>Dosagem</th><th>Validade</th><th>Status</th><th>Ações</th></tr></thead>
+        <thead><tr><th>Medicamento</th><th>Dosagem</th><th>Prescrita em</th><th>Status</th><th>Ações</th></tr></thead>
         <tbody>
           {receitas.map(m => (
             <tr key={m.id || m.nome}>
-              <td><strong>{m.nome} {m.dose}</strong></td><td>{m.dose}</td><td>{m.validade}</td>
+              <td><strong>{m.nome} {m.dose}</strong></td><td>{m.dose}</td><td>{m.dataPrescricao}</td>
               <td><SBadge s={m.status || 'Ativa'} /></td>
               <td><button type="button" className="btn btn-primary btn-sm">Ver QR Code</button></td>
             </tr>

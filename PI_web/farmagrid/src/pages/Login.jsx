@@ -1,15 +1,30 @@
 import { useState } from 'react';
 import '../styles/login.css';
 import { Logo } from '../components/Logo.jsx';
-import { login, cadastro, montarCadastro, mapearTipoFront, obterUsuarioAtual } from '../services/authService.js';
+import {
+  login, logout, montarCadastro,
+  cadastroPaciente, cadastroMedico, cadastroFarmacia, buscarConfigPaciente,
+} from '../services/authService.js';
 
-const TIPOS_USUARIO = [
+// Tipos de cadastro disponíveis. "Farmácia" fica de fora: não existe
+// POST /auth/cadastro/farmacia na API (contas de farmácia só são criadas
+// pelo aplicativo desktop antigo).
+const TIPOS_CADASTRO = [
   ['paciente',     'Paciente'],
   ['profissional', 'Médico/Clínica'],
   ['farmacia',     'Farmácia'],
 ];
 
-export function Login({ onBack, onLogin }) {
+// Tipos que o formulário de LOGIN oferece — precisa saber de antemão qual
+// "tipo" numérico mandar pro /auth/login (a API exige isso para achar a
+// linha). Farmácia/balconista/caixa não têm valor confirmado, então não
+// aparecem aqui (ver services/authService.js).
+const TIPOS_LOGIN = [
+  ['paciente',     'Paciente'],
+  ['profissional', 'Médico/Clínica'],
+];
+
+export function Login({ onBack, onLogin, onCadastroSucesso }) {
   const [aba, setAba] = useState('login');
   const [carregando, setCarregando] = useState(false);
   const [erro, setErro] = useState('');
@@ -20,26 +35,87 @@ export function Login({ onBack, onLogin }) {
     cpf: '',
     telefone: '',
     tipo: 'paciente',
+    tipoLogin: 'paciente',
     sexo: 'M',
     dataNascimento: '',
     rua: '',
     numCasa: '',
     bairro: '',
+    cidade: '',
+    estado: '',
+    cep: '',
+    tipoSanguineo: '',
+    contatoEmergenciaNome: '',
+    contatoEmergenciaTelefone: '',
     crm: '',
     especialidade: '',
     clinica: '',
+    farmaciaNome: '',
+    farmaciaCnpj: '',
+    farmaciaCep: '',
+    farmaciaTelefone: '',
+    farmaciaCidade: '',
+    farmaciaFoto: '',
   });
 
   const atualizar = (campo, valor) => setForm(prev => ({ ...prev, [campo]: valor }));
+
+  const lerFoto = (arquivo) => new Promise((resolve, reject) => {
+    if (!arquivo) return resolve(null);
+    const leitor = new FileReader();
+    leitor.onload = () => resolve(leitor.result);
+    leitor.onerror = () => reject(new Error('Não foi possível ler a foto selecionada.'));
+    leitor.readAsDataURL(arquivo);
+  });
+
+  const cadastrarFarmaciaDemo = async () => {
+    const cnpj = form.farmaciaCnpj.replace(/\D/g, '');
+    const cep = form.farmaciaCep.replace(/\D/g, '');
+    const telefone = form.farmaciaTelefone.replace(/\D/g, '');
+    const idCidade = Number(form.farmaciaCidade);
+    if (!form.farmaciaNome.trim() || cnpj.length !== 14 || cep.length !== 8 || telefone.length < 10 || !Number.isInteger(idCidade) || idCidade <= 0) {
+      throw new Error('Informe nome, CNPJ, CEP, telefone e cidade válidos.');
+    }
+    return cadastroFarmacia({
+      nome: form.farmaciaNome.trim(), cnpj, cep, telefone, idCidade, fotoPerfil: form.farmaciaFoto,
+      email: form.email.trim(), senha: form.senha,
+    });
+  };
 
   const entrar = async (e) => {
     e.preventDefault();
     setCarregando(true);
     setErro('');
     try {
-      const res = await login(form.email, form.senha);
-      const me = await obterUsuarioAtual();
-      onLogin(mapearTipoFront(res.tipo), { ...me, nome: me.nome || res.nome, email: me.email || form.email });
+      const res = await login(form.email, form.senha, form.tipoLogin);
+
+      // A API só implementa funções de paciente no web — outros perfis
+      // (medico/farmacia/balconista/caixa) não usam o painel web atual.
+      if (res.perfil !== 'paciente') {
+        logout();
+        onCadastroSucesso({
+          titulo: 'Login realizado, mas...',
+          mensagem: 'As funções para médicos, clínicas e farmácias ficam disponíveis apenas nos aplicativos FarmaGrid.',
+        });
+        return;
+      }
+
+      let config = null;
+      try {
+        config = await buscarConfigPaciente(res.idPaciente);
+      } catch {
+        // segue mesmo se a busca do perfil completo falhar
+      }
+
+      onLogin('paciente', {
+        idPaciente: res.idPaciente,
+        idLogin: res.id,
+        email: config?.email || res.email || form.email,
+        nome: config?.nome || form.email,
+        telefone: config?.telefone || '',
+        fotoPerfil: config?.fotoPerfil || null,
+        configRaw: config,
+      });
     } catch (err) {
       setErro(err.message || 'Falha ao entrar.');
     } finally {
@@ -52,10 +128,34 @@ export function Login({ onBack, onLogin }) {
     setCarregando(true);
     setErro('');
     try {
+      if (form.tipo === 'farmacia') {
+        await cadastrarFarmaciaDemo();
+        onCadastroSucesso({
+          titulo: 'Farmácia cadastrada com sucesso',
+          mensagem: 'Cadastro salvo para apresentação do projeto. Você será redirecionado para a página inicial.',
+          redirecionarEm: 3500,
+        });
+        return;
+      }
+
       const payload = montarCadastro(form, form.tipo);
-      const res = await cadastro(payload);
-      const me = await obterUsuarioAtual();
-      onLogin(mapearTipoFront(res.tipo), { ...me, nome: me.nome || form.nome, email: me.email || form.email });
+      const res = form.tipo === 'profissional'
+        ? await cadastroMedico(payload)
+        : await cadastroPaciente(payload);
+
+      // Só pacientes usam o painel web. Médico/Clínica só têm acesso via
+      // aplicativo, então aqui só confirmamos o cadastro.
+      if (form.tipo !== 'paciente') {
+        onCadastroSucesso();
+        return;
+      }
+
+      onLogin('paciente', {
+        idPaciente: res.id,
+        nome: form.nome,
+        email: form.email,
+        telefone: form.telefone,
+      });
     } catch (err) {
       setErro(err.message || 'Falha ao cadastrar.');
     } finally {
@@ -78,6 +178,12 @@ export function Login({ onBack, onLogin }) {
 
         {aba === 'login' ? (
           <form onSubmit={entrar}>
+            <div className="form-group">
+              <label>Tipo de Conta</label>
+              <select value={form.tipoLogin} onChange={e => atualizar('tipoLogin', e.target.value)} required>
+                {TIPOS_LOGIN.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+              </select>
+            </div>
             <div className="form-group"><label>Email</label><input type="email" value={form.email} onChange={e => atualizar('email', e.target.value)} placeholder="seu@email.com" required /></div>
             <div className="form-group"><label>Senha</label><input type="password" value={form.senha} onChange={e => atualizar('senha', e.target.value)} placeholder="••••••••" required /></div>
             <button className="btn btn-primary form-submit" type="submit" disabled={carregando}>{carregando ? 'Entrando...' : 'Entrar'}</button>
@@ -85,13 +191,15 @@ export function Login({ onBack, onLogin }) {
           </form>
         ) : (
           <form onSubmit={registrar}>
-            <div className="form-group"><label>Nome Completo</label><input type="text" value={form.nome} onChange={e => atualizar('nome', e.target.value)} placeholder="João Silva" required /></div>
+            {form.tipo !== 'farmacia' && (
+              <div className="form-group"><label>Nome Completo</label><input type="text" value={form.nome} onChange={e => atualizar('nome', e.target.value)} placeholder="João Silva" required /></div>
+            )}
             <div className="form-group"><label>Email</label><input type="email" value={form.email} onChange={e => atualizar('email', e.target.value)} placeholder="seu@email.com" required /></div>
             <div className="form-group"><label>Senha</label><input type="password" value={form.senha} onChange={e => atualizar('senha', e.target.value)} placeholder="••••••••" required /></div>
             <div className="form-group">
               <label>Tipo de Usuário</label>
               <select value={form.tipo} onChange={e => atualizar('tipo', e.target.value)} required>
-                {TIPOS_USUARIO.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                {TIPOS_CADASTRO.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
               </select>
             </div>
 
@@ -111,12 +219,10 @@ export function Login({ onBack, onLogin }) {
                 <div className="form-group"><label>Rua</label><input type="text" value={form.rua} onChange={e => atualizar('rua', e.target.value)} placeholder="Rua das Flores" required /></div>
                 <div className="form-group"><label>Número</label><input type="number" value={form.numCasa} onChange={e => atualizar('numCasa', e.target.value)} placeholder="123" required /></div>
                 <div className="form-group"><label>Bairro</label><input type="text" value={form.bairro} onChange={e => atualizar('bairro', e.target.value)} placeholder="Centro" required /></div>
+                <div className="form-group"><label>Cidade</label><input type="text" value={form.cidade} onChange={e => atualizar('cidade', e.target.value)} placeholder="Campinas" /></div>
+                <div className="form-group"><label>Estado</label><input type="text" value={form.estado} onChange={e => atualizar('estado', e.target.value)} placeholder="SP" maxLength={2} /></div>
+                <div className="form-group"><label>CEP</label><input type="text" value={form.cep} onChange={e => atualizar('cep', e.target.value)} placeholder="00000-000" /></div>
               </>
-            )}
-
-            {/* Campos de FARMÁCIA (funcionário) */}
-            {form.tipo === 'farmacia' && (
-              <div className="form-group"><label>CPF</label><input type="text" value={form.cpf} onChange={e => atualizar('cpf', e.target.value)} placeholder="000.000.000-00" required /></div>
             )}
 
             {/* Campos de MÉDICO */}
@@ -128,7 +234,20 @@ export function Login({ onBack, onLogin }) {
               </>
             )}
 
-            <div className="form-group"><label>Telefone</label><input type="text" value={form.telefone} onChange={e => atualizar('telefone', e.target.value)} placeholder="(19) 99999-9999" /></div>
+            {form.tipo === 'farmacia' && (
+              <>
+                <div className="form-group"><label>Nome da Farmácia</label><input type="text" value={form.farmaciaNome} onChange={e => atualizar('farmaciaNome', e.target.value)} placeholder="FarmaGrid Saúde" required /></div>
+                <div className="form-group"><label>CNPJ</label><input type="text" value={form.farmaciaCnpj} onChange={e => atualizar('farmaciaCnpj', e.target.value)} placeholder="00.000.000/0000-00" inputMode="numeric" required /></div>
+                <div className="form-group"><label>CEP</label><input type="text" value={form.farmaciaCep} onChange={e => atualizar('farmaciaCep', e.target.value)} placeholder="00000-000" inputMode="numeric" required /></div>
+                <div className="form-group"><label>Telefone</label><input type="text" value={form.farmaciaTelefone} onChange={e => atualizar('farmaciaTelefone', e.target.value)} placeholder="(19) 99999-9999" inputMode="tel" required /></div>
+                <div className="form-group"><label>Cidade (ID)</label><input type="number" min="1" value={form.farmaciaCidade} onChange={e => atualizar('farmaciaCidade', e.target.value)} placeholder="Ex.: 1" required /></div>
+                <div className="form-group"><label>Foto de perfil (opcional)</label><input type="file" accept="image/*" onChange={async e => { try { atualizar('farmaciaFoto', await lerFoto(e.target.files[0])); } catch (err) { setErro(err.message); } }} /></div>
+              </>
+            )}
+
+            {form.tipo !== 'farmacia' && (
+              <div className="form-group"><label>Telefone</label><input type="text" value={form.telefone} onChange={e => atualizar('telefone', e.target.value)} placeholder="(19) 99999-9999" /></div>
+            )}
             <button className="btn btn-primary form-submit" type="submit" disabled={carregando}>{carregando ? 'Cadastrando...' : 'Criar Conta'}</button>
             <p className="terms">Ao criar uma conta você concorda com os <a>Termos de Uso</a></p>
           </form>

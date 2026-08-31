@@ -1,13 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 
 export function EditarPerfil({ dados, onSalvar, onCancelar }) {
   const [form, setForm] = useState(dados);
-  const [preview, setPreview] = useState(dados.avatar);
+  const [preview, setPreview] = useState(dados?.avatar);
+  const [dadosAnteriores, setDadosAnteriores] = useState(dados);
 
-  useEffect(() => {
+  if (dados !== dadosAnteriores) {
+    setDadosAnteriores(dados);
     setForm(dados);
-    setPreview(dados.avatar);
-  }, [dados]);
+    setPreview(dados?.avatar);
+  }
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -67,10 +69,6 @@ export function EditarPerfil({ dados, onSalvar, onCancelar }) {
             <strong>Telefone</strong>
             <span>{form.telefone}</span>
           </div>
-          <div className="profile-info-row">
-            <strong>Empresa</strong>
-            <span>{form.empresa}</span>
-          </div>
           <label className="file-upload">
             Alterar foto
             <input type="file" accept="image/*" onChange={handleFileChange} />
@@ -92,14 +90,6 @@ export function EditarPerfil({ dados, onSalvar, onCancelar }) {
                 <label>Telefone</label>
                 <input name="telefone" value={form.telefone} onChange={handleChange} />
               </div>
-              <div className="form-group">
-                <label>Função</label>
-                <input name="cargo" value={form.cargo} onChange={handleChange} />
-              </div>
-            </div>
-            <div className="form-group">
-              <label>Empresa</label>
-              <input name="empresa" value={form.empresa} onChange={handleChange} />
             </div>
             <div className="form-group">
               <label>Bio</label>

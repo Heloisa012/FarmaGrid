@@ -1,90 +1,63 @@
 import { apiFetch } from './api.js';
 
+// ─────────────────────────────────────────────────────────────────────────
+// ⚠️ GAP DE PRODUTO: GET /api/produtos e GET/POST /api/vendas agora exigem
+// ?idFarmacia= / idFarmacia no corpo (EndpointsEspecificosController /
+// FarmagridController). O Paciente não tem nenhum vínculo com uma farmácia
+// no schema atual (sem coluna id_farmacia). Por isso a Loja e o checkout
+// NÃO chamam a API — ficam com o catálogo mock local até haver uma decisão
+// de produto sobre qual farmácia um paciente "compra de".
+// ─────────────────────────────────────────────────────────────────────────
 export const farmagridApi = {
   teleconsultasPorPaciente: (id) => apiFetch(`/api/teleconsultas/paciente/${id}`),
-  teleconsultasPorMedico: (id) => apiFetch(`/api/teleconsultas/medico/${id}`),
   criarTeleconsulta: (dados) => apiFetch('/api/teleconsultas', { method: 'POST', body: JSON.stringify(dados) }),
+  reagendarTeleconsulta: (id, dados) => apiFetch(`/api/teleconsultas/${id}/reagendar`, { method: 'PATCH', body: JSON.stringify(dados) }),
 
   receitasPorPaciente: (id) => apiFetch(`/api/receitas/paciente/${id}`),
-  criarReceita: (dados) => apiFetch('/api/receitas', { method: 'POST', body: JSON.stringify(dados) }),
 
-  listarMedicamentos: () => apiFetch('/api/medicamentos'),
-  listarMedicos: () => apiFetch('/api/medicos'),
-  listarPacientes: () => apiFetch('/api/pacientes'),
-  listarProntuarios: () => apiFetch('/api/prontuarios'),
-  listarParcerias: () => apiFetch('/api/parcerias'),
-  criarParceria: (dados) => apiFetch('/api/parcerias', { method: 'POST', body: JSON.stringify(dados) }),
+  solicitacoesExamePorPaciente: (id) => apiFetch(`/api/solicitacoes-exame/paciente/${id}`),
 
-  listarEstoques: () => apiFetch('/api/estoques'),
-  criarEstoque: (dados) => apiFetch('/api/estoques', { method: 'POST', body: JSON.stringify(dados) }),
+  listarMedicos: () => apiFetch('/api/medicos-disponiveis'),
 
-  vendasHoje: () => apiFetch('/api/vendas/hoje'),
-  criarVenda: (dados) => apiFetch('/api/vendas', { method: 'POST', body: JSON.stringify(dados) }),
-
-  validarCupom: (cupom) => apiFetch(`/api/descontos/validar/${encodeURIComponent(cupom)}`),
-  usarCupom: (cupom) => apiFetch(`/api/descontos/usar/${encodeURIComponent(cupom)}`, { method: 'POST' }),
-  listarDescontos: () => apiFetch('/api/descontos'),
-
-  validadesPorEstoque: (id) => apiFetch(`/api/validades/estoque/${id}`),
-  listarStatus: () => apiFetch('/api/status'),
+  farmaciasProximas: (idPaciente) => apiFetch(`/api/pacientes/${idPaciente}/farmacias-proximas`),
 };
 
-export function formatarTeleconsulta(t) {
-  const data = t.data ? new Date(t.data + 'T00:00:00').toLocaleDateString('pt-BR') : '';
+// Teleconsulta (model real): { id, idMedico, idPaciente, data, horario,
+// status, duracao, tipo, nomePaciente, linkSala }. Não tem objetos aninhados
+// de médico/paciente — por isso recebe o mapa de médicos (id -> {nome,
+// especialidade}) carregado separadamente para juntar os dados na exibição.
+export function formatarTeleconsulta(t, medicosPorId = {}) {
+  const [ano, mes, dia] = (t.data || '').split('-');
+  const dataBr = ano && mes && dia ? `${dia}/${mes}/${ano}` : (t.data || '');
   const hora = t.horario ? String(t.horario).slice(0, 5) : '';
+  const medico = medicosPorId[t.idMedico];
   return {
     id: t.id,
-    data: `${data}${hora ? ` - ${hora}` : ''}`,
-    medico: t.medico?.nome || '—',
-    especialidade: t.medico?.especialidade || '—',
-    paciente: t.paciente?.nome || '—',
+    data: `${dataBr}${hora ? ` - ${hora}` : ''}`,
+    medico: medico ? `${medico.nome} ${medico.sobrenome || ''}`.trim() : '—',
+    especialidade: medico?.especialidade || '—',
     tipo: t.tipo || 'Teleconsulta',
-    status: t.status?.nomeStatus || 'Agendada',
+    status: t.status || 'Agendada',
     horario: hora,
+    linkSala: t.linkSala || null,
     raw: t,
   };
 }
 
+// Receita (model real, bem mais rico agora): { id, idMedico, idPaciente,
+// medicamento, dosagem, concentracao, frequencia, duracao, viaAdministracao,
+// instrucoes, observacoes, dataPrescricao, status }. Não existe campo de
+// validade/expiração — dataPrescricao é a data em que foi PRESCRITA, não até
+// quando vale.
 export function formatarReceita(r) {
+  const dose = [r.dosagem, r.concentracao].filter(Boolean).join(' ');
   return {
     id: r.id,
-    nome: r.medicamento?.nome || 'Medicamento',
-    dose: r.dosagem || '—',
-    freq: r.frequencia ? `${r.frequencia}x ao dia` : '—',
-    validade: r.dataInicio || '—',
+    nome: r.medicamento || 'Medicamento',
+    dose: dose || '—',
+    freq: r.frequencia || r.duracao || '—',
+    dataPrescricao: r.dataPrescricao || '—',
     status: r.status || 'Ativa',
     raw: r,
-  };
-}
-
-export function formatarEstoque(e) {
-  const qtd = e.quantidadeAtual ?? 0;
-  const min = e.estoqueMinimo ?? 0;
-  let status = e.status?.nomeStatus || 'OK';
-  if (!e.status) {
-    if (qtd <= min * 0.2) status = 'Crítico';
-    else if (qtd <= min) status = 'Baixo';
-    else status = 'OK';
-  }
-  return {
-    id: e.id,
-    nome: e.nomeProduto || e.medicamento?.nome || 'Produto',
-    qtd,
-    min,
-    preco: Number(e.preco || 0),
-    status,
-    raw: e,
-  };
-}
-
-export function formatarVenda(v) {
-  const hora = v.data ? new Date(v.data).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : '—';
-  return {
-    id: v.id,
-    hora,
-    paciente: v.paciente?.nome || 'Cliente',
-    valor: Number(v.valorPago || 0),
-    pagamento: v.tipoPagamento || '—',
-    raw: v,
   };
 }

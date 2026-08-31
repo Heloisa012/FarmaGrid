@@ -1,31 +1,17 @@
 import { useState } from 'react';
 import '../styles/barraLateral.css';
 import { Logo } from './Logo.jsx';
-import { ISair, IGrid, ICalendario, IArquivo, ICarrinho, IEstrela, IUsuarios, IEstoque, IGrafico } from './Icones.jsx';
+import { ISair, IGrid, ICalendario, IArquivo, ICarrinho, IEstrela, IUsuarios } from './Icones.jsx';
 
-const MENUS = {
-  paciente: [
-    ['visaoGeral',  IGrid,       'Visão Geral'],
-    ['consultas',   ICalendario, 'Consultas'],
-    ['exames',      IArquivo,    'Exames e Receitas'],
-    ['loja',        ICarrinho,   'Loja'],
-    ['clube',       IEstrela,    'Clube de Descontos'],
-  ],
-  profissional: [
-    ['visaoGeral',  IGrid,       'Visão Geral'],
-    ['parcerias',   IUsuarios,   'Parcerias'],
-    ['prontuarios', IArquivo,    'Prontuários'],
-    ['estoque',     IEstoque,    'Estoque'],
-    ['relatorios',  IGrafico,    'Relatórios'],
-  ],
-  farmacia: [
-    ['visaoGeral',  IGrid,       'Visão Geral'],
-    ['dispensacao', IArquivo,    'Dispensação'],
-    ['estoque',     IEstoque,    'Estoque'],
-    ['vendas',      ICarrinho,   'Vendas'],
-    ['relatorios',  IGrafico,    'Relatórios'],
-  ],
-};
+// Só existem funções de paciente no momento — o menu é o mesmo para qualquer
+// tipo de conta que tenha feito login.
+const MENU_PACIENTE = [
+  ['visaoGeral', IGrid,       'Visão Geral'],
+  ['consultas',  ICalendario, 'Consultas'],
+  ['exames',     IArquivo,    'Exames e Receitas'],
+  ['loja',       ICarrinho,   'Loja'],
+  ['clube',      IEstrela,    'Clube de Descontos'],
+];
 
 const INFO_USUARIO = {
   paciente:     { iniciais: 'MS', nome: 'Maria Silva',      funcao: 'Paciente' },
@@ -76,7 +62,7 @@ export function BarraLateral({ perfil, secao, setSecao, onLogout, onEditarPerfil
         </div>
 
         <ul className="sidebar-nav">
-          {MENUS[perfil].map(([id, Ico, rotulo]) => (
+          {MENU_PACIENTE.map(([id, Ico, rotulo]) => (
             <li
               key={id}
               className={`nav-item ${secao === id ? 'active' : ''}`}

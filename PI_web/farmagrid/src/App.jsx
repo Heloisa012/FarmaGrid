@@ -3,15 +3,13 @@ import './styles/global.css';
 
 import { Inicio }             from './pages/Inicio.jsx';
 import { Login }              from './pages/Login.jsx';
+import { CadastroSucesso }    from './pages/CadastroSucesso.jsx';
 import { EditarPerfil }       from './pages/EditarPerfil.jsx';
 import { BarraLateral }       from './components/BarraLateral.jsx';
 import { Toast }              from './components/UI.jsx';
 import { ModaisDeAcao }       from './components/ModaisDeAcao.jsx';
 import { PainelPaciente }     from './dashboards/PainelPaciente.jsx';
-import { PainelProfissional } from './dashboards/PainelProfissional.jsx';
-import { PainelFarmacia }     from './dashboards/PainelFarmacia.jsx';
-import { TELECONSULTA_MEET_URL } from './data/dadosMock.js';
-import { logout as authLogout, atualizarPerfil } from './services/authService.js';
+import { logout as authLogout, atualizarConfigPaciente, salvarFotoPaciente } from './services/authService.js';
 import { useDadosPainel } from './hooks/useDadosPainel.js';
 import { farmagridApi } from './services/farmagridApi.js';
 
@@ -22,7 +20,7 @@ function carregarPerfilLocal(email) {
   try {
     const raw = localStorage.getItem(`${LOCAL_PROFILE_PREFIX}${email}`);
     return raw ? JSON.parse(raw) : null;
-  } catch (error) {
+  } catch {
     return null;
   }
 }
@@ -31,33 +29,15 @@ function salvarPerfilLocal(email, perfil) {
   if (!email) return;
   try {
     localStorage.setItem(`${LOCAL_PROFILE_PREFIX}${email}`, JSON.stringify(perfil));
-  } catch (error) {
+  } catch {
     // ignora falha de storage
   }
 }
 
-const PAINEIS = {
-  paciente:     PainelPaciente,
-  profissional: PainelProfissional,
-  farmacia:     PainelFarmacia,
-};
-
-function perfilInicial(usuario, tipo) {
-  const funcoes = {
-    paciente: 'Paciente',
-    profissional: usuario?.tipo === 'MEDICO' ? (usuario?.especialidade || 'Médico') : 'Profissional',
-    farmacia: 'Farmácia',
-  };
-  return {
-    nome: usuario?.nome || 'Usuário',
-    funcao: funcoes[tipo] || 'Usuário',
-    cargo: funcoes[tipo] || 'Usuário',
-    email: usuario?.email || '',
-    telefone: usuario?.telefone || '',
-    empresa: 'FarmaGrid',
-    bio: '',
-    avatar: usuario?.avatar || '',
-  };
+function bytesParaDataUrl(bytes) {
+  if (!bytes) return '';
+  // O Jackson já manda um array de bytes como string base64 no JSON.
+  return typeof bytes === 'string' ? `data:image/jpeg;base64,${bytes}` : '';
 }
 
 export default function App() {
@@ -69,8 +49,9 @@ export default function App() {
   const [carrinho,     setCarrinho]     = useState([]);
   const [usuario,      setUsuario]      = useState(null);
   const [dadosUsuario, setDadosUsuario] = useState(null);
+  const [infoCadastro, setInfoCadastro] = useState(null);
 
-  const { dados: dadosPainel, carregando: carregandoPainel, erro: erroPainel, recarregar: recarregarPainel } = useDadosPainel(usuario, tipoPerfil);
+  const { dados: dadosPainel, carregando: carregandoPainel, erro: erroPainel, recarregar: recarregarPainel } = useDadosPainel(usuario);
 
   const exibirToast = useCallback((msg) => {
     setToast(msg);
@@ -108,58 +89,40 @@ export default function App() {
   const removerDoCarrinho = (indice) => setCarrinho(prev => prev.filter((_, i) => i !== indice));
   const limparCarrinho = () => setCarrinho([]);
 
-  const finalizarCompra = async () => {
+  // ⚠️ GAP DE PRODUTO: POST /api/vendas agora exige idFarmacia (não-nulo) e
+  // o Paciente não tem farmácia associada no schema atual — por isso o
+  // checkout continua só local (sem chamar a API) até essa decisão ser
+  // tomada. Ver farmagridApi.js.
+  const finalizarCompra = () => {
     if (!carrinho.length) return exibirToast('Seu carrinho está vazio.');
-    try {
-      const total = carrinho.reduce((s, i) => s + i.preco * i.qtd, 0);
-      await farmagridApi.criarVenda({
-        data: new Date().toISOString().slice(0, 19),
-        tipoPagamento: 'PIX',
-        valorPago: total,
-        paciente: usuario?.idPaciente ? { id: usuario.idPaciente } : null,
-      });
-      exibirToast('Compra finalizada com sucesso!');
-      limparCarrinho();
-      recarregarPainel();
-      fecharModal();
-    } catch (e) {
-      exibirToast(e.message || 'Erro ao finalizar compra.');
-    }
+    exibirToast('Compra finalizada com sucesso! (simulação local — ver nota sobre idFarmacia)');
+    limparCarrinho();
+    fecharModal();
   };
 
   const acoes = {
     setSecao,
     usuario,
-    abrirModal: (tipo, dados) => setModal({ tipo, dados }),
     agendar: () => setModal({ tipo: 'agendar' }),
-    teleconsulta: () => window.open(TELECONSULTA_MEET_URL, '_blank', 'noopener,noreferrer'),
+    // Cada teleconsulta pode ter seu próprio link de sala (linkSala) agora.
+    // Se a consulta ainda não tiver um link salvo, avisamos em vez de abrir
+    // uma URL genérica que não corresponde à consulta real.
+    teleconsulta: (consulta) => {
+      if (consulta?.linkSala) {
+        window.open(consulta.linkSala, '_blank', 'noopener,noreferrer');
+      } else {
+        exibirToast('Esta consulta ainda não tem um link de sala definido.');
+      }
+    },
     detalhes: (dados) => setModal({ tipo: 'detalhes', dados }),
-    prontuario: () => setModal({ tipo: 'prontuario' }),
-    novaReceita: (paciente) => setModal({ tipo: 'receita', dados: { paciente } }),
-    novaConsulta: () => setModal({ tipo: 'novaConsulta' }),
-    novaParceria: () => setModal({ tipo: 'novaParceria' }),
-    adicionarProduto: () => setModal({ tipo: 'adicionarProduto' }),
-    scannerQR: () => setModal({ tipo: 'scannerQR' }),
-    verReceita: () => setModal({ tipo: 'verReceita' }),
-    listaVencimento: () => setModal({ tipo: 'listaVencimento' }),
-    adicionarProdutoEstoque: () => setModal({ tipo: 'adicionarProdutoEstoque' }),
-    novaVenda: () => setModal({ tipo: 'novaVenda' }),
-    abrirCarrinho: () => setModal({ tipo: 'carrinho' }),
     reagendar: () => { fecharModal(); setSecao('consultas'); setModal({ tipo: 'agendar' }); },
-    confirmarConsulta: () => confirmarModal('Consulta confirmada com sucesso!'),
-    baixarPdf: (nome) => exibirToast(`Download iniciado: ${nome}`),
-    dispensar: () => confirmarModal('Medicamento dispensado com sucesso!'),
-    solicitarReposicao: () => exibirToast('Solicitação de reposição enviada com sucesso.'),
-    verificarSensor: () => exibirToast('Verificação iniciada. Equipe notificada.'),
-    repor: () => exibirToast('Reposição registrada com sucesso.'),
-    prepararConsulta: () => exibirToast('Consulta preparada com sucesso!'),
-    exportarPdf: () => exibirToast('Exportação PDF iniciada.'),
     adicionarAoCarrinho,
     carrinho,
     atualizarQtdCarrinho,
     removerDoCarrinho,
     limparCarrinho,
     finalizarCompra,
+    abrirCarrinho: () => setModal({ tipo: 'carrinho' }),
     farmagridApi,
     recarregarPainel,
     exibirToast,
@@ -169,7 +132,15 @@ export default function App() {
     const perfilLocal = carregarPerfilLocal(usuarioApi?.email);
     setTipoPerfil(tipo);
     setUsuario(usuarioApi);
-    setDadosUsuario(perfilLocal || perfilInicial(usuarioApi, tipo));
+    setDadosUsuario(perfilLocal || {
+      nome: usuarioApi?.nome || 'Usuário',
+      cargo: tipo === 'paciente' ? 'Paciente' : 'Usuário',
+      email: usuarioApi?.email || '',
+      telefone: usuarioApi?.telefone || '',
+      empresa: 'FarmaGrid',
+      bio: '',
+      avatar: bytesParaDataUrl(usuarioApi?.fotoPerfil),
+    });
     setSecao('visaoGeral');
     setPagina('painel');
   };
@@ -188,19 +159,27 @@ export default function App() {
   const handleSalvarPerfil = async (novosDados) => {
     setDadosUsuario(prev => ({ ...prev, ...novosDados }));
 
-    const payload = {
-      nome: novosDados.nome,
-      email: novosDados.email,
-      telefone: novosDados.telefone,
-      cargo: novosDados.cargo,
-      empresa: novosDados.empresa,
-      bio: novosDados.bio,
-      avatar: novosDados.avatar,
-    };
-
     try {
-      const atualizado = await atualizarPerfil(payload);
-      const novoPerfil = { ...dadosUsuario, ...novosDados, ...atualizado };
+      if (!usuario?.idPaciente) throw new Error('Paciente não identificado.');
+
+      // PUT /api/pacientes/{id}/config espera o objeto quase inteiro de volta
+      // — mandamos o que já tínhamos (usuario.configRaw) mesclado com o que
+      // o usuário editou nesta tela (nome/email/telefone).
+      await atualizarConfigPaciente(usuario.idPaciente, {
+        ...usuario.configRaw,
+        nome: novosDados.nome,
+        email: novosDados.email,
+        telefone: novosDados.telefone,
+      });
+
+      // Foto: se o usuário trocou o avatar (data URL nova), sobe via o
+      // endpoint dedicado de foto.
+      if (novosDados.avatar && novosDados.avatar.startsWith('data:') && novosDados.avatar !== dadosUsuario?.avatar) {
+        const base64 = novosDados.avatar.split(',')[1];
+        if (base64) await salvarFotoPaciente(usuario.idPaciente, base64);
+      }
+
+      const novoPerfil = { ...dadosUsuario, ...novosDados };
       setDadosUsuario(novoPerfil);
       salvarPerfilLocal(novosDados.email || dadosUsuario.email, novoPerfil);
       exibirToast('Perfil atualizado com sucesso!');
@@ -215,14 +194,37 @@ export default function App() {
   };
 
   if (pagina === 'inicio') return <Inicio onLogin={() => setPagina('login')} />;
-  if (pagina === 'login')  return <Login onBack={() => setPagina('inicio')} onLogin={handleLogin} />;
+  if (pagina === 'login') {
+    return (
+      <Login
+        onBack={() => setPagina('inicio')}
+        onLogin={handleLogin}
+        onCadastroSucesso={(info) => { setInfoCadastro(info || null); setPagina('cadastroSucesso'); }}
+      />
+    );
+  }
+  if (pagina === 'cadastroSucesso') {
+    return (
+      <CadastroSucesso
+        onVoltar={() => { setInfoCadastro(null); setPagina('inicio'); }}
+        titulo={infoCadastro?.titulo}
+        mensagem={infoCadastro?.mensagem}
+        redirecionarEm={infoCadastro?.redirecionarEm}
+      />
+    );
+  }
   if (pagina === 'perfil') return <EditarPerfil dados={dadosUsuario} onSalvar={handleSalvarPerfil} onCancelar={() => setPagina('painel')} />;
 
-  if (!tipoPerfil || !PAINEIS[tipoPerfil]) {
-    return <Login onBack={() => setPagina('inicio')} onLogin={handleLogin} />;
+  if (!tipoPerfil) {
+    return (
+      <Login
+        onBack={() => setPagina('inicio')}
+        onLogin={handleLogin}
+        onCadastroSucesso={(info) => { setInfoCadastro(info || null); setPagina('cadastroSucesso'); }}
+      />
+    );
   }
 
-  const Painel = PAINEIS[tipoPerfil];
   return (
     <div className="dashboard">
       <BarraLateral
@@ -236,7 +238,7 @@ export default function App() {
       <main className="main">
         {erroPainel && <div className="api-alert warn">{erroPainel} — exibindo dados locais.</div>}
         {carregandoPainel && <div className="api-alert info">Carregando dados da API...</div>}
-        <Painel secao={secao} acoes={acoes} dados={dadosPainel} usuario={usuario} />
+        <PainelPaciente secao={secao} acoes={acoes} dados={dadosPainel} usuario={usuario} />
       </main>
       <ModaisDeAcao modal={modal} onFechar={fecharModal} onConfirmar={confirmarModal} acoes={acoes} dados={dadosPainel} />
       <Toast message={toast} />
