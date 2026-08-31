@@ -580,28 +580,69 @@ ipcMain.handle(
 
 // === CADASTRAR FUNCIONÁRIO PELA API ===
 ipcMain.handle('cadastrar-funcionario', async (event, novoFuncionario) => {
-  try {
-    const { cpf, nome, email, telefone, funcao, status, idFarmacia } = novoFuncionario;
+    try {
+      const {
+        cpf,
+        nome,
+        email,
+        senha,
+        telefone,
+        funcao,
+        status,
+        idFarmacia
+      } = novoFuncionario;
 
-    const funcionarioCriado = await apiPost('/api/funcionarios', {
-      cpf: cpf.trim(),
-      nome: nome.trim(),
-      email: email ? email.trim() : '',
-      telefone: telefone ? telefone.trim() : '',
-      funcao,
-      status: status || 'ativo',
-      idFarmacia
-    });
+      const funcionarioCriado = await apiPost(
+        '/api/funcionarios',
+        {
+          cpf: cpf.trim(),
+          nome: nome.trim(),
+          email: email.trim().toLowerCase(),
+          senha,
+          telefone: telefone.trim(),
+          funcao,
+          status: status || 'ativo',
+          idFarmacia
+        }
+      );
 
-    return { sucesso: true, resultado: funcionarioCriado };
-  } catch (err) {
-    console.error('Erro ao cadastrar funcionário pela API:', err);
-    if (err.message && err.message.includes('CPF já cadastrado')) {
-      return { sucesso: false, erro: 'CPF já cadastrado.' };
+      return {
+        sucesso: true,
+        resultado: funcionarioCriado
+      };
+    } catch (err) {
+      console.error(
+        'Erro ao cadastrar funcionário pela API:',
+        err
+      );
+
+      if (
+        err.message &&
+        err.message.includes('CPF já cadastrado')
+      ) {
+        return {
+          sucesso: false,
+          erro: 'CPF já cadastrado.'
+        };
+      }
+
+      if (
+        err.message &&
+        err.message.includes('E-mail já cadastrado')
+      ) {
+        return {
+          sucesso: false,
+          erro: 'E-mail já cadastrado.'
+        };
+      }
+
+      return {
+        sucesso: false,
+        erro: err.message
+      };
     }
-    return { sucesso: false, erro: err.message };
   }
-});
+);
 
 // === BUSCAR FUNCIONÁRIOS PELA API ===
 ipcMain.handle('buscar-funcionarios', async (event, idFarmacia) => {

@@ -596,6 +596,10 @@
                 <p style="margin-top: 6px; font-size: 14px;"><b>E-mail</b></p>
                 <input type="email" class="form-control mb-3 busca"
                 placeholder="funcionario@farmagrid.com" id="email">
+
+                <p style="margin-top: 6px; font-size: 14px;"><b>Senha de acesso</b></p>
+                <input type="password" class="form-control mb-3 busca"
+                placeholder="Digite uma senha" id="senha" minlength="8" autocomplete="new-password">
  
                 <p style="margin-top: 6px; font-size: 14px;"><b>Telefone</b></p>
                 <input type="text" class="form-control mb-3 busca"
@@ -784,16 +788,34 @@
     // CADASTRAR FUNCIONÁRIO
     document.getElementById('btnCadastrar').addEventListener('click', async () => {
  
-      const nome     = document.getElementById('nome').value.trim();
-      const cpf      = document.getElementById('cpf').value.trim();
-      const email    = document.getElementById('email').value.trim();
+      const nome = document.getElementById('nome').value.trim();
+      const cpf = document.getElementById('cpf').value.trim();
+      const email = document.getElementById('email').value.trim();
       const telefone = document.getElementById('telefone').value.trim();
-      const funcao   = document.getElementById('modalFuncao').value;
-      const status   = document.getElementById('modalStatus').value;
+      const funcao = document.getElementById('modalFuncao').value;
+      const status = document.getElementById('modalStatus').value;
+      const senha = document.getElementById('senha').value;
  
       // Validação básica
-      if (!nome || !cpf || !email || !telefone) {
-        mostrarMensagem('Por favor, preencha todos os campos.');
+      if (
+        !nome ||
+        !cpf ||
+        !email ||
+        !telefone ||
+        !senha
+      ) {
+        mostrarMensagem(
+          'Por favor, preencha todos os campos.'
+        );
+
+        return;
+      }
+
+      if (senha.length < 6) {
+        mostrarMensagem(
+          'A senha deve possuir pelo menos 6 caracteres.'
+        );
+
         return;
       }
  
@@ -811,7 +833,7 @@
       }
 
       const resultado = await window.electronAPI.cadastrarFuncionario({
-        nome, cpf, email, telefone, funcao, status, idFarmacia: usuarioLogado.id_farmacia
+        nome, cpf, email, senha, telefone, funcao, status, idFarmacia: usuarioLogado.id_farmacia
       });
  
       if (resultado.sucesso) {
@@ -825,6 +847,7 @@
         document.getElementById('nome').value = '';
         document.getElementById('cpf').value = '';
         document.getElementById('email').value = '';
+        document.getElementById('senha').value = '';
         document.getElementById('telefone').value = '';
  
       } else {
