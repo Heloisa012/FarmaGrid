@@ -2,6 +2,12 @@ import { useState } from 'react';
 import '../styles/login.css';
 import { Logo } from '../components/Logo.jsx';
 import {
+  mascararCPF,
+  mascararCEP,
+  mascararCNPJ,
+  mascararTelefone,
+} from '../utils/maskUtils.js';
+import {
   login, logout, montarCadastro,
   cadastroPaciente, cadastroMedico, cadastroFarmacia, buscarConfigPaciente,
 } from '../services/authService.js';
@@ -59,6 +65,10 @@ export function Login({ onBack, onLogin, onCadastroSucesso }) {
   });
 
   const atualizar = (campo, valor) => setForm(prev => ({ ...prev, [campo]: valor }));
+
+  const atualizarComMascara = (campo, valor, mascara) => {
+    atualizar(campo, mascara(valor));
+  };
 
   const lerFoto = (arquivo) => new Promise((resolve, reject) => {
     if (!arquivo) return resolve(null);
@@ -206,7 +216,7 @@ export function Login({ onBack, onLogin, onCadastroSucesso }) {
             {/* Campos de PACIENTE */}
             {form.tipo === 'paciente' && (
               <>
-                <div className="form-group"><label>CPF</label><input type="text" value={form.cpf} onChange={e => atualizar('cpf', e.target.value)} placeholder="000.000.000-00" required /></div>
+                <div className="form-group"><label>CPF</label><input type="text" value={form.cpf} onChange={e => atualizarComMascara('cpf', e.target.value, mascararCPF)} placeholder="000.000.000-00" maxLength={14} required /></div>
                 <div className="form-group">
                   <label>Sexo</label>
                   <select value={form.sexo} onChange={e => atualizar('sexo', e.target.value)} required>
@@ -221,7 +231,7 @@ export function Login({ onBack, onLogin, onCadastroSucesso }) {
                 <div className="form-group"><label>Bairro</label><input type="text" value={form.bairro} onChange={e => atualizar('bairro', e.target.value)} placeholder="Centro" required /></div>
                 <div className="form-group"><label>Cidade</label><input type="text" value={form.cidade} onChange={e => atualizar('cidade', e.target.value)} placeholder="Campinas" /></div>
                 <div className="form-group"><label>Estado</label><input type="text" value={form.estado} onChange={e => atualizar('estado', e.target.value)} placeholder="SP" maxLength={2} /></div>
-                <div className="form-group"><label>CEP</label><input type="text" value={form.cep} onChange={e => atualizar('cep', e.target.value)} placeholder="00000-000" /></div>
+                <div className="form-group"><label>CEP</label><input type="text" value={form.cep} onChange={e => atualizarComMascara('cep', e.target.value, mascararCEP)} placeholder="00000-000" maxLength={9} /></div>
               </>
             )}
 
@@ -237,16 +247,16 @@ export function Login({ onBack, onLogin, onCadastroSucesso }) {
             {form.tipo === 'farmacia' && (
               <>
                 <div className="form-group"><label>Nome da Farmácia</label><input type="text" value={form.farmaciaNome} onChange={e => atualizar('farmaciaNome', e.target.value)} placeholder="FarmaGrid Saúde" required /></div>
-                <div className="form-group"><label>CNPJ</label><input type="text" value={form.farmaciaCnpj} onChange={e => atualizar('farmaciaCnpj', e.target.value)} placeholder="00.000.000/0000-00" inputMode="numeric" required /></div>
-                <div className="form-group"><label>CEP</label><input type="text" value={form.farmaciaCep} onChange={e => atualizar('farmaciaCep', e.target.value)} placeholder="00000-000" inputMode="numeric" required /></div>
-                <div className="form-group"><label>Telefone</label><input type="text" value={form.farmaciaTelefone} onChange={e => atualizar('farmaciaTelefone', e.target.value)} placeholder="(19) 99999-9999" inputMode="tel" required /></div>
+                <div className="form-group"><label>CNPJ</label><input type="text" value={form.farmaciaCnpj} onChange={e => atualizarComMascara('farmaciaCnpj', e.target.value, mascararCNPJ)} placeholder="00.000.000/0000-00" inputMode="numeric" maxLength={18} required /></div>
+                <div className="form-group"><label>CEP</label><input type="text" value={form.farmaciaCep} onChange={e => atualizarComMascara('farmaciaCep', e.target.value, mascararCEP)} placeholder="00000-000" inputMode="numeric" maxLength={9} required /></div>
+                <div className="form-group"><label>Telefone</label><input type="text" value={form.farmaciaTelefone} onChange={e => atualizarComMascara('farmaciaTelefone', e.target.value, mascararTelefone)} placeholder="(19) 99999-9999" inputMode="tel" maxLength={15} required /></div>
                 <div className="form-group"><label>Cidade (ID)</label><input type="number" min="1" value={form.farmaciaCidade} onChange={e => atualizar('farmaciaCidade', e.target.value)} placeholder="Ex.: 1" required /></div>
                 <div className="form-group"><label>Foto de perfil (opcional)</label><input type="file" accept="image/*" onChange={async e => { try { atualizar('farmaciaFoto', await lerFoto(e.target.files[0])); } catch (err) { setErro(err.message); } }} /></div>
               </>
             )}
 
             {form.tipo !== 'farmacia' && (
-              <div className="form-group"><label>Telefone</label><input type="text" value={form.telefone} onChange={e => atualizar('telefone', e.target.value)} placeholder="(19) 99999-9999" /></div>
+              <div className="form-group"><label>Telefone</label><input type="text" value={form.telefone} onChange={e => atualizarComMascara('telefone', e.target.value, mascararTelefone)} placeholder="(19) 99999-9999" maxLength={15} /></div>
             )}
             <button className="btn btn-primary form-submit" type="submit" disabled={carregando}>{carregando ? 'Cadastrando...' : 'Criar Conta'}</button>
             <p className="terms">Ao criar uma conta você concorda com os <a>Termos de Uso</a></p>

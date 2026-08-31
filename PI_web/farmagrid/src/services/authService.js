@@ -107,7 +107,7 @@ export function montarCadastro(form, tipoFront) {
       especialidade: form.especialidade || 'Clínica Geral',
       clinica: form.clinica || 'FarmaGrid',
       enderecoClinica: form.enderecoClinica || '',
-      telefone: form.telefone || '',
+      telefone: String(form.telefone || '').replace(/\D/g, ''),
       endereco: form.endereco || '',
       dataNascimento: form.dataNascimento || null,
       rqe: form.rqe || '',
@@ -125,7 +125,7 @@ export function montarCadastro(form, tipoFront) {
     email: form.email,
     senha: form.senha,
     nome: form.nome,
-    cpf: form.cpf,
+    cpf: String(form.cpf || '').replace(/\D/g, ''),
     dataNascimento: form.dataNascimento || null,
     sexo: form.sexo || 'M',
     rua: form.rua || '',
@@ -135,10 +135,10 @@ export function montarCadastro(form, tipoFront) {
     estado: form.estado || '',
     idCidade: null, // ⚠️ não há seletor de cidade (tabela de cidades) no formulário ainda
     idPlano: null,  // ⚠️ não há seletor de plano de saúde no formulário ainda
-    telefone: form.telefone || '',
-    cep: form.cep || '',
+    telefone: String(form.telefone || '').replace(/\D/g, ''),
+    cep: String(form.cep || '').replace(/\D/g, ''),
     tipoSanguineo: form.tipoSanguineo || '',
     contatoEmergenciaNome: form.contatoEmergenciaNome || '',
-    contatoEmergenciaTelefone: form.contatoEmergenciaTelefone || '',
+    contatoEmergenciaTelefone: String(form.contatoEmergenciaTelefone || '').replace(/\D/g, ''),
   };
 }
