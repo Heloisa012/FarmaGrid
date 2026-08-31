@@ -1921,13 +1921,114 @@
 
     document.addEventListener("DOMContentLoaded", mostrarDataAtual);
 
+    function confirmarPersonalizado(texto) {
+      return new Promise((resolve) => {
+        const fundo = document.createElement('div');
+
+        fundo.style.cssText = `
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.45);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          z-index: 10000;
+        `;
+
+        fundo.innerHTML = `
+          <div style="
+            width: 360px;
+            background: white;
+            padding: 24px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+          ">
+            <p style="
+              color: #234e2d;
+              font-size: 16px;
+              margin-bottom: 22px;
+            ">
+              ${texto}
+            </p>
+
+            <div style="
+              display: flex;
+              justify-content: center;
+              gap: 12px;
+            ">
+              <button id="cancelarConfirmacao" style="
+                padding: 8px 18px;
+                border: 1px solid #ccc;
+                border-radius: 7px;
+                background: #f5f5f5;
+                cursor: pointer;
+              ">
+                Cancelar
+              </button>
+
+              <button id="aceitarConfirmacao" style="
+                padding: 8px 18px;
+                border: none;
+                border-radius: 7px;
+                background: #c0392b;
+                color: white;
+                cursor: pointer;
+              ">
+                Apagar
+              </button>
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(fundo);
+
+        fundo.querySelector('#cancelarConfirmacao').onclick = () => {
+          fundo.remove();
+          resolve(false);
+        };
+
+        fundo.querySelector('#aceitarConfirmacao').onclick = () => {
+          fundo.remove();
+          resolve(true);
+        };
+
+        fundo.addEventListener('click', (event) => {
+          if (event.target === fundo) {
+            fundo.remove();
+            resolve(false);
+          }
+        });
+      });
+    }
+
 
     async function deletarRelatorio(id) {
-      const confirmar = confirm('Deseja realmente apagar este relatório?');
+      const confirmar = await confirmarPersonalizado(
+        'Deseja realmente apagar este relatório?'
+      );
+
       if (!confirmar) return;
-      await window.electronAPI.deletarRelatorio(id);
-      // Recarrega a aba de relatórios
-      document.querySelector('[data-aba="relatorios"]')?.click();
+
+      try {
+        const resultado = await window.electronAPI.deletarRelatorio(id);
+
+        if (resultado?.sucesso === false) {
+          mostrarMensagem(
+            resultado.erro || 'Não foi possível apagar o relatório.'
+          );
+          return;
+        }
+
+        mostrarMensagem('Relatório apagado com sucesso!');
+
+        document
+          .querySelector('[data-aba="relatorios"]')
+          ?.click();
+      } catch (erro) {
+        console.error('Erro ao apagar relatório:', erro);
+        mostrarMensagem('Erro ao apagar o relatório.');
+      }
     }
 
     function formatarDataExtenso(dataStr) {
