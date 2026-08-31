@@ -10,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.security.core.context.SecurityContext;
 
 import java.io.IOException;
 import java.util.List;
@@ -28,18 +29,32 @@ public class JwtFilter extends OncePerRequestFilter {
         String header = request.getHeader("Authorization");
 
         if (header != null && header.startsWith("Bearer ")) {
-            String token = header.substring(7);
+            String token = header.substring(7).trim();
 
             if (jwtUtil.tokenValido(token)) {
-                String email = jwtUtil.extrairEmail(token);
-                String tipo  = jwtUtil.extrairTipo(token);
+                String email =
+                    jwtUtil.extrairEmail(token);
 
-                UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
+                String tipo =
+                    jwtUtil.extrairTipo(token);
+
+                UsernamePasswordAuthenticationToken auth =
+                    new UsernamePasswordAuthenticationToken(
                         email,
                         null,
-                        List.of(new SimpleGrantedAuthority("ROLE_" + tipo.toUpperCase()))
-                );
-                SecurityContextHolder.getContext().setAuthentication(auth);
+                        List.of(
+                            new SimpleGrantedAuthority(
+                                "ROLE_" + tipo.toUpperCase()
+                            )
+                        )
+                    );
+
+                SecurityContext context =
+                    SecurityContextHolder.createEmptyContext();
+
+                context.setAuthentication(auth);
+
+                SecurityContextHolder.setContext(context);
             }
         }
 

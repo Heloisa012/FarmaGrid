@@ -2033,30 +2033,48 @@ ipcMain.handle('buscar-resumo-relatorios', async (event, idFarmacia) => {
   }
 });
 
-// === ATUALIZAR DADOS DO FUNCIONÁRIO ===
+// === ATUALIZAR FUNCIONÁRIO PELA API ===
 ipcMain.handle('atualizar-funcionario', async (event, dados) => {
-  try {
-    const { cpf, nome, email, telefone, funcao, status, idFarmacia } = dados;
-    const cpfLimpo = cpf.replace(/\D/g, '');
+    try {
+      const {
+        cpf,
+        nome,
+        email,
+        telefone,
+        funcao,
+        status,
+        idFarmacia
+      } = dados;
 
-    const [resultado] = await db.promise().query(
-      `UPDATE funcFarma
-       SET nome = ?, email = ?, telefone = ?, funcao = ?, status = ?
-       WHERE id_farmacia = ?
-         AND REPLACE(REPLACE(REPLACE(CPF, '.', ''), '-', ''), ' ', '') = ?`,
-      [nome, email, telefone, funcao, status, idFarmacia, cpfLimpo]
-    );
+      const funcionarioAtualizado = await apiPut(
+        `/api/funcionarios/${encodeURIComponent(cpf)}`,
+        {
+          nome: nome.trim(),
+          email: email.trim().toLowerCase(),
+          telefone: telefone.trim(),
+          funcao,
+          status,
+          idFarmacia
+        }
+      );
 
-    if (resultado.affectedRows === 0) {
-      return { sucesso: false, erro: 'Funcionário não encontrado pelo CPF informado.' };
+      return {
+        sucesso: true,
+        resultado: funcionarioAtualizado
+      };
+    } catch (err) {
+      console.error(
+        'Erro ao atualizar funcionário pela API:',
+        err
+      );
+
+      return {
+        sucesso: false,
+        erro: err.message
+      };
     }
-
-    return { sucesso: true };
-  } catch (err) {
-    console.error('Erro ao atualizar funcionário:', err);
-    return { sucesso: false, erro: err.message };
   }
-});
+);
 
 // === BUSCAR DADOS DO PRÓPRIO FUNCIONÁRIO (SIDEBAR BALCONISTA/CAIXA) ===
 ipcMain.handle('buscar-dados-funcionario', async (event, cpf) => {
