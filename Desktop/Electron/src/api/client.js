@@ -3,7 +3,9 @@ const BASE_URL = process.env.API_BASE_URL || 'https://farmagrid.onrender.com';
 let token = null;
 
 function setToken(novoToken) {
-  token = novoToken;
+  token = typeof novoToken === 'string'
+    ? novoToken.trim()
+    : null;
 }
 
 function authHeaders() {
@@ -18,14 +20,28 @@ async function tratarResposta(res) {
 
   if (!res.ok) {
     const mensagem = typeof corpo === 'string' ? corpo : (corpo?.message || JSON.stringify(corpo));
-    throw new Error(mensagem || `Erro HTTP ${res.status}`);
+    throw new Error(
+      mensagem
+        ? `Erro HTTP ${res.status}: ${mensagem}`
+        : `Erro HTTP ${res.status}`
+    );
   }
 
   return corpo;
 }
 
 async function apiGet(path) {
-  const res = await fetch(`${BASE_URL}${path}`, { headers: { ...authHeaders() } });
+  console.log('GET pela API:', {
+    path,
+    tokenPresente: Boolean(token)
+  });
+
+  const res = await fetch(`${BASE_URL}${path}`, {
+    headers: {
+      ...authHeaders()
+    }
+  });
+
   return tratarResposta(res);
 }
 

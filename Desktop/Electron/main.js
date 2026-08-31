@@ -355,6 +355,15 @@ ipcMain.handle('login', async (event, email, senha, tipoSelecionado) => {
       tipo: Number(tipoSelecionado)
     });
 
+    console.log('Resposta do login:', {
+      perfil: resposta.perfil,
+      tipo: resposta.tipo,
+      idFarmacia: resposta.idFarmacia,
+      idBalconista: resposta.idBalconista,
+      idCaixa: resposta.idCaixa,
+      tokenPresente: Boolean(resposta.token)
+    });
+
     setToken(resposta.token);
 
     const user = {

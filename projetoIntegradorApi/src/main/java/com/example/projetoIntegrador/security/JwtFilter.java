@@ -26,20 +26,60 @@ public class JwtFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
 
-        String header = request.getHeader("Authorization");
+        String header =
+        request.getHeader("Authorization");
 
-        if (header != null && header.startsWith("Bearer ")) {
-            String token = header.substring(7).trim();
+        System.out.println(
+            "JWT: rota=" + request.getRequestURI() +
+            ", authorizationPresente=" + (header != null)
+        );
 
-            if (jwtUtil.tokenValido(token)) {
-                String email =
+        if (
+            header != null &&
+            header.startsWith("Bearer ")
+        ) {
+            String token =
+                    header.substring(7).trim();
+
+            boolean tokenValido =
+                    jwtUtil.tokenValido(token);
+
+            System.out.println(
+                "JWT: tokenValido=" + tokenValido
+            );
+
+            if (!tokenValido) {
+                response.sendError(
+                    HttpServletResponse.SC_UNAUTHORIZED,
+                    "Token JWT inválido ou expirado."
+                );
+
+                return;
+            }
+
+            String email =
                     jwtUtil.extrairEmail(token);
 
-                String tipo =
+            String tipo =
                     jwtUtil.extrairTipo(token);
 
-                UsernamePasswordAuthenticationToken auth =
-                    new UsernamePasswordAuthenticationToken(
+            if (
+                email == null ||
+                email.isBlank() ||
+                tipo == null ||
+                tipo.isBlank()
+            ) {
+                response.sendError(
+                    HttpServletResponse.SC_UNAUTHORIZED,
+                    "Token JWT sem usuário ou perfil."
+                );
+
+                return;
+            }
+
+            UsernamePasswordAuthenticationToken auth =
+                UsernamePasswordAuthenticationToken
+                    .authenticated(
                         email,
                         null,
                         List.of(
@@ -49,13 +89,18 @@ public class JwtFilter extends OncePerRequestFilter {
                         )
                     );
 
-                SecurityContext context =
-                    SecurityContextHolder.createEmptyContext();
+            SecurityContext context =
+                    SecurityContextHolder
+                            .createEmptyContext();
 
-                context.setAuthentication(auth);
+            context.setAuthentication(auth);
 
-                SecurityContextHolder.setContext(context);
-            }
+            SecurityContextHolder.setContext(context);
+
+            System.out.println(
+                "JWT: usuário autenticado=" + email +
+                ", perfil=" + tipo
+            );
         }
 
         chain.doFilter(request, response);

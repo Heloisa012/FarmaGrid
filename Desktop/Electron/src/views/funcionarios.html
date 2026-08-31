@@ -871,7 +871,6 @@
       }
 
       const usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
-      const funcionarios = await window.electronAPI.buscarFuncionarios(usuarioLogado.id_farmacia);
       const resultado = await window.electronAPI.atualizarFuncionario({
         cpf, nome, email, telefone, funcao, status, idFarmacia: usuarioLogado.id_farmacia
       });
