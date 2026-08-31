@@ -6,7 +6,7 @@ import { IVideo, IArquivo, IEstoque, IRelogio, IEstrela, IGrafico } from '../com
 const SERVICOS = [
   [IVideo,    'Teleconsultas',           'Consultas médicas por videochamada com profissionais verificados e especialistas.'],
   [IArquivo,  'Prontuários Eletrônicos', 'Histórico médico completo, exames e receitas digitais em um só lugar.'],
-  [IEstoque,  'Controle de Estoque IoT', 'Gestão inteligente com sensores RFID e alertas automáticos de reposição.'],
+  [IEstoque,  'Controle de Estoque', 'Gestão inteligente so estoque.'],
   [IRelogio,  'Receitas Digitais',       'Prescrições eletrônicas com assinatura digital ICP-Brasil e validação por QR Code.'],
   [IEstrela,  'Clube de Descontos',      'Até 60% de desconto em medicamentos com assinatura mensal ou anual.'],
   [IGrafico,  'Relatórios Gerenciais',   'Análise completa de vendas, consultas e performance com gráficos detalhados.'],
