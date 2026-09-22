@@ -1,5 +1,28 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
+// O preload roda no sandbox do Electron e não pode importar módulos locais.
+// Por isso, a validação também fica disponível aqui como função pura.
+function validarCPF(valor) {
+  const cpf = String(valor ?? '').replace(/\D/g, '');
+
+  if (cpf.length !== 11 || /^(\d)\1{10}$/.test(cpf)) {
+    return false;
+  }
+
+  const calcularDigito = (quantidade) => {
+    let soma = 0;
+    for (let indice = 0; indice < quantidade; indice += 1) {
+      soma += Number(cpf[indice]) * (quantidade + 1 - indice);
+    }
+
+    const resto = (soma * 10) % 11;
+    return resto === 10 ? 0 : resto;
+  };
+
+  return calcularDigito(9) === Number(cpf[9])
+    && calcularDigito(10) === Number(cpf[10]);
+}
+
 let operacoesEmAndamento = 0;
 const botoesEmAndamento = new WeakMap();
 
@@ -161,7 +184,92 @@ async function invocar(canal, ...argumentos) {
   }
 }
 
+function campoDeCPF(elemento) {
+  if (!elemento || elemento.tagName !== 'INPUT') return false;
+  const identificador = `${elemento.id || ''} ${elemento.name || ''}`.toLowerCase();
+  return identificador.includes('cpf');
+}
+
+function removerAvisoCPF(campo) {
+  campo.setCustomValidity('');
+  campo.classList.remove('farmagrid-cpf-invalido');
+  campo.removeAttribute('aria-invalid');
+
+  const aviso = campo.nextElementSibling;
+  if (aviso?.classList.contains('farmagrid-cpf-feedback')) aviso.remove();
+}
+
+function mostrarAvisoCPF(campo) {
+  campo.setCustomValidity('Informe um CPF válido.');
+  campo.classList.add('farmagrid-cpf-invalido');
+  campo.setAttribute('aria-invalid', 'true');
+
+  if (!campo.nextElementSibling?.classList.contains('farmagrid-cpf-feedback')) {
+    const aviso = document.createElement('div');
+    aviso.className = 'farmagrid-cpf-feedback';
+    aviso.textContent = 'CPF inválido. Confira os números informados.';
+    campo.insertAdjacentElement('afterend', aviso);
+  }
+}
+
+function validarCampoCPF(campo, forcar = false) {
+  if (!campoDeCPF(campo)) return true;
+
+  const digitos = campo.value.replace(/\D/g, '');
+  if (!digitos) {
+    removerAvisoCPF(campo);
+    return true;
+  }
+
+  if (!forcar && digitos.length < 11) {
+    removerAvisoCPF(campo);
+    return false;
+  }
+
+  const valido = validarCPF(digitos);
+  if (valido) removerAvisoCPF(campo);
+  else mostrarAvisoCPF(campo);
+  return valido;
+}
+
+function configurarValidacaoVisualCPF() {
+  if (!document.getElementById('farmagrid-cpf-style')) {
+    const estilo = document.createElement('style');
+    estilo.id = 'farmagrid-cpf-style';
+    estilo.textContent = `
+      .farmagrid-cpf-invalido {
+        border-color: #c62828 !important;
+        box-shadow: 0 0 0 2px rgba(198, 40, 40, 0.12) !important;
+      }
+
+      .farmagrid-cpf-feedback {
+        margin-top: -10px;
+        margin-bottom: 10px;
+        color: #c62828;
+        font-family: Poppins, Arial, sans-serif;
+        font-size: 12px;
+      }
+    `;
+    document.head.appendChild(estilo);
+  }
+
+  document.addEventListener('input', (evento) => {
+    if (campoDeCPF(evento.target)) validarCampoCPF(evento.target);
+  });
+
+  document.addEventListener('blur', (evento) => {
+    if (campoDeCPF(evento.target)) validarCampoCPF(evento.target, true);
+  }, true);
+}
+
+if (document.readyState === 'loading') {
+  window.addEventListener('DOMContentLoaded', configurarValidacaoVisualCPF, { once: true });
+} else {
+  configurarValidacaoVisualCPF();
+}
+
 contextBridge.exposeInMainWorld("electronAPI", {
+  validarCPF: (cpf) => validarCPF(cpf),
   abrirJanelaIndex: () => ipcRenderer.send("abrir-janela-index"),
   abrirJanelaBalconista: () => ipcRenderer.send("abrir-janela-balconista"),
   abrirJanelaCaixa: () => ipcRenderer.send("abrir-janela-caixa"),

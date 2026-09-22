@@ -1137,6 +1137,12 @@
             return;
           }
 
+          if (!window.electronAPI.validarCPF(cpf)) {
+            msg.style.color = 'red';
+            msg.textContent = 'CPF inválido. Confira os números informados.';
+            return;
+          }
+
           if (!idFarmaciaLogada) {
             msg.style.color = 'red';
             msg.textContent =
@@ -1174,6 +1180,11 @@
 
           if (!cpf) {
             resultado.innerHTML = '<p style="color:red; font-size:13px;">Digite um CPF.</p>';
+            return;
+          }
+
+          if (!window.electronAPI.validarCPF(cpf)) {
+            resultado.innerHTML = '<p style="color:red; font-size:13px;">CPF inválido. Confira os números informados.</p>';
             return;
           }
 
@@ -1690,6 +1701,16 @@
 
       if (!nomePaciente) {
         mostrarMensagem("Informe o nome do paciente.");
+        return;
+      }
+
+      if (cpfPaciente && !window.electronAPI.validarCPF(cpfPaciente)) {
+        mostrarMensagem("CPF do paciente inválido. Confira os números informados.");
+        return;
+      }
+
+      if (clienteSelecionado?.CPF && !window.electronAPI.validarCPF(clienteSelecionado.CPF)) {
+        mostrarMensagem("CPF do cliente selecionado é inválido.");
         return;
       }
 

@@ -819,9 +819,8 @@
         return;
       }
  
-      const cpfLimpo = cpf.replace(/\D/g, '');
-      if (cpfLimpo.length !== 11) {
-        mostrarMensagem('CPF inválido. Digite 11 dígitos.');
+      if (!window.electronAPI.validarCPF(cpf)) {
+        mostrarMensagem('CPF inválido. Confira os números informados.');
         return;
       }
  
@@ -867,6 +866,11 @@
 
       if (!nome || !email || !telefone) {
         mostrarMensagem('Por favor, preencha todos os campos.');
+        return;
+      }
+
+      if (!window.electronAPI.validarCPF(cpf)) {
+        mostrarMensagem('CPF inválido. Confira os números informados.');
         return;
       }
 

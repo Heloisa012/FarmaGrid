@@ -4,6 +4,7 @@ const { app, BrowserWindow, nativeTheme, Menu, shell, ipcMain, dialog } = requir
 const path = require('path');
 const fs = require('fs');
 const bcrypt = require('bcrypt');
+const { validarCPF } = require('./src/utils/cpf');
 
 const {
   apiGet,
@@ -601,6 +602,13 @@ ipcMain.handle('cadastrar-funcionario', async (event, novoFuncionario) => {
         idFarmacia
       } = novoFuncionario;
 
+      if (!validarCPF(cpf)) {
+        return {
+          sucesso: false,
+          erro: 'CPF inválido. Confira os números informados.'
+        };
+      }
+
       const funcionarioCriado = await apiPost(
         '/api/funcionarios',
         {
@@ -843,6 +851,13 @@ ipcMain.handle('cadastrar-cliente', async (_event, cliente) => {
       idFarmacia
     } = cliente;
 
+    if (!validarCPF(cpf)) {
+      return {
+        sucesso: false,
+        erro: 'CPF inválido. Confira os números informados.'
+      };
+    }
+
     await apiPost('/api/clientes', {
       cpf: cpf.trim(),
       nome: nome.trim(),
@@ -878,6 +893,8 @@ ipcMain.handle('cadastrar-cliente', async (_event, cliente) => {
 // === BUSCAR CLIENTE POR CPF PELA API ===
 ipcMain.handle('buscar-cliente', async (_event, cpf, idFarmacia) => {
   try {
+    if (!validarCPF(cpf)) return null;
+
     const cliente = await apiGet(
       `/api/clientes/${encodeURIComponent(cpf.trim())}` +
       `?idFarmacia=${encodeURIComponent(idFarmacia)}`
@@ -2055,6 +2072,13 @@ ipcMain.handle('atualizar-funcionario', async (event, dados) => {
         idFarmacia
       } = dados;
 
+      if (!validarCPF(cpf)) {
+        return {
+          sucesso: false,
+          erro: 'CPF inválido. Confira os números informados.'
+        };
+      }
+
       const funcionarioAtualizado = await apiPut(
         `/api/funcionarios/${encodeURIComponent(cpf)}`,
         {
@@ -2366,6 +2390,14 @@ ipcMain.handle('cadastrar-receita-controlada', async (event, dados) => {
       tipoReceita, numeroReceita, dataReceita,
       originalConferida, documentoVerificado, observacoes
     } = dados;
+
+    if (cpfCliente && !validarCPF(cpfCliente)) {
+      return { sucesso: false, erro: 'O CPF do cliente é inválido.' };
+    }
+
+    if (cpfPaciente && !validarCPF(cpfPaciente)) {
+      return { sucesso: false, erro: 'O CPF do paciente é inválido.' };
+    }
 
     const [result] = await db.promise().query(
       `INSERT INTO receitas_controladas

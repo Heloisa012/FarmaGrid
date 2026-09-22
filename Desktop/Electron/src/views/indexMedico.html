@@ -2191,7 +2191,7 @@
     function mascararCPF(cpf) {
       if (!cpf) return '—';
       const digitos = cpf.replace(/\D/g, '');
-      if (digitos.length !== 11) return cpf;
+      if (!window.electronAPI.validarCPF(digitos)) return 'CPF inválido';
       return `***.${digitos.slice(3, 6)}.${digitos.slice(6, 9)}-**`;
     }
 
