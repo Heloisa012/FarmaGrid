@@ -1,7 +1,6 @@
 const { contextBridge, ipcRenderer } = require("electron");
 
-// O preload roda no sandbox do Electron e não pode importar módulos locais.
-// Por isso, a validação também fica disponível aqui como função pura.
+// valida o cpf
 function validarCPF(valor) {
   const cpf = String(valor ?? '').replace(/\D/g, '');
 
@@ -262,14 +261,92 @@ function configurarValidacaoVisualCPF() {
   }, true);
 }
 
+//cache
+
+let ultimoStatusCache = null;
+
+function renderizarStatusCache(status) {
+  ultimoStatusCache = status;
+  if (!document.body || !status) return;
+
+  let indicador = document.getElementById('farmagrid-offline-status');
+  if (!indicador) {
+    const estilo = document.createElement('style');
+    estilo.id = 'farmagrid-offline-style';
+    estilo.textContent = `
+      #farmagrid-offline-status {
+        position: fixed;
+        right: 16px;
+        bottom: 16px;
+        z-index: 2147483646;
+        display: none;
+        padding: 9px 13px;
+        border: 0;
+        border-radius: 999px;
+        background: #8a5a00;
+        color: #fff;
+        font: 600 12px Poppins, Arial, sans-serif;
+        box-shadow: 0 5px 18px rgba(0, 0, 0, .2);
+        cursor: pointer;
+      }
+      #farmagrid-offline-status.farmagrid-cache-visivel { display: block; }
+      #farmagrid-offline-status.farmagrid-cache-erro { background: #a12622; }
+      #farmagrid-offline-status.farmagrid-cache-sync { background: #355e3b; }
+    `;
+    document.head.appendChild(estilo);
+
+    indicador = document.createElement('button');
+    indicador.id = 'farmagrid-offline-status';
+    indicador.type = 'button';
+    indicador.title = 'Clique para tentar sincronizar agora';
+    indicador.addEventListener('click', () => invocar('sincronizar-cache'));
+    document.body.appendChild(indicador);
+  }
+
+  indicador.className = '';
+  const total = Number(status.pendentes || 0);
+  const erros = Number(status.comErro || 0);
+
+  if (status.sincronizando) {
+    indicador.textContent = `Sincronizando ${total} item(ns)...`;
+    indicador.classList.add('farmagrid-cache-visivel', 'farmagrid-cache-sync');
+  } else if (!status.online) {
+    indicador.textContent = `Offline • ${total} pendente(s)`;
+    indicador.classList.add('farmagrid-cache-visivel');
+  } else if (erros > 0) {
+    indicador.textContent = `${erros} item(ns) com erro de sincronização`;
+    indicador.classList.add('farmagrid-cache-visivel', 'farmagrid-cache-erro');
+  } else if (total > 0) {
+    indicador.textContent = `${total} item(ns) aguardando sincronização`;
+    indicador.classList.add('farmagrid-cache-visivel');
+  }
+}
+
+function configurarStatusCache() {
+  if (ultimoStatusCache) renderizarStatusCache(ultimoStatusCache);
+  ipcRenderer.invoke('obter-status-cache').then(renderizarStatusCache).catch(() => {});
+}
+
+ipcRenderer.on('cache-status-alterado', (_event, status) => renderizarStatusCache(status));
+
 if (document.readyState === 'loading') {
-  window.addEventListener('DOMContentLoaded', configurarValidacaoVisualCPF, { once: true });
+  window.addEventListener('DOMContentLoaded', () => {
+    configurarValidacaoVisualCPF();
+    configurarStatusCache();
+  }, { once: true });
 } else {
   configurarValidacaoVisualCPF();
+  configurarStatusCache();
 }
 
 contextBridge.exposeInMainWorld("electronAPI", {
   validarCPF: (cpf) => validarCPF(cpf),
+  obterStatusCache: () => ipcRenderer.invoke('obter-status-cache'),
+  sincronizarCache: () => invocar('sincronizar-cache'),
+  aoAlterarStatusCache: (callback) => {
+    if (typeof callback !== 'function') return;
+    ipcRenderer.on('cache-status-alterado', (_event, status) => callback(status));
+  },
   abrirJanelaIndex: () => ipcRenderer.send("abrir-janela-index"),
   abrirJanelaBalconista: () => ipcRenderer.send("abrir-janela-balconista"),
   abrirJanelaCaixa: () => ipcRenderer.send("abrir-janela-caixa"),

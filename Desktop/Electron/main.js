@@ -1,6 +1,6 @@
 require('dotenv').config();
 
-const { app, BrowserWindow, nativeTheme, Menu, shell, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, nativeTheme, Menu, shell, ipcMain, dialog, safeStorage } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const bcrypt = require('bcrypt');
@@ -12,8 +12,63 @@ const {
   apiPut,
   apiPatch,
   apiDelete,
-  setToken
+  setToken,
+  configurarCacheOffline,
+  iniciarSincronizacaoAutomatica,
+  pararSincronizacaoAutomatica,
+  sincronizarPendencias,
+  obterStatusCache
 } = require('./src/api/client');
+
+let arquivoSessaoOffline = null;
+
+function usuarioDaRespostaLogin(resposta) {
+  return {
+    id: resposta.id,
+    email: resposta.email,
+    tipo: resposta.tipo,
+    perfil: resposta.perfil,
+    id_medico: resposta.idMedico,
+    id_paciente: resposta.idPaciente,
+    id_farmacia: resposta.idFarmacia,
+    id_balconista: resposta.idBalconista,
+    id_caixa: resposta.idCaixa
+  };
+}
+
+function salvarSessaoOffline(sessao) {
+  if (!arquivoSessaoOffline) return;
+
+  try {
+    const texto = JSON.stringify(sessao);
+    const conteudo = safeStorage.isEncryptionAvailable()
+      ? { encrypted: true, data: safeStorage.encryptString(texto).toString('base64') }
+      : { encrypted: false, data: texto };
+
+    fs.writeFileSync(arquivoSessaoOffline, JSON.stringify(conteudo), 'utf8');
+  } catch (error) {
+    console.error('Não foi possível salvar a sessão offline:', error.message);
+  }
+}
+
+function lerSessaoOffline() {
+  if (!arquivoSessaoOffline || !fs.existsSync(arquivoSessaoOffline)) return null;
+
+  try {
+    const conteudo = JSON.parse(fs.readFileSync(arquivoSessaoOffline, 'utf8'));
+    const texto = conteudo.encrypted
+      ? safeStorage.decryptString(Buffer.from(conteudo.data, 'base64'))
+      : conteudo.data;
+    return JSON.parse(texto);
+  } catch (error) {
+    console.error('Não foi possível ler a sessão offline:', error.message);
+    return null;
+  }
+}
+
+function falhaTemporariaDaApi(error) {
+  return !Number(error?.status) || [408, 425, 429].includes(error.status) || error.status >= 500;
+}
 
 
 //Janela Principal
@@ -107,8 +162,21 @@ const childWindow4 = () => {
   }
 };
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
+  const diretorioOffline = path.join(app.getPath('userData'), 'farmagrid-offline');
+  arquivoSessaoOffline = path.join(diretorioOffline, 'sessao.json');
+
+  await configurarCacheOffline({
+    directory: diretorioOffline,
+    onStatusChange: (status) => {
+      for (const janela of BrowserWindow.getAllWindows()) {
+        janela.webContents.send('cache-status-alterado', status);
+      }
+    }
+  });
+
   createWindow();
+  iniciarSincronizacaoAutomatica();
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -117,6 +185,10 @@ app.whenReady().then(() => {
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
+});
+
+app.on('before-quit', () => {
+  pararSincronizacaoAutomatica();
 });
 
 //Template Menu
@@ -347,6 +419,10 @@ ipcMain.on('abrir-janela-config', () => {
 // === CONEXÃO COM O BANCO DE DADOS ===
 const db = require('./src/db/conexao');
 
+// Status e acionamento manual da fila offline.
+ipcMain.handle('obter-status-cache', () => obterStatusCache());
+ipcMain.handle('sincronizar-cache', () => sincronizarPendencias());
+
 // === LOGIN ===
 ipcMain.handle('login', async (event, email, senha, tipoSelecionado) => {
   try {
@@ -366,19 +442,15 @@ ipcMain.handle('login', async (event, email, senha, tipoSelecionado) => {
     });
 
     setToken(resposta.token);
+    const user = usuarioDaRespostaLogin(resposta);
 
-    const user = {
-      id: resposta.id,
-      email: resposta.email,
-      tipo: resposta.tipo,
-      perfil: resposta.perfil,
-
-      id_medico: resposta.idMedico,
-      id_paciente: resposta.idPaciente,
-      id_farmacia: resposta.idFarmacia,
-      id_balconista: resposta.idBalconista,
-      id_caixa: resposta.idCaixa
-    };
+    salvarSessaoOffline({
+      email: String(email).trim().toLowerCase(),
+      tipo: Number(tipoSelecionado),
+      senhaHash: await bcrypt.hash(senha, 10),
+      token: resposta.token,
+      user
+    });
 
     console.log('Login realizado pela API com perfil:', user.perfil);
 
@@ -389,6 +461,21 @@ ipcMain.handle('login', async (event, email, senha, tipoSelecionado) => {
       err.message.includes('Email ou senha incorretos')
     ) {
       return null;
+    }
+
+    if (falhaTemporariaDaApi(err)) {
+      const sessao = lerSessaoOffline();
+      const mesmoEmail = sessao?.email === String(email).trim().toLowerCase();
+      const mesmoTipo = Number(sessao?.tipo) === Number(tipoSelecionado);
+      const senhaValida = mesmoEmail && mesmoTipo && typeof sessao?.senhaHash === 'string'
+        ? await bcrypt.compare(senha, sessao.senhaHash)
+        : false;
+
+      if (senhaValida) {
+        setToken(sessao.token);
+        console.log('Login offline realizado com a última sessão válida.');
+        return { ...sessao.user, offline: true };
+      }
     }
 
     console.error('Erro ao realizar login pela API:', err);
