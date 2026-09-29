@@ -40,7 +40,7 @@ function idDoCaminho(caminho) {
   const partes = semQuery.split('/').filter(Boolean);
   const ultimo = partes.at(-1);
 
-  if (!ultimo || ['status', 'prateleira'].includes(ultimo)) {
+  if (!ultimo || ['status', 'prateleira', 'desconto', 'reagendar', 'profissional', 'preferencias', 'foto', 'arquivo'].includes(ultimo)) {
     return partes.at(-2);
   }
 
@@ -62,8 +62,11 @@ function pertenceAoFiltro(caminho, body) {
   if (!query) return true;
 
   const params = new URLSearchParams(query);
-  const idFarmacia = params.get('idFarmacia');
-  return !idFarmacia || body?.idFarmacia === undefined || idsIguais(idFarmacia, body.idFarmacia);
+  for (const campo of ['idFarmacia', 'idPaciente', 'idMedico']) {
+    const filtro = params.get(campo);
+    if (filtro && body?.[campo] !== undefined && !idsIguais(filtro, body[campo])) return false;
+  }
+  return true;
 }
 
 function substituirValor(value, antigo, novo) {
@@ -94,6 +97,68 @@ function limparMarcacaoPendente(value, id) {
   }
 
   return value;
+}
+
+function objetoOtimista(caminho, body, tempId) {
+  const objeto = { ...(body || {}), id: tempId, pendenteSincronizacao: true };
+
+  if (caminho === '/api/desktop/parceiros') {
+    return { ...objeto, nome: body?.parceiro, status: 'ativo', servicos: [] };
+  }
+
+  if (caminho === '/api/desktop/prontuarios') {
+    return {
+      ...objeto,
+      id_medico: body?.idMedico,
+      id_paciente: body?.idPaciente,
+      nome_paciente: body?.nomePaciente,
+      condicao: body?.diagnostico,
+      ultima_visita: body?.dataAtendimento,
+      exame_fisico: body?.exameFisico,
+      data_retorno: body?.dataRetorno,
+      status: 'Ativo'
+    };
+  }
+
+  if (caminho === '/api/desktop/receitas') {
+    return {
+      ...objeto,
+      id_medico: body?.idMedico,
+      id_paciente: body?.idPaciente,
+      via_administracao: body?.viaAdministracao,
+      data_prescricao: body?.dataPrescricao,
+      status: 'Ativa'
+    };
+  }
+
+  if (caminho === '/api/desktop/relatorios') {
+    return { ...objeto, id_paciente: body?.idPaciente, id_medico: body?.idMedico };
+  }
+
+  if (caminho === '/api/desktop/relatorios-farmacia') {
+    return {
+      ...objeto,
+      nome_arquivo: body?.nomeArquivo,
+      tamanho_kb: body?.tamanhoKb,
+      id_farmacia: body?.idFarmacia,
+      gerado_em: new Date().toISOString()
+    };
+  }
+
+  return objeto;
+}
+
+function idParceiroAfetado(caminho) {
+  const match = caminho.match(/^\/api\/desktop\/parceiros\/([^/]+)\/(?:servicos|encaminhamentos)$/);
+  return match ? decodeURIComponent(match[1]) : undefined;
+}
+
+function mudancasOtimistas(caminho, body) {
+  if (caminho.endsWith('/reagendar')) {
+    return { data: body?.novaData, horario: body?.novoHorario, duracao: body?.novaDuracao };
+  }
+  if (caminho.endsWith('/foto')) return { fotoPerfil: body?.foto };
+  return body || {};
 }
 
 class OfflineStore {
@@ -149,6 +214,10 @@ class OfflineStore {
     return clone(this.state.cache[caminho]?.data);
   }
 
+  hasCached(caminho) {
+    return Object.prototype.hasOwnProperty.call(this.state.cache, caminho);
+  }
+
   findCachedEntity(caminho) {
     const procurado = idDoCaminho(caminho);
     if (!procurado) return undefined;
@@ -191,6 +260,8 @@ class OfflineStore {
       if (operation.path === '/api/lotes') {
         state.cache = limparMarcacaoPendente(state.cache, operation.body?.idProduto);
       }
+      const parceiroId = idParceiroAfetado(operation.path);
+      if (parceiroId !== undefined) state.cache = limparMarcacaoPendente(state.cache, parceiroId);
       state.lastError = null;
       state.lastSyncAt = new Date().toISOString();
     });
@@ -199,10 +270,17 @@ class OfflineStore {
   applyOptimistic(state, operation) {
     const { method, path: caminho, body, tempId } = operation;
     const id = idDoCaminho(caminho);
-    const objetoNovo = { ...(body || {}), id: tempId, pendenteSincronizacao: true };
+    const objetoNovo = objetoOtimista(caminho, body, tempId);
+    const mudancas = mudancasOtimistas(caminho, body);
 
     for (const [cachePath, entry] of Object.entries(state.cache)) {
-      if (!Array.isArray(entry?.data)) continue;
+      if (!Array.isArray(entry?.data)) {
+        const medicoPath = caminho.match(/^\/api\/medicos\/([^/]+)(?:\/(?:profissional|preferencias|foto))?$/);
+        if (medicoPath && cachePath === `/api/medicos/${medicoPath[1]}/config`) {
+          entry.data = { ...entry.data, ...mudancas, pendenteSincronizacao: true };
+        }
+        continue;
+      }
 
       if (method === 'POST' && pertenceAoFiltro(cachePath, body)) {
         const recurso = caminho.split('?')[0];
@@ -223,12 +301,28 @@ class OfflineStore {
               : item
           ));
         }
+
+        const servicoParceiro = recurso.match(/^\/api\/desktop\/parceiros\/([^/]+)\/servicos$/);
+        if (servicoParceiro && cacheRecurso === '/api/desktop/parceiros') {
+          const idParceiro = decodeURIComponent(servicoParceiro[1]);
+          entry.data = entry.data.map(item => objetoTemId(item, idParceiro)
+            ? { ...item, servicos: [...(item.servicos || []), body?.nomeServico], pendenteSincronizacao: true }
+            : item);
+        }
+
+        const encaminhamento = recurso.match(/^\/api\/desktop\/parceiros\/([^/]+)\/encaminhamentos$/);
+        if (encaminhamento && cacheRecurso === '/api/desktop/parceiros') {
+          const idParceiro = decodeURIComponent(encaminhamento[1]);
+          entry.data = entry.data.map(item => objetoTemId(item, idParceiro)
+            ? { ...item, encaminhamentosMes: Number(item.encaminhamentosMes || 0) + 1, pendenteSincronizacao: true }
+            : item);
+        }
       }
 
       if (['PUT', 'PATCH'].includes(method)) {
         entry.data = entry.data.map(item => (
           objetoTemId(item, id)
-            ? { ...item, ...(body || {}), pendenteSincronizacao: true }
+            ? { ...item, ...mudancas, pendenteSincronizacao: true }
             : item
         ));
       }
@@ -245,7 +339,7 @@ class OfflineStore {
       }
     } else if (state.cache[caminho]) {
       if (method === 'DELETE') delete state.cache[caminho];
-      else state.cache[caminho].data = { ...state.cache[caminho].data, ...(body || {}), pendenteSincronizacao: true };
+      else state.cache[caminho].data = { ...state.cache[caminho].data, ...mudancas, pendenteSincronizacao: true };
     }
   }
 
@@ -265,6 +359,8 @@ class OfflineStore {
       if (operation.path === '/api/lotes') {
         state.cache = limparMarcacaoPendente(state.cache, operation.body?.idProduto);
       }
+      const parceiroId = idParceiroAfetado(operation.path);
+      if (parceiroId !== undefined) state.cache = limparMarcacaoPendente(state.cache, parceiroId);
 
       state.queue = state.queue.filter(item => item.id !== operationId);
       state.lastError = null;

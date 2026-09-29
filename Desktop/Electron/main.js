@@ -416,8 +416,13 @@ ipcMain.on('abrir-janela-config', () => {
 });
 
 
-// === CONEXÃO COM O BANCO DE DADOS ===
-const db = require('./src/db/conexao');
+// A conexão legada só é carregada se a recuperação de senha for usada.
+// As telas comuns do Desktop não abrem mais conexão direta com o MySQL.
+let bancoRecuperacaoSenha = null;
+function obterBancoRecuperacaoSenha() {
+  if (!bancoRecuperacaoSenha) bancoRecuperacaoSenha = require('./src/db/conexao');
+  return bancoRecuperacaoSenha;
+}
 
 // Status e acionamento manual da fila offline.
 ipcMain.handle('obter-status-cache', () => obterStatusCache());
@@ -486,9 +491,7 @@ ipcMain.handle('login', async (event, email, senha, tipoSelecionado) => {
 // === BUSCAR PRONTUÁRIOS ===
 ipcMain.handle('buscar-prontuarios', async () => {
   try {
-    const [rows] = await db.promise().query('SELECT * FROM prontuario');
-    console.log('Prontuários buscados com sucesso:', rows);
-    return rows;
+    return await apiGet('/api/desktop/prontuarios');
   } catch (error) {
     console.error('Erro ao buscar prontuários:', error);
     throw error;
@@ -498,68 +501,11 @@ ipcMain.handle('buscar-prontuarios', async () => {
 // === CADASTRAR PRONTUÁRIO ===
 ipcMain.handle('cadastrar-prontuario', async (event, dados) => {
   try {
-    const {
-      idMedico,
-      idPaciente,
-      nomePaciente,
-      idade,
-      tipo,
-      dataAtendimento,
-      pa,
-      temperatura,
-      peso,
-      spo2,
-      diagnostico,
-      cid10,
-      anamnese,
-      exameFisico,
-      conduta,
-      dataRetorno
-    } = dados;
-
-    const [result] = await db.promise().query(`
-      INSERT INTO prontuario (
-        id_medico,
-        id_paciente,
-        nome_paciente,
-        idade,
-        condicao,
-        ultima_visita,
-        status,
-        tipo,
-        cid10,
-        anamnese,
-        exame_fisico,
-        conduta,
-        data_retorno,
-        pa,
-        temperatura,
-        peso,
-        spo2
-      )
-      VALUES (?, ?, ?, ?, ?, ?, 'Ativo', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `, [
-      idMedico,
-      idPaciente,
-      nomePaciente,
-      idade,
-      diagnostico,
-      dataAtendimento,
-      tipo,
-      cid10 || null,
-      anamnese,
-      exameFisico || null,
-      conduta || null,
-      dataRetorno || null,
-      pa || null,
-      temperatura || null,
-      peso || null,
-      spo2 || null
-    ]);
+    const result = await apiPost('/api/desktop/prontuarios', dados);
 
     return {
       sucesso: true,
-      id: result.insertId
+      id: result.id
     };
   } catch (err) {
     console.error('Erro ao cadastrar prontuário:', err);
@@ -575,29 +521,17 @@ ipcMain.handle('cadastrar-prontuario', async (event, dados) => {
 ipcMain.handle(
   'buscar-receitas',
   async (event, idPaciente, idMedico) => {
-    const [rows] = await db.promise().query(`
-      SELECT *
-      FROM receita
-      WHERE id_paciente = ?
-        AND id_medico = ?
-      ORDER BY id DESC
-    `, [idPaciente, idMedico]);
-
-    return rows;
+    return apiGet(
+      `/api/desktop/receitas?idPaciente=${encodeURIComponent(idPaciente)}` +
+      `&idMedico=${encodeURIComponent(idMedico)}`
+    );
   }
 );
 
 // === CADASTRAR PARCEIRO ===
 ipcMain.handle('cadastrar-parceiro', async (event, novoParceiro) => {
   try {
-    const { idMedico, parceiro, tipo, email, telefone, desconto, dataInicio } = novoParceiro;
-    const sql = `
-      INSERT INTO parceiros (id_medico, nome, tipo, email, telefone, desconto, status, data_inicio)
-      VALUES (?, ?, ?, ?, ?, ?, 'ativo', STR_TO_DATE(?, '%d/%m/%Y'))
-    `;
-    const [result] = await db.promise().query(sql, [
-      idMedico, parceiro, tipo, email, telefone, desconto, dataInicio,
-    ]);
+    const result = await apiPost('/api/desktop/parceiros', novoParceiro);
     console.log('Parceiro cadastrado com sucesso!');
     return result;
   } catch (err) {
@@ -609,39 +543,7 @@ ipcMain.handle('cadastrar-parceiro', async (event, novoParceiro) => {
 // === BUSCAR PARCEIROS (do médico logado) ===
 ipcMain.handle('buscar-parceiros', async (event, idMedico) => {
   try {
-    const [parceiros] = await db.promise().query(`
-      SELECT
-        p.id,
-        p.nome,
-        p.tipo,
-        p.email,
-        p.telefone,
-        p.desconto,
-        p.status,
-        DATE_FORMAT(p.data_inicio, '%d/%m/%Y') AS dataInicio,
-        (SELECT COUNT(*) FROM parceiro_encaminhamentos pe
-         WHERE pe.id_parceiro = p.id
-         AND MONTH(pe.data_encaminhamento) = MONTH(CURDATE())
-         AND YEAR(pe.data_encaminhamento) = YEAR(CURDATE())
-        ) AS encaminhamentosMes
-      FROM parceiros p
-      WHERE p.id_medico = ?
-      ORDER BY p.nome
-    `, [idMedico]);
-
-    const [servicos] = await db.promise().query(`
-      SELECT ps.id_parceiro, ps.nome_servico
-      FROM parceiro_servicos ps
-      INNER JOIN parceiros p ON p.id = ps.id_parceiro
-      WHERE p.id_medico = ?
-    `, [idMedico]);
-
-    const parceirosComServicos = parceiros.map(p => ({
-      ...p,
-      servicos: servicos.filter(s => s.id_parceiro === p.id).map(s => s.nome_servico)
-    }));
-
-    return parceirosComServicos;
+    return await apiGet(`/api/desktop/parceiros?idMedico=${encodeURIComponent(idMedico)}`);
   } catch (err) {
     console.error('Erro ao buscar parceiros:', err);
     throw err;
@@ -1047,14 +949,11 @@ ipcMain.handle(
 ipcMain.handle("reagendarConsulta", async (event, dados) => {
   try {
     const { id, novaData, novoHorario, novaDuracao } = dados;
-
-    const sql = `
-      UPDATE teleconsulta
-      SET data = ?, horario = ?, duracao = ?
-      WHERE id = ?
-    `;
-
-    await db.promise().query(sql, [novaData, novoHorario, novaDuracao, id]);
+    await apiPatch(`/api/desktop/teleconsultas/${encodeURIComponent(id)}/reagendar`, {
+      novaData,
+      novoHorario,
+      novaDuracao
+    });
 
     console.log(`Consulta ${id} reagendada com sucesso!`);
     return { sucesso: true };
@@ -1098,17 +997,14 @@ ipcMain.handle('selecionar-pdf', async () => {
 // === ABRIR PDF DO BANCO ===
 ipcMain.handle('abrir-pdf', async (event, idRelatorio) => {
     try {
-        const [rows] = await db.promise().query(
-            `SELECT arquivo, titulo FROM relatorios WHERE id = ?`,
-            [idRelatorio]
-        );
-        if (rows.length === 0) return;
+        const relatorio = await apiGet(`/api/desktop/relatorios/${encodeURIComponent(idRelatorio)}/arquivo`);
+        if (!relatorio?.arquivoBase64) return;
 
         const pasta = path.join(__dirname, 'src/relatorios');
         if (!fs.existsSync(pasta)) fs.mkdirSync(pasta, { recursive: true });
 
         const tempPath = path.join(pasta, `temp_${idRelatorio}.pdf`);
-        fs.writeFileSync(tempPath, rows[0].arquivo);
+        fs.writeFileSync(tempPath, Buffer.from(relatorio.arquivoBase64, 'base64'));
         await shell.openPath(tempPath);
     } catch (err) {
         console.error('Erro no abrir-pdf:', err);
@@ -1141,30 +1037,18 @@ ipcMain.handle('salvar-relatorio', async (event, dados) => {
       };
     }
 
-    const arquivoBuffer = fs.readFileSync(caminho);
-
-    const [result] = await db.promise().query(`
-      INSERT INTO relatorios (
-        id_paciente,
-        id_medico,
-        titulo,
-        tipo,
-        data,
-        arquivo
-      )
-      VALUES (?, ?, ?, ?, ?, ?)
-    `, [
+    const result = await apiPost('/api/desktop/relatorios', {
       idPaciente,
       idMedico,
       titulo,
-      tipo || 'PDF',
+      tipo: tipo || 'PDF',
       data,
-      arquivoBuffer
-    ]);
+      arquivoBase64: fs.readFileSync(caminho).toString('base64')
+    });
 
     return {
       sucesso: true,
-      id: result.insertId
+      id: result.id
     };
   } catch (err) {
     console.error('Erro ao salvar relatório:', err);
@@ -1180,22 +1064,17 @@ ipcMain.handle('salvar-relatorio', async (event, dados) => {
 ipcMain.handle(
   'buscar-relatorios',
   async (event, idPaciente, idMedico) => {
-    const [rows] = await db.promise().query(`
-      SELECT id, id_paciente, id_medico, titulo, tipo, data
-      FROM relatorios
-      WHERE id_paciente = ?
-        AND id_medico = ?
-      ORDER BY id DESC
-    `, [idPaciente, idMedico]);
-
-    return rows;
+    return apiGet(
+      `/api/desktop/relatorios?idPaciente=${encodeURIComponent(idPaciente)}` +
+      `&idMedico=${encodeURIComponent(idMedico)}`
+    );
   }
 );
 
 // === DELETAR RELATORIO ===
 ipcMain.handle('deletar-relatorio', async (event, id) => {
     try {
-        await db.promise().query(`DELETE FROM relatorios WHERE id = ?`, [id]);
+        await apiDelete(`/api/desktop/relatorios/${encodeURIComponent(id)}`);
         return { sucesso: true };
     } catch (err) {
         console.error('Erro ao deletar relatório:', err);
@@ -1206,22 +1085,19 @@ ipcMain.handle('deletar-relatorio', async (event, id) => {
 // === BUSCAR DADOS DO MÉDICO (CONFIGURAÇÕES) ===
 ipcMain.handle('buscar-dados-medico', async (event, idMedico) => {
   try {
-    const [rows] = await db.promise().query(`
-      SELECT m.*, mc.nome_clinica, mc.endereco_clinica, mc.tempo_consulta, mc.valor_consulta
-      FROM medico m
-      LEFT JOIN medico_clinica mc ON mc.id_medico = m.id
-      WHERE m.id = ?
-    `, [idMedico]);
-
-    if (rows.length === 0) return null;
-
-    const medico = rows[0];
-
-    if (medico.foto_perfil) {
-      medico.foto_perfil = medico.foto_perfil.toString('base64');
-    }
-
-    return medico;
+    const medico = await apiGet(`/api/medicos/${encodeURIComponent(idMedico)}/config`);
+    return {
+      ...medico,
+      data_nascimento: medico.dataNascimento,
+      foto_perfil: medico.fotoPerfil,
+      horario_inicio: medico.horarioInicio,
+      horario_termino: medico.horarioTermino,
+      tipo_atendimento: medico.tipoAtendimento,
+      nome_clinica: medico.nomeClinica,
+      endereco_clinica: medico.enderecoClinica,
+      tempo_consulta: medico.tempoConsulta,
+      valor_consulta: medico.valorConsulta
+    };
   } catch (err) {
     console.error('Erro ao buscar dados do médico:', err);
     throw err;
@@ -1231,26 +1107,14 @@ ipcMain.handle('buscar-dados-medico', async (event, idMedico) => {
 // === SALVAR ALTERAÇÕES DE CONFIGURAÇÕES DO MEDICO ===
 ipcMain.handle('atualizar-dados-medico', async (event, dados) => {
   try {
-
-    await db.promise().query(`
-      UPDATE medico
-      SET
-        nome = ?,
-        sobrenome = ?,
-        email = ?,
-        telefone = ?,
-        data_nascimento = ?,
-        endereco = ?
-      WHERE id = ?
-    `, [
-      dados.nome,
-      dados.sobrenome,
-      dados.email,
-      dados.telefone,
-      dados.data_nascimento,
-      dados.endereco,
-      dados.id
-    ]);
+    await apiPut(`/api/medicos/${encodeURIComponent(dados.id)}`, {
+      nome: dados.nome,
+      sobrenome: dados.sobrenome,
+      email: dados.email,
+      telefone: dados.telefone,
+      dataNascimento: dados.data_nascimento,
+      endereco: dados.endereco
+    });
 
     return { sucesso: true };
 
@@ -1262,82 +1126,40 @@ ipcMain.handle('atualizar-dados-medico', async (event, dados) => {
 
 // === SALVAR ALTERAÇÕES PROFISSIONAIS DO MEDICO ===
 ipcMain.handle('atualizar-dados-profissionais', async (event, dados) => {
-  const connection = await db.promise().getConnection();
-
   try {
-    await connection.beginTransaction();
+    const medicoAtual = await apiGet(
+      `/api/medicos/${encodeURIComponent(dados.id)}/config`
+    );
 
-    const [resultadoMedico] = await connection.query(`
-      UPDATE medico
-      SET crm = ?,
-          rqe = ?,
-          especialidade = ?,
-          subespecialidades = ?
-      WHERE id = ?
-    `, [
-      dados.crm || null,
-      dados.rqe || null,
-      dados.especialidade || null,
-      dados.subespecialidades || null,
-      dados.id
-    ]);
-
-    if (resultadoMedico.affectedRows === 0) {
-      throw new Error('Médico não encontrado.');
-    }
-
-    await connection.query(`
-      INSERT INTO medico_clinica (
-        id_medico,
-        nome_clinica,
-        endereco_clinica,
-        tempo_consulta,
-        valor_consulta
-      )
-      VALUES (?, ?, ?, ?, ?)
-      ON DUPLICATE KEY UPDATE
-        nome_clinica = VALUES(nome_clinica),
-        endereco_clinica = VALUES(endereco_clinica),
-        tempo_consulta = VALUES(tempo_consulta),
-        valor_consulta = VALUES(valor_consulta)
-    `, [
-      dados.id,
-      dados.nome_clinica || null,
-      dados.endereco_clinica || null,
-      dados.tempo_consulta || null,
-      dados.valor_consulta === '' ? null : dados.valor_consulta
-    ]);
-
-    await connection.commit();
+    await apiPut(`/api/medicos/${encodeURIComponent(dados.id)}/profissional`, {
+      crm: dados.crm || null,
+      rqe: dados.rqe || null,
+      especialidade: dados.especialidade || null,
+      subespecialidades: dados.subespecialidades || null,
+      tipoAtendimento: dados.tipo_atendimento ?? medicoAtual?.tipoAtendimento ?? null,
+      nomeClinica: dados.nome_clinica || null,
+      enderecoClinica: dados.endereco_clinica || null,
+      tempoConsulta: dados.tempo_consulta || null,
+      valorConsulta: dados.valor_consulta === '' ? null : dados.valor_consulta
+    });
     return { sucesso: true };
   } catch (err) {
-    await connection.rollback();
     console.error('Erro ao atualizar dados profissionais:', err);
 
     return {
       sucesso: false,
       erro: err.message
     };
-  } finally {
-    connection.release();
   }
 });
 
 // === SALVAR PREFERÊNCIAS DO MÉDICO ===
 ipcMain.handle('atualizar-preferencias', async (event, dados) => {
   try {
-
-    await db.promise().query(`
-      UPDATE medico
-      SET
-        horario_inicio = ?,
-        horario_termino = ?
-      WHERE id = ?
-    `, [
-      dados.horario_inicio,
-      dados.horario_termino,
-      dados.id
-    ]);
+    await apiPut(`/api/medicos/${encodeURIComponent(dados.id)}/preferencias`, {
+      horarioInicio: dados.horario_inicio,
+      horarioTermino: dados.horario_termino
+    });
 
     return { sucesso: true };
 
@@ -1349,12 +1171,9 @@ ipcMain.handle('atualizar-preferencias', async (event, dados) => {
 
 // === SALVAR FOTO DE PERFIL NO BANCO ===
 ipcMain.handle('salvar-foto-perfil', async (event, data) => {
-    const buffer = Buffer.from(data.foto);
-
-    await db.promise().query(
-        "UPDATE medico SET foto_perfil = ? WHERE id = ?",
-        [buffer, data.id]
-    );
+    await apiPut(`/api/medicos/${encodeURIComponent(data.id)}/foto`, {
+      foto: Buffer.from(data.foto).toString('base64')
+    });
 });
 
 // === BUSCAR TODOS OS PRODUTOS ===
@@ -1744,51 +1563,7 @@ ipcMain.handle('deletar-cupom', async (event, id) => {
 // === DADOS DO DASHBOARD ===
 ipcMain.handle('buscar-dashboard', async (event, idFarmacia) => {
   try {
-    const [[estoqueRow]] = await db.promise().query(
-      'SELECT COALESCE(SUM(quantidade), 0) AS total FROM produtos WHERE id_farmacia = ?',
-      [idFarmacia]
-    );
-
-    const [alertasRows] = await db.promise().query(`
-      SELECT l.*, p.nome AS nome_produto
-      FROM lotes l
-      JOIN produtos p ON p.id = l.id_produto
-      WHERE p.id_farmacia = ?
-        AND l.data_validade IS NOT NULL
-        AND l.data_validade BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
-      ORDER BY l.data_validade ASC
-    `, [idFarmacia]);
-
-    const [estoqueBaixoRows] = await db.promise().query(`
-      SELECT * FROM produtos
-      WHERE id_farmacia = ? AND quantidade < estoque_min
-      ORDER BY quantidade ASC
-    `, [idFarmacia]);
-
-    const [vendasRows] = await db.promise().query(
-      'SELECT total, data_venda FROM vendas_concluidas WHERE id_farmacia = ?',
-      [idFarmacia]
-    );
-
-    const hoje = new Date();
-    const mesAtual = hoje.getMonth();
-    const anoAtual = hoje.getFullYear();
-
-    const vendasDoMes = vendasRows
-      .filter(v => {
-        const partes = (v.data_venda || '').split('/');
-        if (partes.length !== 3) return false;
-        return (parseInt(partes[1]) - 1) === mesAtual && parseInt(partes[2]) === anoAtual;
-      })
-      .reduce((soma, v) => soma + parseFloat(v.total), 0);
-
-    return {
-      totalEstoque: estoqueRow.total,
-      totalAlertasValidade: alertasRows.length,
-      vendasDoMes,
-      proximosVencimento: alertasRows.slice(0, 3),
-      estoqueBaixo: estoqueBaixoRows.slice(0, 5)
-    };
+    return await apiGet(`/api/desktop/dashboard/${encodeURIComponent(idFarmacia)}`);
   } catch (err) {
     console.error('Erro ao buscar dados do dashboard:', err);
     throw err;
@@ -1904,70 +1679,12 @@ function gerarCSV(dados, caminho) {
   );
 }
 
-function calcularPeriodoRelatorio(tipo, periodo) {
-  const hoje = new Date();
-  const dias = periodo === 'Última Semana' ? 7
-             : periodo === 'Último Mês' ? 30
-             : periodo === 'Últimos 3 Meses' ? 90
-             : null;
-
-  if (!dias) return { inicio: null, fim: null };
-
-  // Validade olha pra FRENTE (próximos X dias), Vendas olha pra TRÁS (últimos X dias)
-  if (tipo === 'validade') {
-    const fim = new Date(hoje);
-    fim.setDate(fim.getDate() + dias);
-    return { inicio: hoje, fim };
-  } else {
-    const inicio = new Date(hoje);
-    inicio.setDate(inicio.getDate() - dias);
-    return { inicio, fim: hoje };
-  }
-}
-
 async function buscarDadosRelatorio(tipo, periodo, idFarmacia) {
-  if (tipo === 'estoque') {
-    const [rows] = await db.promise().query(
-      'SELECT nome, categoria, quantidade, estoque_min, preco, fornecedor FROM produtos WHERE id_farmacia = ? ORDER BY nome ASC',
-      [idFarmacia]
-    );
-    return rows;
-  }
-
-  if (tipo === 'validade') {
-    const { inicio, fim } = calcularPeriodoRelatorio('validade', periodo);
-    let sql = `
-      SELECT p.nome, l.numero_lote, l.quantidade, l.data_validade, l.prateleira
-      FROM lotes l JOIN produtos p ON p.id = l.id_produto
-      WHERE p.id_farmacia = ? AND l.data_validade IS NOT NULL
-    `;
-    const params = [idFarmacia];
-    if (inicio && fim) {
-      sql += ' AND l.data_validade BETWEEN ? AND ?';
-      params.push(inicio.toISOString().split('T')[0], fim.toISOString().split('T')[0]);
-    }
-    sql += ' ORDER BY l.data_validade ASC';
-    const [rows] = await db.promise().query(sql, params);
-    return rows;
-  }
-
-  if (tipo === 'vendas') {
-    const [rows] = await db.promise().query(
-      'SELECT cliente, total, quantidade, metodo_pago, data_venda FROM vendas_concluidas WHERE id_farmacia = ?',
-      [idFarmacia]
-    );
-    const { inicio, fim } = calcularPeriodoRelatorio('vendas', periodo);
-    if (!inicio) return rows;
-
-    return rows.filter(v => {
-      const partes = (v.data_venda || '').split('/');
-      if (partes.length !== 3) return false;
-      const data = new Date(`${partes[2]}-${partes[1]}-${partes[0]}`);
-      return data >= inicio && data <= fim;
-    });
-  }
-
-  return [];
+  return apiGet(
+    `/api/desktop/relatorios-farmacia/dados?tipo=${encodeURIComponent(tipo)}` +
+    `&periodo=${encodeURIComponent(periodo)}` +
+    `&idFarmacia=${encodeURIComponent(idFarmacia)}`
+  );
 }
 
 ipcMain.handle('gerar-relatorio-farmacia', async (event, { tipo, periodo, formato, idFarmacia }) => {
@@ -1987,29 +1704,16 @@ ipcMain.handle('gerar-relatorio-farmacia', async (event, { tipo, periodo, format
     const arquivoBuffer = fs.readFileSync(caminho);
     const tamanhoKb = Math.round(arquivoBuffer.length / 1024);
 
-    await db.promise().query(
-      `INSERT INTO relatorios_farmacia (
-        tipo,
-        periodo,
-        formato,
-        nome_arquivo,
-        caminho,
-        tamanho_kb,
-        id_farmacia,
-        arquivo
-      )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        tipo,
-        periodo,
-        formato,
-        nomeArquivo,
-        caminho,
-        tamanhoKb,
-        idFarmacia,
-        arquivoBuffer
-      ]
-    );
+    await apiPost('/api/desktop/relatorios-farmacia', {
+      tipo,
+      periodo,
+      formato,
+      nomeArquivo,
+      caminho,
+      tamanhoKb,
+      idFarmacia,
+      arquivoBase64: arquivoBuffer.toString('base64')
+    });
 
     return { sucesso: true };
   } catch (err) {
@@ -2020,11 +1724,9 @@ ipcMain.handle('gerar-relatorio-farmacia', async (event, { tipo, periodo, format
 
 ipcMain.handle('buscar-relatorios-farmacia', async (event, idFarmacia) => {
   try {
-    const [rows] = await db.promise().query(
-      'SELECT * FROM relatorios_farmacia WHERE id_farmacia = ? ORDER BY gerado_em DESC LIMIT 10',
-      [idFarmacia]
+    return await apiGet(
+      `/api/desktop/relatorios-farmacia?idFarmacia=${encodeURIComponent(idFarmacia)}`
     );
-    return rows;
   } catch (err) {
     console.error('Erro ao buscar relatórios:', err);
     throw err;
@@ -2035,39 +1737,28 @@ ipcMain.handle(
   'baixar-relatorio-farmacia',
   async (_event, { id, idFarmacia }) => {
     try {
-      const [rows] = await db.promise().query(
-        `SELECT nome_arquivo, caminho, arquivo
-         FROM relatorios_farmacia
-         WHERE id = ? AND id_farmacia = ?`,
-        [id, idFarmacia]
+      const relatorio = await apiGet(
+        `/api/desktop/relatorios-farmacia/${encodeURIComponent(id)}/arquivo` +
+        `?idFarmacia=${encodeURIComponent(idFarmacia)}`
       );
-
-      if (rows.length === 0) {
-        return {
-          sucesso: false,
-          erro: 'Relatório não encontrado.'
-        };
-      }
-
-      const relatorio = rows[0];
       let caminhoArquivo = relatorio.caminho;
 
       // Se o arquivo não existir mais, recria usando o conteúdo do banco.
       if (!caminhoArquivo || !fs.existsSync(caminhoArquivo)) {
-        if (!relatorio.arquivo) {
+        if (!relatorio.arquivoBase64) {
           return {
             sucesso: false,
             erro: 'O arquivo deste relatório antigo não está mais disponível.'
           };
         }
 
-        const nomeSeguro = path.basename(relatorio.nome_arquivo);
+        const nomeSeguro = path.basename(relatorio.nomeArquivo);
         caminhoArquivo = path.join(
           app.getPath('downloads'),
           nomeSeguro
         );
 
-        fs.writeFileSync(caminhoArquivo, relatorio.arquivo);
+        fs.writeFileSync(caminhoArquivo, Buffer.from(relatorio.arquivoBase64, 'base64'));
       }
 
       const erroAoAbrir = await shell.openPath(caminhoArquivo);
@@ -2096,50 +1787,9 @@ ipcMain.handle(
 
 ipcMain.handle('buscar-resumo-relatorios', async (event, idFarmacia) => {
   try {
-    const [[estoqueRow]] = await db.promise().query(
-      'SELECT COALESCE(SUM(quantidade), 0) AS total FROM produtos WHERE id_farmacia = ?',
-      [idFarmacia]
+    return await apiGet(
+      `/api/desktop/relatorios-farmacia/resumo?idFarmacia=${encodeURIComponent(idFarmacia)}`
     );
-
-    const [[alertasRow]] = await db.promise().query(`
-      SELECT COUNT(*) AS total FROM lotes l
-      JOIN produtos p ON p.id = l.id_produto
-      WHERE p.id_farmacia = ?
-        AND l.data_validade IS NOT NULL
-        AND l.data_validade BETWEEN CURDATE() AND DATE_ADD(CURDATE(), INTERVAL 30 DAY)
-    `, [idFarmacia]);
-
-    const [vendasRows] = await db.promise().query(
-      'SELECT total, data_venda FROM vendas_concluidas WHERE id_farmacia = ?',
-      [idFarmacia]
-    );
-
-    const somarMes = (mes, ano) => vendasRows
-      .filter(v => {
-        const partes = (v.data_venda || '').split('/');
-        if (partes.length !== 3) return false;
-        return (parseInt(partes[1]) - 1) === mes && parseInt(partes[2]) === ano;
-      })
-      .reduce((soma, v) => soma + parseFloat(v.total), 0);
-
-    const hoje = new Date();
-    const mesAtual = hoje.getMonth();
-    const anoAtual = hoje.getFullYear();
-    const mesAnterior = new Date(anoAtual, mesAtual - 1, 1);
-
-    const vendasMesAtual = somarMes(mesAtual, anoAtual);
-    const vendasMesAnterior = somarMes(mesAnterior.getMonth(), mesAnterior.getFullYear());
-
-    const variacaoVendas = vendasMesAnterior > 0
-      ? Math.round(((vendasMesAtual - vendasMesAnterior) / vendasMesAnterior) * 100)
-      : null;
-
-    return {
-      totalEstoque: estoqueRow.total,
-      vendasMesAtual,
-      variacaoVendas,
-      totalAlertas: alertasRow.total
-    };
   } catch (err) {
     console.error('Erro ao buscar resumo de relatórios:', err);
     throw err;
@@ -2216,10 +1866,7 @@ ipcMain.handle('buscar-dados-funcionario', async (event, cpf) => {
 ipcMain.handle('atualizar-status-parceiro', async (event, dados) => {
   try {
     const { id, status } = dados;
-    await db.promise().query(
-      'UPDATE parceiros SET status = ? WHERE id = ?',
-      [status, id]
-    );
+    await apiPatch(`/api/desktop/parceiros/${encodeURIComponent(id)}/status`, { status });
     console.log(`Status do parceiro ${id} atualizado para ${status}`);
     return { sucesso: true };
   } catch (err) {
@@ -2232,10 +1879,7 @@ ipcMain.handle('atualizar-status-parceiro', async (event, dados) => {
 ipcMain.handle('atualizar-desconto-parceiro', async (event, dados) => {
   try {
     const { id, desconto } = dados;
-    await db.promise().query(
-      'UPDATE parceiros SET desconto = ? WHERE id = ?',
-      [desconto, id]
-    );
+    await apiPatch(`/api/desktop/parceiros/${encodeURIComponent(id)}/desconto`, { desconto });
     console.log(`Desconto do parceiro ${id} atualizado para ${desconto}`);
     return { sucesso: true };
   } catch (err) {
@@ -2248,12 +1892,12 @@ ipcMain.handle('atualizar-desconto-parceiro', async (event, dados) => {
 ipcMain.handle('adicionar-servico-parceiro', async (event, dados) => {
   try {
     const { idParceiro, nomeServico, categoria, descricao } = dados;
-    const [result] = await db.promise().query(
-      'INSERT INTO parceiro_servicos (id_parceiro, nome_servico, categoria, descricao) VALUES (?, ?, ?, ?)',
-      [idParceiro, nomeServico, categoria || null, descricao || null]
+    const result = await apiPost(
+      `/api/desktop/parceiros/${encodeURIComponent(idParceiro)}/servicos`,
+      { nomeServico, categoria: categoria || null, descricao: descricao || null }
     );
     console.log('Serviço adicionado ao parceiro:', nomeServico);
-    return { sucesso: true, id: result.insertId };
+    return { sucesso: true, id: result.id };
   } catch (err) {
     console.error('Erro ao adicionar serviço:', err);
     return { sucesso: false, erro: err.message };
@@ -2269,19 +1913,7 @@ ipcMain.handle(
         throw new Error('Médico não identificado.');
       }
 
-      const [rows] = await db.promise().query(`
-        SELECT DISTINCT
-          pac.id,
-          pac.nome,
-          pac.data_nascimento
-        FROM paciente pac
-        INNER JOIN teleconsulta tc
-          ON tc.id_paciente = pac.id
-        WHERE tc.id_medico = ?
-        ORDER BY pac.nome
-      `, [idMedico]);
-
-      return rows;
+      return await apiGet(`/api/desktop/medicos/${encodeURIComponent(idMedico)}/pacientes`);
     } catch (err) {
       console.error(
         'Erro ao buscar pacientes do médico:',
@@ -2297,9 +1929,9 @@ ipcMain.handle(
 ipcMain.handle('encaminhar-paciente-parceiro', async (event, dados) => {
   try {
     const { idParceiro, idPaciente } = dados;
-    await db.promise().query(
-      'INSERT INTO parceiro_encaminhamentos (id_parceiro, id_paciente) VALUES (?, ?)',
-      [idParceiro, idPaciente || null]
+    await apiPost(
+      `/api/desktop/parceiros/${encodeURIComponent(idParceiro)}/encaminhamentos`,
+      { idPaciente: idPaciente || null }
     );
     console.log(`Encaminhamento registrado para o parceiro ${idParceiro}`);
     return { sucesso: true };
@@ -2312,11 +1944,9 @@ ipcMain.handle('encaminhar-paciente-parceiro', async (event, dados) => {
 // === BUSCAR PRONTUÁRIO MAIS RECENTE DE UM PACIENTE ===
 ipcMain.handle('buscar-prontuario-recente', async (event, idPaciente) => {
   try {
-    const [rows] = await db.promise().query(
-      'SELECT * FROM prontuario WHERE id_paciente = ? ORDER BY id DESC LIMIT 1',
-      [idPaciente]
+    return await apiGet(
+      `/api/desktop/prontuarios/recente?idPaciente=${encodeURIComponent(idPaciente)}`
     );
-    return rows.length > 0 ? rows[0] : null;
   } catch (err) {
     console.error('Erro ao buscar prontuário recente:', err);
     throw err;
@@ -2326,21 +1956,7 @@ ipcMain.handle('buscar-prontuario-recente', async (event, idPaciente) => {
 // === BUSCAR LISTA DE PACIENTES (para sidebar, com CPF real) ===
 ipcMain.handle('buscar-pacientes-prontuario', async (event, idMedico) => {
   try {
-    const [rows] = await db.promise().query(`
-      SELECT DISTINCT
-        pac.id,
-        pac.nome AS nome_paciente,
-        pac.idade,
-        pac.CPF,
-        (SELECT pr.condicao FROM prontuario pr WHERE pr.id_paciente = pac.id ORDER BY pr.id DESC LIMIT 1) AS condicao,
-        (SELECT pr.ultima_visita FROM prontuario pr WHERE pr.id_paciente = pac.id ORDER BY pr.id DESC LIMIT 1) AS ultima_visita,
-        (SELECT pr.status FROM prontuario pr WHERE pr.id_paciente = pac.id ORDER BY pr.id DESC LIMIT 1) AS status
-      FROM paciente pac
-      INNER JOIN teleconsulta tc ON tc.id_paciente = pac.id
-      WHERE tc.id_medico = ?
-      ORDER BY pac.nome
-    `, [idMedico]);
-    return rows;
+    return await apiGet(`/api/desktop/medicos/${encodeURIComponent(idMedico)}/pacientes`);
   } catch (err) {
     console.error('Erro ao buscar pacientes:', err);
     throw err;
@@ -2351,15 +1967,10 @@ ipcMain.handle('buscar-pacientes-prontuario', async (event, idMedico) => {
 ipcMain.handle(
   'buscar-prontuarios-paciente',
   async (event, idPaciente, idMedico) => {
-    const [rows] = await db.promise().query(`
-      SELECT *
-      FROM prontuario
-      WHERE id_paciente = ?
-        AND id_medico = ?
-      ORDER BY id DESC
-    `, [idPaciente, idMedico]);
-
-    return rows;
+    return apiGet(
+      `/api/desktop/prontuarios?idPaciente=${encodeURIComponent(idPaciente)}` +
+      `&idMedico=${encodeURIComponent(idMedico)}`
+    );
   }
 );
 
@@ -2375,19 +1986,15 @@ ipcMain.handle('cadastrar-receita', async (event, dados) => {
     const hoje = new Date();
     const dataPrescricao = `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}-${String(hoje.getDate()).padStart(2, '0')}`;
 
-    const [result] = await db.promise().query(
-      `INSERT INTO receita
-        (id_medico, id_paciente, medicamento, concentracao, dosagem, frequencia, duracao, via_administracao, instrucoes, observacoes, status, data_prescricao)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Ativa', ?)`,
-      [
-        idMedico, idPaciente, medicamento, concentracao || null,
-        dosagem, frequencia || null, duracao || null, viaAdministracao || null,
-        instrucoes || null, observacoes || null, dataPrescricao
-      ]
-    );
+    const result = await apiPost('/api/desktop/receitas', {
+      idMedico, idPaciente, medicamento, concentracao: concentracao || null,
+      dosagem, frequencia: frequencia || null, duracao: duracao || null,
+      viaAdministracao: viaAdministracao || null, instrucoes: instrucoes || null,
+      observacoes: observacoes || null, dataPrescricao
+    });
 
     console.log('Receita cadastrada com sucesso!');
-    return { sucesso: true, id: result.insertId };
+    return { sucesso: true, id: result.id };
   } catch (err) {
     console.error('Erro ao cadastrar receita:', err);
     return { sucesso: false, erro: err.message };
@@ -2398,27 +2005,10 @@ ipcMain.handle('cadastrar-receita', async (event, dados) => {
 ipcMain.handle('atualizar-senha', async (event, dados) => {
   try {
     const { idLogin, senhaAtual, novaSenha } = dados;
-
-    const [rows] = await db.promise().query(
-      'SELECT senha FROM login WHERE id = ? LIMIT 1',
-      [idLogin]
-    );
-
-    if (rows.length === 0) {
-      return { sucesso: false, erro: 'Usuário não encontrado.' };
-    }
-
-    const senhaCorreta = await bcrypt.compare(senhaAtual, rows[0].senha);
-    if (!senhaCorreta) {
-      return { sucesso: false, erro: 'Senha atual incorreta.' };
-    }
-
-    const novaSenhaHash = await bcrypt.hash(novaSenha, 10);
-
-    await db.promise().query(
-      'UPDATE login SET senha = ? WHERE id = ?',
-      [novaSenhaHash, idLogin]
-    );
+    await apiPut(`/api/logins/${encodeURIComponent(idLogin)}/senha`, {
+      senhaAtual,
+      novaSenha
+    });
 
     console.log(`Senha do login ${idLogin} atualizada com sucesso`);
     return { sucesso: true };
@@ -2431,7 +2021,7 @@ ipcMain.handle('atualizar-senha', async (event, dados) => {
 // === VERIFICAR E-MAIL PARA RECUPERAÇÃO DE SENHA ===
 ipcMain.handle('verificar-email-recuperacao', async (event, email) => {
   try {
-    const [rows] = await db.promise().query(
+    const [rows] = await obterBancoRecuperacaoSenha().promise().query(
       'SELECT id FROM login WHERE email = ? LIMIT 1',
       [email]
     );
@@ -2454,7 +2044,7 @@ ipcMain.handle('redefinir-senha', async (event, dados) => {
 
     const novaSenhaHash = await bcrypt.hash(novaSenha, 10);
 
-    await db.promise().query(
+    await obterBancoRecuperacaoSenha().promise().query(
       'UPDATE login SET senha = ? WHERE id = ?',
       [novaSenhaHash, idLogin]
     );
@@ -2486,23 +2076,25 @@ ipcMain.handle('cadastrar-receita-controlada', async (event, dados) => {
       return { sucesso: false, erro: 'O CPF do paciente é inválido.' };
     }
 
-    const [result] = await db.promise().query(
-      `INSERT INTO receitas_controladas
-        (cpf_cliente, nome_cliente, produto_nome, nome_medico, crm, uf_crm,
-         nome_paciente, cpf_paciente, tipo_receita, numero_receita, data_receita,
-         original_conferida, documento_verificado, observacoes)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        cpfCliente || null, nomeCliente || null, produtoNome,
-        nomeMedico, crm, ufCrm,
-        nomePaciente, cpfPaciente || null,
-        tipoReceita, numeroReceita || null, dataReceita || null,
-        originalConferida ? 1 : 0, documentoVerificado ? 1 : 0, observacoes || null
-      ]
-    );
+    const result = await apiPost('/api/desktop/receitas-controladas', {
+      cpfCliente: cpfCliente || null,
+      nomeCliente: nomeCliente || null,
+      produtoNome,
+      nomeMedico,
+      crm,
+      ufCrm,
+      nomePaciente,
+      cpfPaciente: cpfPaciente || null,
+      tipoReceita,
+      numeroReceita: numeroReceita || null,
+      dataReceita: dataReceita || null,
+      originalConferida,
+      documentoVerificado,
+      observacoes: observacoes || null
+    });
 
     console.log('Receita controlada registrada com sucesso!');
-    return { sucesso: true, id: result.insertId };
+    return { sucesso: true, id: result.id };
   } catch (err) {
     console.error('Erro ao registrar receita controlada:', err);
     return { sucesso: false, erro: err.message };
@@ -2512,19 +2104,7 @@ ipcMain.handle('cadastrar-receita-controlada', async (event, dados) => {
 // === BUSCAR DADOS DA FARMÁCIA (SIDEBAR) ===
 ipcMain.handle('buscar-dados-farmacia', async (event, idFarmacia) => {
   try {
-    const [rows] = await db.promise().query(
-      'SELECT * FROM farmacia WHERE id = ?',
-      [idFarmacia]
-    );
-
-    if (rows.length === 0) return null;
-
-    const farmacia = rows[0];
-    if (farmacia.foto_perfil) {
-      farmacia.foto_perfil = farmacia.foto_perfil.toString('base64');
-    }
-
-    return farmacia;
+    return await apiGet(`/api/desktop/farmacias/${encodeURIComponent(idFarmacia)}`);
   } catch (err) {
     console.error('Erro ao buscar dados da farmácia:', err);
     throw err;

@@ -178,7 +178,9 @@ async function apiGet(caminho) {
     if (initialized && store.hasPending()) {
       await sincronizarPendencias();
       if (!online) {
-        const cachedAfterSync = store.getCached(caminho) ?? store.findCachedEntity(caminho);
+        const cachedAfterSync = store.hasCached(caminho)
+          ? store.getCached(caminho)
+          : store.findCachedEntity(caminho);
         if (cachedAfterSync !== undefined) return cachedAfterSync;
       }
     }
@@ -192,7 +194,9 @@ async function apiGet(caminho) {
     if (!erroTemporario(error) || !initialized) throw error;
 
     online = false;
-    const cached = store.getCached(caminho) ?? store.findCachedEntity(caminho);
+    const cached = store.hasCached(caminho)
+      ? store.getCached(caminho)
+      : store.findCachedEntity(caminho);
     emitirStatus();
 
     if (cached !== undefined) {
@@ -205,7 +209,8 @@ async function apiGet(caminho) {
 }
 
 async function apiSend(method, caminho, body) {
-  const podeEnfileirar = initialized && !caminho.startsWith('/auth/');
+  const contemCredencial = /^\/api\/logins\/[^/]+\/senha(?:\?|$)/.test(caminho);
+  const podeEnfileirar = initialized && !caminho.startsWith('/auth/') && !contemCredencial;
 
   if (podeEnfileirar && store.hasPending()) {
     const queued = await enfileirar(method, caminho, body);

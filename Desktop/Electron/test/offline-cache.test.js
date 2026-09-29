@@ -72,6 +72,39 @@ test('usa cache em GET offline e sincroniza escritas pendentes', async () => {
   }
 });
 
+test('localiza o arquivo de um relatorio criado offline pelo ID temporario', async () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'farmagrid-report-cache-test-'));
+  const { OfflineStore } = require('../src/api/offline-store');
+  const store = new OfflineStore();
+
+  try {
+    await store.init(directory);
+    const lista = '/api/desktop/relatorios-farmacia?idFarmacia=7';
+    await store.cacheResponse(lista, []);
+    await store.enqueue({
+      id: 'operacao-relatorio',
+      tempId: -20,
+      method: 'POST',
+      path: '/api/desktop/relatorios-farmacia',
+      body: {
+        idFarmacia: 7,
+        nomeArquivo: 'estoque.pdf',
+        caminho: 'C:\\Downloads\\estoque.pdf',
+        arquivoBase64: 'cGRm'
+      },
+      status: 'pending'
+    });
+
+    const relatorio = store.findCachedEntity(
+      '/api/desktop/relatorios-farmacia/-20/arquivo?idFarmacia=7'
+    );
+    assert.equal(relatorio.id, -20);
+    assert.equal(relatorio.arquivoBase64, 'cGRm');
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
+
 function clientSafeStop() {
   try {
     require('../src/api/client').pararSincronizacaoAutomatica();
@@ -79,3 +112,31 @@ function clientSafeStop() {
     // O módulo pode não ter sido carregado caso o teste falhe antes da configuração.
   }
 }
+
+test('mantém os dados otimistas do Desktop no filtro correto', async () => {
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'farmagrid-desktop-cache-test-'));
+  const { OfflineStore } = require('../src/api/offline-store');
+  const store = new OfflineStore();
+
+  try {
+    await store.init(directory);
+    await store.cacheResponse('/api/desktop/parceiros?idMedico=1', []);
+    await store.cacheResponse('/api/desktop/parceiros?idMedico=2', []);
+    await store.enqueue({
+      id: 'operacao-parceiro',
+      tempId: -10,
+      method: 'POST',
+      path: '/api/desktop/parceiros',
+      body: { idMedico: 1, parceiro: 'Laboratório Offline' },
+      status: 'pending'
+    });
+
+    const medico1 = store.getCached('/api/desktop/parceiros?idMedico=1');
+    const medico2 = store.getCached('/api/desktop/parceiros?idMedico=2');
+    assert.equal(medico1.length, 1);
+    assert.equal(medico1[0].nome, 'Laboratório Offline');
+    assert.equal(medico2.length, 0);
+  } finally {
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
