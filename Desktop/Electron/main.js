@@ -416,14 +416,6 @@ ipcMain.on('abrir-janela-config', () => {
 });
 
 
-// A conexão legada só é carregada se a recuperação de senha for usada.
-// As telas comuns do Desktop não abrem mais conexão direta com o MySQL.
-let bancoRecuperacaoSenha = null;
-function obterBancoRecuperacaoSenha() {
-  if (!bancoRecuperacaoSenha) bancoRecuperacaoSenha = require('./src/db/conexao');
-  return bancoRecuperacaoSenha;
-}
-
 // Status e acionamento manual da fila offline.
 ipcMain.handle('obter-status-cache', () => obterStatusCache());
 ipcMain.handle('sincronizar-cache', () => sincronizarPendencias());
@@ -2021,42 +2013,23 @@ ipcMain.handle('atualizar-senha', async (event, dados) => {
 // === VERIFICAR E-MAIL PARA RECUPERAÇÃO DE SENHA ===
 ipcMain.handle('verificar-email-recuperacao', async (event, email) => {
   try {
-    const [rows] = await obterBancoRecuperacaoSenha().promise().query(
-      'SELECT id FROM login WHERE email = ? LIMIT 1',
-      [email]
-    );
-
-    if (rows.length === 0) {
-      return { existe: false };
-    }
-
-    return { existe: true, idLogin: rows[0].id };
+    return await apiPost('/auth/recuperacao/solicitar', { email });
   } catch (err) {
-    console.error('Erro ao verificar e-mail:', err);
-    return { existe: false, erro: err.message };
+    return { sucesso: false, erro: err.body?.message || 'Não foi possível enviar o código. Verifique a conexão e tente novamente.' };
   }
 });
 
-// === REDEFINIR SENHA (via "esqueci minha senha") ===
 ipcMain.handle('redefinir-senha', async (event, dados) => {
   try {
-    const { idLogin, novaSenha } = dados;
-
-    const novaSenhaHash = await bcrypt.hash(novaSenha, 10);
-
-    await obterBancoRecuperacaoSenha().promise().query(
-      'UPDATE login SET senha = ? WHERE id = ?',
-      [novaSenhaHash, idLogin]
-    );
-
-    console.log(`Senha do login ${idLogin} redefinida com sucesso`);
-    return { sucesso: true };
+    const resultado = await apiPost('/auth/recuperacao/redefinir', {
+      email: dados.email, codigo: dados.codigo, novaSenha: dados.novaSenha
+    });
+    if (arquivoSessaoOffline && fs.existsSync(arquivoSessaoOffline)) fs.unlinkSync(arquivoSessaoOffline);
+    return resultado;
   } catch (err) {
-    console.error('Erro ao redefinir senha:', err);
-    return { sucesso: false, erro: err.message };
+    return { sucesso: false, erro: err.body?.message || 'Não foi possível redefinir a senha. Confira o código ou solicite outro.' };
   }
 });
-
 // === CADASTRAR RECEITA DE MEDICAMENTO CONTROLADO (BALCONISTA) ===
 ipcMain.handle('cadastrar-receita-controlada', async (event, dados) => {
   try {

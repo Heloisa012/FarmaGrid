@@ -31,6 +31,8 @@ public class SecurityConfig {
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                     .requestMatchers(HttpMethod.POST,
                             "/auth/login",
+                            "/auth/recuperacao/solicitar",
+                            "/auth/recuperacao/redefinir",
                             "/auth/cadastro/paciente",
                             "/auth/cadastro/medico").permitAll()
                         .requestMatchers("/api/**").authenticated()

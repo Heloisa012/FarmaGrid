@@ -291,6 +291,14 @@
 
         <div class="form-inner oculto" id="formNovaSenha">
           <div class="form-group">
+            <label for="codigo">Código recebido por e-mail:</label>
+            <div class="input-icon">
+              <input id="codigo" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" />
+            </div>
+            <p>O código expira em 10 minutos. Confira também a pasta de spam.</p>
+            <button type="button" id="btnReenviar">Solicitar outro código</button>
+          </div>
+          <div class="form-group">
             <label for="novaSenha">Nova Senha:</label>
             <div class="input-icon">
               <input id="novaSenha" type="password" />
@@ -315,7 +323,7 @@
 
 
     <script>
-    let idLoginRecuperacao = null;
+    let emailRecuperacao = null;
     let etapaAtual = 'email'; // 'email' | 'senha'
 
     const btnEnviar = document.getElementById('btnEnviar');
@@ -323,22 +331,25 @@
     const formNovaSenha = document.getElementById('formNovaSenha');
 
     btnEnviar.addEventListener('click', async () => {
+      btnEnviar.disabled = true;
+      try {
       if (etapaAtual === 'email') {
         const email = document.getElementById('email').value.trim();
 
-        if (!email) {
+        if (!email || !document.getElementById('email').checkValidity()) {
           Swal.fire({ icon: 'warning', title: 'Preencha o e-mail.' });
           return;
         }
 
         const resultado = await window.electronAPI.verificarEmailRecuperacao(email);
 
-        if (!resultado.existe) {
-          Swal.fire({ icon: 'error', title: 'E-mail não encontrado.', text: 'Verifique o e-mail digitado e tente novamente.' });
+        if (!resultado.sucesso) {
+          Swal.fire({ icon: 'error', title: 'Não foi possível enviar o código.', text: resultado.erro || 'Tente novamente.' });
           return;
         }
 
-        idLoginRecuperacao = resultado.idLogin;
+        emailRecuperacao = email;
+        await Swal.fire({ icon: 'info', title: 'Confira seu e-mail', text: resultado.mensagem });
 
         formEmail.classList.add('oculto');
         formNovaSenha.classList.remove('oculto');
@@ -346,6 +357,11 @@
         etapaAtual = 'senha';
 
       } else if (etapaAtual === 'senha') {
+        const codigo = document.getElementById('codigo').value.trim();
+        if (!/^[0-9]{6}$/.test(codigo)) {
+          await Swal.fire({ icon: 'warning', title: 'Informe o código de 6 dígitos recebido por e-mail.' });
+          return;
+        }
         const novaSenha = document.getElementById('novaSenha').value;
         const confNovaSenha = document.getElementById('confNovaSenha').value;
 
@@ -365,7 +381,7 @@
         }
 
         const resultado = await window.electronAPI.redefinirSenha({
-          idLogin: idLoginRecuperacao,
+          email: emailRecuperacao, codigo,
           novaSenha: novaSenha
         });
 
@@ -377,6 +393,23 @@
         await Swal.fire({ icon: 'success', title: 'Senha redefinida com sucesso!', text: 'Você já pode fazer login com a nova senha.' });
         window.location.href = 'index.html';
       }
+      } catch (erro) {
+        await Swal.fire({ icon: 'error', title: 'Não foi possível concluir a solicitação.', text: 'Tente novamente.' });
+      } finally {
+        btnEnviar.disabled = false;
+      }
+    });
+    document.getElementById('btnReenviar').addEventListener('click', async (event) => {
+      const botao = event.currentTarget;
+      botao.disabled = true;
+      try {
+        const resultado = await window.electronAPI.verificarEmailRecuperacao(emailRecuperacao);
+        await Swal.fire({ icon: resultado.sucesso ? 'info' : 'error',
+          title: resultado.sucesso ? 'Confira seu e-mail' : 'Não foi possível reenviar',
+          text: resultado.mensagem || resultado.erro });
+      } catch (erro) {
+        await Swal.fire({ icon: 'error', title: 'Não foi possível reenviar o código.' });
+      } finally { botao.disabled = false; }
     });
   </script>
 
