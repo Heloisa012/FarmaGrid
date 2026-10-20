@@ -2,6 +2,7 @@ import '../widgets/carregamento.dart';
 import 'offline_service.dart';
 import 'perfil_service.dart';
 import 'dart:convert';
+import 'dart:async';
 
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -37,42 +38,60 @@ class AuthService {
     int tipo,
   ) async {
     return Carregamento.executar('Entrando...', () async {
+      final http.Response resposta;
       try {
-        final resposta = await http
+        // da mais tempo para o servidor responder na primeira tentativa
+        resposta = await http
             .post(
               Uri.parse('${ApiConfig.baseUrl}/auth/login'),
               headers: {'Content-Type': 'application/json'},
-              body: jsonEncode({'email': email, 'senha': senha, 'tipo': tipo}),
+              body: jsonEncode({
+                'email': email.trim(),
+                'senha': senha,
+                'tipo': tipo,
+              }),
             )
-            .timeout(const Duration(seconds: 30));
+            .timeout(const Duration(seconds: 60));
+      } on TimeoutException {
+        throw ApiException(
+          'O servidor demorou para responder. Aguarde um pouco e tente entrar novamente.',
+        );
+      } on http.ClientException {
+        throw ApiException(
+          'Nao foi possivel acessar a API. Confira sua conexao e tente novamente.',
+        );
+      }
 
-        if (resposta.statusCode != 200) {
-          throw ApiException(_extrairMensagemErro(resposta));
-        }
+      if (resposta.statusCode != 200) {
+        throw ApiException(_extrairMensagemErro(resposta));
+      }
 
-        final dynamic json = jsonDecode(resposta.body);
+      final UsuarioLogado usuario;
+      try {
+        // confere a resposta antes de criar a sessao
+        final dynamic json = jsonDecode(utf8.decode(resposta.bodyBytes));
+        if (json is! Map<String, dynamic>) throw const FormatException();
+        usuario = UsuarioLogado.fromJson(json);
+        if (usuario.token.isEmpty) throw const FormatException();
+      } catch (_) {
+        throw ApiException(
+          'A API retornou uma resposta de login invalida. Tente novamente.',
+        );
+      }
 
-        if (json is! Map<String, dynamic>) {
-          throw ApiException('Resposta inválida recebida do servidor.');
-        }
-
-        final usuario = UsuarioLogado.fromJson(json);
-
-        usuarioLogado = usuario;
-
+      try {
+        // so confirma o login depois de guardar a sessao
         await _storage.write(
           key: _chaveSessao,
           value: jsonEncode(usuario.toJson()),
         );
-
-        return usuario;
-      } on ApiException {
-        rethrow;
-      } catch (e) {
+      } catch (_) {
         throw ApiException(
-          'Não foi possível conectar ao servidor. Verifique se a API está em execução em ${ApiConfig.baseUrl}.',
+          'O navegador ou aparelho nao permitiu guardar a sessao. Verifique as permissoes de armazenamento ou tente em uma janela normal.',
         );
       }
+      usuarioLogado = usuario;
+      return usuario;
     });
   }
 
