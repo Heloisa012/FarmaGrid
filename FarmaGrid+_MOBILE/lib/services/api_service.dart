@@ -4,8 +4,9 @@ import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 import '../widgets/carregamento.dart';
 import 'auth_service.dart';
+import 'offline_service.dart';
 
-// deixei as chamadas da api juntas pra reaproveitar o mesmo envio e tratamento de resposta
+// chamadas da api juntas pra reaproveitar o mesmo envio e tratamento de resposta
 class ApiService {
   static Map<String, String> get headers => {
     'Content-Type': 'application/json',
@@ -69,8 +70,31 @@ class ApiService {
     String method,
     String path, {
     Map<String, dynamic>? body,
+    bool permitirCache = true,
   }) => Carregamento.executar(_mensagem(method, path), () async {
     final client = http.Client();
+    final usuario = AuthService.usuarioLogado;
+    // exportacao e pagamentos sempre precisam do servidor
+    final usarCache =
+        permitirCache &&
+        method == 'GET' &&
+        usuario != null &&
+        !path.contains('cartoes') &&
+        !path.contains('assinatura') &&
+        !path.contains('exportar') &&
+        !path.contains('/logins');
+    Future<dynamic> tentarOffline() async {
+      if (usarCache && AuthService.usuarioLogado?.id == usuario.id) {
+        final salvo = await OfflineService.ler(usuario.id, path);
+        if (salvo != null) return salvo;
+      }
+      throw ApiException(
+        method == 'GET'
+            ? 'Sem conexao com a API e sem dados salvos disponiveis.'
+            : 'Sem conexao com a API. A alteracao nao foi salva. Tente novamente quando a conexao voltar.',
+      );
+    }
+
     try {
       final request = http.Request(
         method,
@@ -97,16 +121,26 @@ class ApiService {
               : '${value ?? 'Erro HTTP ${response.statusCode}'}',
         );
       }
+      if (AuthService.usuarioLogado?.id != usuario?.id) {
+        throw ApiException('A sessao mudou. Faca login novamente.');
+      }
+      if (usarCache) await OfflineService.salvar(usuario.id, path, value);
+      if (method != 'GET' && usuario != null) {
+        // apaga copias antigas depois de mudar os dados
+        try {
+          await OfflineService.limpar(usuario.id);
+        } catch (_) {}
+      }
       return value;
     } on ApiException {
       rethrow;
     } on TimeoutException {
-      throw ApiException(
-        'A operação demorou mais que o esperado. Tente novamente.',
-      );
+      return tentarOffline();
+    } on http.ClientException {
+      return tentarOffline();
     } catch (_) {
       throw ApiException(
-        'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.',
+        'Nao foi possivel concluir a requisicao. Tente novamente.',
       );
     } finally {
       client.close();

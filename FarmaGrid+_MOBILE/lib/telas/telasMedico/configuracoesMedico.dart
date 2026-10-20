@@ -1,3 +1,4 @@
+import '../../widgets/privacidade_config.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import '../../services/auth_service.dart';
@@ -667,6 +668,8 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
       onCancelar: () {},
       child: Column(
         children: [
+          const PrivacidadeConfig(),
+          const SizedBox(height: 14),
           _cardSecao(
             titulo: 'Alterar Senha',
             subtitulo: 'Mantenha sua conta segura com uma senha forte',

@@ -30,5 +30,6 @@ public class Cartao {
     private String bandeira;
 
     @Column(name = "token_pagamento", length = 255)
+    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY)
     private String tokenPagamento;
 }

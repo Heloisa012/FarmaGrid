@@ -1,4 +1,6 @@
 import '../widgets/carregamento.dart';
+import 'offline_service.dart';
+import 'perfil_service.dart';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -22,7 +24,7 @@ class ApiException implements Exception {
 }
 
 class AuthService {
-  // esse pacote guarda o token protegido no aparelho pra pessoa nao precisar entrar toda hora
+  // guarda o token protegido no aparelho pra pessoa nao precisar entrar toda hora
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
   static const String _chaveSessao = 'sessao_usuario';
@@ -208,9 +210,12 @@ class AuthService {
   }
 
   static Future<void> logout() async {
+    // limpa os dados locais ao sair da conta
+    final id = usuarioLogado?.id;
     await _storage.delete(key: _chaveSessao);
-
     usuarioLogado = null;
+    PerfilService.limpar();
+    if (id != null) await OfflineService.limpar(id);
   }
 
   static String _extrairMensagemErro(http.Response resposta) {

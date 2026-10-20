@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'services/auth_service.dart';
+import 'services/offline_service.dart';
 import 'telas/telasMedico/home_medico.dart';
 import 'telas/telasPaciente/homePaciente.dart';
 
@@ -27,7 +28,23 @@ class MyApp extends StatelessWidget {
       supportedLocales: const [Locale('pt', 'BR')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
       builder: (context, child) =>
-          CamadaCarregamento(child: child ?? const SizedBox.shrink()),
+          CamadaCarregamento(
+            child: Column(children: [
+              ValueListenableBuilder<String?>(
+                valueListenable: OfflineService.aviso,
+                builder: (context, aviso, _) => aviso == null
+                    ? const SizedBox.shrink()
+                    : Material(
+                        color: const Color(0xFFFFF3CD),
+                        child: SafeArea(bottom: false, child: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: Text(aviso, style: const TextStyle(fontSize: 12)),
+                        )),
+                      ),
+              ),
+              Expanded(child: child ?? const SizedBox.shrink()),
+            ]),
+          ),
       home: _TelaInicial(
         restaurarSessao: restaurarSessao ?? AuthService.restaurarSessao,
       ),

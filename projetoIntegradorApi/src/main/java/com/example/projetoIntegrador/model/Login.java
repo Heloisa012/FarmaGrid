@@ -20,6 +20,7 @@ public class Login {
     private String email;
 
     @Column(nullable = false, length = 100)
+    @com.fasterxml.jackson.annotation.JsonProperty(access = com.fasterxml.jackson.annotation.JsonProperty.Access.WRITE_ONLY)
     private String senha;
 
     @JdbcTypeCode(SqlTypes.TINYINT)

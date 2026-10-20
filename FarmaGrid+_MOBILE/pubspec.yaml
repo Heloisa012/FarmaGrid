@@ -16,6 +16,7 @@ dependencies:
   http: ^1.2.0
   flutter_secure_storage: ^9.0.0
   image_picker: ^1.2.3
+  file_saver: ^0.4.0
 
 dev_dependencies:
   flutter_test:
@@ -38,4 +39,3 @@ flutter:
     - assets/images/carol.jpeg
     - assets/images/aires.jpeg
     - assets/images/heloisa.jpeg
-    

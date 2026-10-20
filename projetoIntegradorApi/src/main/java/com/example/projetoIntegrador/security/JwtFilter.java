@@ -26,13 +26,10 @@ public class JwtFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain chain) throws ServletException, IOException {
 
+        // evita mostrar dados pessoais nos logs
         String header =
         request.getHeader("Authorization");
 
-        System.out.println(
-            "JWT: rota=" + request.getRequestURI() +
-            ", authorizationPresente=" + (header != null)
-        );
 
         if (
             header != null &&
@@ -44,9 +41,6 @@ public class JwtFilter extends OncePerRequestFilter {
             boolean tokenValido =
                     jwtUtil.tokenValido(token);
 
-            System.out.println(
-                "JWT: tokenValido=" + tokenValido
-            );
 
             if (!tokenValido) {
                 response.sendError(
@@ -97,10 +91,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
             SecurityContextHolder.setContext(context);
 
-            System.out.println(
-                "JWT: usuário autenticado=" + email +
-                ", perfil=" + tipo
-            );
         }
 
         chain.doFilter(request, response);

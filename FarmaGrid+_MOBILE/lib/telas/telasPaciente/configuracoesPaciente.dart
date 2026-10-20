@@ -1,3 +1,4 @@
+import '../../widgets/privacidade_config.dart';
 import '../../models/lista_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
@@ -1000,6 +1001,8 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
       subtitulo: 'Gerencie sua senha e permissões de dados',
       child: Column(
         children: [
+          const PrivacidadeConfig(),
+          const SizedBox(height: 14),
           _cardSecao(
             titulo: 'Alterar Senha',
             subtitulo: 'Mantenha sua conta segura com uma senha forte',
