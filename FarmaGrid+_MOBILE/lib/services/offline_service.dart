@@ -46,6 +46,7 @@ class OfflineService {
 
   static Future<void> limpar(int id) async {
     final valores = await storage.readAll();
+    // filtra as chaves dessa conta pra nao apagar os dados de outros usuarios
     for (final key in valores.keys.toList().where(
       (key) => key.startsWith(prefixo(id)),
     )) {

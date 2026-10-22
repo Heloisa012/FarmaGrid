@@ -72,6 +72,7 @@ class PacienteMedico {
       idade: idadeValor == null ? null : _int(idadeValor),
       condicoes: (json['condicoes'] as List? ?? const [])
           .map((item) => '$item')
+          // descarta condicoes vazias antes de montar a lista
           .where((item) => item.isNotEmpty)
           .toList(),
       totalConsultas: _int(json['totalConsultas']),
@@ -85,12 +86,14 @@ class PacienteMedico {
   String get nomeComIdade => idade == null ? nome : '$nome, $idade anos';
 
   String get cpfMascarado {
+    // replaceall apaga tudo que o padrao identifica como diferente de zero a nove
     final digitos = cpf.replaceAll(RegExp(r'[^0-9]'), '');
     if (digitos.length != 11) return cpf.isEmpty ? 'CPF não informado' : cpf;
     return '***.***.${digitos.substring(6, 9)}-${digitos.substring(9)}';
   }
 
   String get cpfFormatado {
+
     final digitos = cpf.replaceAll(RegExp(r'[^0-9]'), '');
     if (digitos.length != 11) return cpf.isEmpty ? 'CPF não informado' : cpf;
     return '${digitos.substring(0, 3)}.${digitos.substring(3, 6)}.${digitos.substring(6, 9)}-${digitos.substring(9)}';

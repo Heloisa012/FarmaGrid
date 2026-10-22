@@ -117,6 +117,7 @@ class AuthService {
       'email': email,
       'senha': senha,
       'nome': nome,
+      // replaceall apaga tudo que o padrao identifica como diferente de zero a nove
       'cpf': cpf.replaceAll(RegExp(r'[^0-9]'), ''),
       'dataNascimento': dataNascimento,
       'sexo': sexo,

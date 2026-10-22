@@ -51,13 +51,17 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
   }
 
   List<PacienteMedico> get _pacientesFiltrados {
+    // deixa a busca em minusculas e tira o que nao esta nos intervalos de letras e numeros do padrao
     final busca = _buscaController.text.toLowerCase().replaceAll(
       RegExp(r'[^a-z0-9á-ú]'),
       '',
     );
     if (busca.isEmpty) return _pacientes;
+    // where deixa so os pacientes cujo nome ou cpf contem a busca
     return _pacientes.where((p) {
+      // limpa o nome com o mesmo padrao da busca pra comparar os dois
       final nome = p.nome.toLowerCase().replaceAll(RegExp(r'[^a-z0-9á-ú]'), '');
+      // replaceall apaga tudo que o padrao identifica como diferente de zero a nove
       final cpf = p.cpf.replaceAll(RegExp(r'[^0-9]'), '');
       return nome.contains(busca) || cpf.contains(busca);
     }).toList();

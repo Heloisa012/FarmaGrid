@@ -30,6 +30,7 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
   static const Color _teal2 = Color(0xFF629991);
 
   double get _total {
+    // fold soma os subtotais dos itens pra calcular o valor do carrinho
     return widget.itens.fold(0.0, (soma, item) {
       return soma + item.medicamento.preco * item.quantidade;
     });
@@ -315,6 +316,7 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
       final produtos = await PacienteService.listarProdutos();
       if (!mounted) return;
       setState(
+        // where deixa na loja so os produtos com estoque
         () => _produtosApi = produtos.where((p) => p.quantidade > 0).toList(),
       );
     } catch (erro) {
@@ -325,11 +327,13 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
   }
 
   int get _totalItens =>
+      // fold soma as quantidades pra contar os itens do carrinho
       _carrinho.fold(0, (soma, item) => soma + item.quantidade);
 
   void _adicionarAoCarrinho(ProdutoPaciente med) {
     setState(() {
       final existente = _carrinho
+          // procura o produto pelo id e firstornull devolve null se ele nao estiver no carrinho
           .where((i) => i.medicamento.id == med.id)
           .firstOrNull;
       if (existente != null) {
@@ -364,8 +368,10 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
 
   List<ProdutoPaciente> get _medicamentosFiltrados {
     final todosMedicamentos = _produtosApi;
+    // filtra por nome ou categoria sem diferenciar maiusculas de minusculas
     if (_termoBusca.isEmpty) return todosMedicamentos;
     final termo = _termoBusca.toLowerCase();
+ 
     return todosMedicamentos
         .where(
           (m) =>
@@ -554,6 +560,7 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
 
   Widget _cardMedicamento(ProdutoPaciente med) {
     final noCarrinho = _carrinho
+        // procura o produto pelo id e firstornull devolve null se ele nao estiver no carrinho
         .where((i) => i.medicamento.id == med.id)
         .firstOrNull;
     final qtdNoCarrinho = noCarrinho?.quantidade ?? 0;

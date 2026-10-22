@@ -4,20 +4,29 @@ import 'package:flutter/material.dart';
 
 // avisa o resto do app quando alguma tarefa comeca ou termina
 class Carregamento extends ChangeNotifier {
+
   static final instancia = Carregamento();
+
   final Map<Object, String> _operacoes = {};
   bool get ativo => _operacoes.isNotEmpty;
   String get mensagem => ativo ? _operacoes.values.last : 'Carregando...';
+  // avisa que o estado do carregamento mudou
   void _atualizar() => scheduleMicrotask(notifyListeners);
+ 
   static Future<T> executar<T>(
     String mensagem,
+
+    // recebe uma funcao pra executar depois
     Future<T> Function() acao,
   ) async {
+   
     final chave = Object();
     instancia._operacoes[chave] = mensagem;
     instancia._atualizar();
+  
     try {
       return await acao();
+   
     } finally {
       instancia._operacoes.remove(chave);
       instancia._atualizar();
@@ -27,14 +36,16 @@ class Carregamento extends ChangeNotifier {
 
 class CartaoCarregamento extends StatelessWidget {
   const CartaoCarregamento({super.key, this.mensagem = 'Carregando...'});
+ 
   final String mensagem;
   @override
   Widget build(BuildContext context) => Center(
-    // informa o estado do carregamento pra quem usa leitor de tela
+
     child: Semantics(
       liveRegion: true,
       label: mensagem,
       child: Container(
+
         constraints: const BoxConstraints(maxWidth: 270),
         margin: const EdgeInsets.all(24),
         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 26),
@@ -83,10 +94,11 @@ class CartaoCarregamento extends StatelessWidget {
 class CamadaCarregamento extends StatelessWidget {
   const CamadaCarregamento({super.key, required this.child});
   final Widget child;
-  // enquanto carrega, essa camada escurece a tela e evita toques ou voltar sem querer
+  // enquanto carrega escurece a tela e evita toques ou voltar sem querer
   @override
-  // acompanha as mudancas do carregamento e bloqueia interacoes ate terminar
+
   Widget build(BuildContext context) => ListenableBuilder(
+
     listenable: Carregamento.instancia,
     builder: (context, _) {
       final controle = Carregamento.instancia;

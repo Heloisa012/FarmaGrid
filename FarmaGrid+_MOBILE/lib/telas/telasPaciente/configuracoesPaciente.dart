@@ -123,6 +123,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
   }
 
   String get _numeroCartao =>
+      // replaceall apaga tudo que o padrao identifica como diferente de zero a nove
       _numeroCartaoCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
 
   String get _bandeiraCartao {
@@ -227,6 +228,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
       '655000',
       '655019',
     ];
+    // any confere se o numero comeca com algum dos prefixos da bandeira elo
     if (eloPrefixos.any(numero.startsWith)) return 'Elo';
     if (numero.startsWith('606282') || numero.startsWith('3841')) {
       return 'Hipercard';
@@ -261,8 +263,10 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
       ]);
       if (!mounted) return;
       _perfil = resultados[0] as Map<String, dynamic>;
+      // separa o nome onde houver um ou mais espacos
       final partes = '${_perfil['nome'] ?? ''}'.trim().split(RegExp(r'\s+'));
       _nomeCtrl.text = partes.isEmpty ? '' : partes.first;
+      // skip pula o primeiro nome e join junta o restante como sobrenome
       _sobrenomeCtrl.text = partes.length < 2 ? '' : partes.skip(1).join(' ');
       _emailCtrl.text = '${_perfil['email'] ?? ''}';
       _telefoneCtrl.text = '${_perfil['telefone'] ?? ''}';
@@ -295,6 +299,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
         ..addAll(
           (resultados[2] as List<Map<String, dynamic>>)
               .map((a) => '${a['alergia'] ?? a['nome'] ?? ''}')
+              // descarta alergias sem nome antes de preencher a lista
               .where((a) => a.isNotEmpty),
         );
       _cartoes = resultados[3] as List<Map<String, dynamic>>;
@@ -310,6 +315,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
         'nome': [
           _nomeCtrl.text.trim(),
           _sobrenomeCtrl.text.trim(),
+        // tira as partes vazias antes de juntar nome e sobrenome
         ].where((v) => v.isNotEmpty).join(' '),
         'email': _emailCtrl.text.trim(),
         'cpf': _perfil['cpf'],
@@ -372,10 +378,12 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
 
   Future<bool> _salvarCartao() async {
     try {
+      // replaceall apaga tudo que o padrao identifica como diferente de zero a nove
       final numero = _numeroCartaoCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
       if (numero.length < 13 ||
           _titularCtrl.text.trim().isEmpty ||
           _validadeCtrl.text.trim().length != 5 ||
+          // esse padrao so aceita um cvv inteiro com tres ou quatro digitos
           !RegExp(r'^\d{3,4}$').hasMatch(_cvvCtrl.text)) {
         _snack('Preencha número, titular, validade e CVV corretamente.');
         return false;
@@ -2208,7 +2216,7 @@ class _SemGlowScroll extends ScrollBehavior {
   };
 }
 
-// esses formatadores deixam os dados do cartao no padrao enquanto a pessoa digita
+// deixam os dados do cartao no padrao enquanto a pessoa digita
 class _NumeroCartaoFormatter extends TextInputFormatter {
   const _NumeroCartaoFormatter();
 
@@ -2217,6 +2225,7 @@ class _NumeroCartaoFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
+    // replaceall apaga tudo que o padrao identifica como diferente de zero a nove
     var digitos = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
     final amex = digitos.startsWith('34') || digitos.startsWith('37');
     final limite = amex ? 15 : 19;
@@ -2228,12 +2237,14 @@ class _NumeroCartaoFormatter extends TextInputFormatter {
       var inicio = 0;
       for (final tamanho in tamanhos) {
         if (inicio >= digitos.length) break;
+        // clamp impede que o recorte passe do fim dos digitos
         final fim = (inicio + tamanho).clamp(0, digitos.length);
         grupos.add(digitos.substring(inicio, fim));
         inicio = fim;
       }
     } else {
       for (var i = 0; i < digitos.length; i += 4) {
+        // recorta grupos de ate quatro digitos sem passar do fim do texto
         grupos.add(digitos.substring(i, (i + 4).clamp(0, digitos.length)));
       }
     }
@@ -2245,6 +2256,7 @@ class _NumeroCartaoFormatter extends TextInputFormatter {
   }
 }
 
+// permite criar uma regra propria pra formatar o que e digitado
 class _ValidadeCartaoFormatter extends TextInputFormatter {
   const _ValidadeCartaoFormatter();
 
@@ -2253,6 +2265,7 @@ class _ValidadeCartaoFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
+ 
     var digitos = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
     if (digitos.length > 4) digitos = digitos.substring(0, 4);
     final texto = digitos.length > 2
@@ -2273,6 +2286,7 @@ class _CvvFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
+  
     var digitos = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
     if (digitos.length > 4) digitos = digitos.substring(0, 4);
     return TextEditingValue(

@@ -61,6 +61,7 @@ class _TelaIndicadoresClinicosState extends State<TelaIndicadoresClinicos> {
       _painel?['diagnosticos'] ?? const {},
     );
     final ordenados = diagnosticos.entries.toList()
+      // ordena do maior valor pro menor pra mostrar os diagnosticos mais frequentes
       ..sort((a, b) => (b.value as num).compareTo(a.value as num));
     final maior = ordenados.isEmpty
         ? 1.0
@@ -70,6 +71,7 @@ class _TelaIndicadoresClinicosState extends State<TelaIndicadoresClinicos> {
       (s, v) => s + (v as num),
     );
 
+    // take pega so os cinco primeiros depois da ordenacao
     final diagnosticosVisiveis = ordenados.take(5).toList();
     return RefreshIndicator(
       onRefresh: _carregar,

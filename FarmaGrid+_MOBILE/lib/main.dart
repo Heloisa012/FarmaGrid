@@ -30,6 +30,7 @@ class MyApp extends StatelessWidget {
       builder: (context, child) =>
           CamadaCarregamento(
             child: Column(children: [
+              // reconstroi esse trecho quando o valor observado muda
               ValueListenableBuilder<String?>(
                 valueListenable: OfflineService.aviso,
                 builder: (context, aviso, _) => aviso == null

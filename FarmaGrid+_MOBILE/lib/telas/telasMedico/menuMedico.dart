@@ -41,6 +41,7 @@ class DrawerMedico extends StatelessWidget {
     const bgColor = Colors.white;
     const subColor = Colors.grey;
 
+    // cria um painel que pode ser arrastado e rolado
     return DraggableScrollableSheet(
       initialChildSize: 0.92,
       minChildSize: 0.5,

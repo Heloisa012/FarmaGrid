@@ -96,6 +96,7 @@ class PerfilService {
   static String nome(Map<String, dynamic>? perfil) {
     final nome = '${perfil?['nome'] ?? ''}'.trim();
     final sobrenome = '${perfil?['sobrenome'] ?? ''}'.trim();
+    // where tira as partes vazias e join junta o nome com um espaco
     return [nome, sobrenome].where((v) => v.isNotEmpty).join(' ');
   }
 

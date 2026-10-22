@@ -137,6 +137,7 @@ class _TelaReceitasProntuariosState extends State<TelaReceitasProntuarios> {
                       ),
                     ),
                     Text(
+                      // where separa as receitas ativas e length conta quantas sobraram
                       "${_receitas.where((r) => r.status.toLowerCase() == 'ativa').length} receita(s) ativa(s)",
                       style: const TextStyle(color: Colors.grey),
                     ),

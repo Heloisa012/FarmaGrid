@@ -51,6 +51,7 @@ class _TelaCadastroMedicoState extends State<TelaCadastroMedico> {
   // mascaras pra crm, rqe e telefone ja sairem formatados enquanto digita
   final _crmMask = MaskTextInputFormatter(
     mask: '######/AA',
+    // o filtro aceita numeros nos # e letras nos a
     filter: {'#': RegExp(r'[0-9]'), 'A': RegExp(r'[A-Za-z]')},
     type: MaskAutoCompletionType.lazy,
   );
@@ -98,6 +99,7 @@ class _TelaCadastroMedicoState extends State<TelaCadastroMedico> {
           horarioInicio: _horarioInicioCtrl.text.trim(),
           horarioTermino: _horarioTerminoCtrl.text.trim(),
           tempoConsulta: _tempoConsultaCtrl.text.trim(),
+          // troca a virgula por ponto pra enviar o valor no formato da api
           valorConsulta: _valorConsultaCtrl.text.trim().replaceAll(',', '.'),
           tipoAtendimento: _tipoAtendimento,
         );

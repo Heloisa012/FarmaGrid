@@ -349,6 +349,7 @@ class _TelaDescontosState extends State<TelaDescontos> {
       final atualizado = await PacienteService.resgatarCupom(cupom.id);
       if (!mounted) return;
       setState(() {
+        // indexwhere procura a posicao do cupom pelo id e devolve menos um se nao achar
         final indice = _cupons.indexWhere((c) => c.id == cupom.id);
         if (indice >= 0) _cupons = [..._cupons]..[indice] = atualizado;
       });

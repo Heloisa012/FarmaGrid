@@ -39,6 +39,7 @@ class _TelaDetalhesPacienteState extends State<TelaDetalhesPaciente> {
 
   String get _cpfPaciente {
     final cpf = '${_perfilPaciente['cpf'] ?? widget.cpfMascarado}';
+    // replaceall apaga tudo que o padrao identifica como diferente de zero a nove
     final digitos = cpf.replaceAll(RegExp(r'[^0-9]'), '');
     if (digitos.length != 11) {
       return cpf.isEmpty ? 'CPF não informado' : cpf;
@@ -456,6 +457,7 @@ class _TelaDetalhesPacienteState extends State<TelaDetalhesPaciente> {
       ),
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(ctx).bottom),
+       
         child: DraggableScrollableSheet(
           expand: false,
           initialChildSize: .9,

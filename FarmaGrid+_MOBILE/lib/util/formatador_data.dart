@@ -1,4 +1,4 @@
-// usa essa funcao pra pegar datas que vem da api e mostrar no padrao brasileiro
+// pega datas que vem da api e mostrar no padrao brasileiro
 String formatarDataBrasileira(String? valor) {
   final texto = (valor ?? '').trim();
   if (texto.isEmpty) return '';

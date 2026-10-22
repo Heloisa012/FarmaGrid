@@ -13,6 +13,7 @@ class PrivacidadeConfig extends StatefulWidget {
 
 class _PrivacidadeConfigState extends State<PrivacidadeConfig> {
   bool _baixando = false;
+ 
   void _avisar(String texto) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(texto)));
@@ -21,6 +22,7 @@ class _PrivacidadeConfigState extends State<PrivacidadeConfig> {
   Future<void> _baixar() async {
     // baixa os dados da conta conectada
     setState(() => _baixando = true);
+   
     try {
       final dados = await ApiService.requisitar(
         'GET',
@@ -30,6 +32,7 @@ class _PrivacidadeConfigState extends State<PrivacidadeConfig> {
       final arquivo = await FileSaver.instance.saveAs(
         name: 'farmagrid_meus_dados_${DateTime.now().millisecondsSinceEpoch}',
         bytes: Uint8List.fromList(
+          // prepara um conversor json
           utf8.encode(const JsonEncoder.withIndent('  ').convert(dados)),
         ),
         fileExtension: 'json',
@@ -42,6 +45,7 @@ class _PrivacidadeConfigState extends State<PrivacidadeConfig> {
     } catch (e) {
       _avisar('Nao foi possivel baixar os dados: $e');
     } finally {
+
       if (mounted) setState(() => _baixando = false);
     }
   }

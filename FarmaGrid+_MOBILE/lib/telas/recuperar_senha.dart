@@ -65,11 +65,13 @@ class _TelaRecuperarSenhaState extends State<TelaRecuperarSenha> {
     setState(() => _erro = null);
     final etapa = _etapa;
     if (etapa == 0 &&
+        // confere o formato do email com arroba e dominio sem espacos
         !RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(_email.text.trim())) {
       setState(() => _erro = 'Informe um e-mail válido.');
       return;
     }
     final codigo = _digitos.map((d) => d.text).join();
+    // o padrao exige exatamente seis digitos do comeco ao fim
     if (etapa == 1 && !reenviar && !RegExp(r'^\d{6}$').hasMatch(codigo)) {
       setState(() => _erro = 'Preencha os seis números do código.');
       return;
@@ -186,6 +188,7 @@ class _TelaRecuperarSenhaState extends State<TelaRecuperarSenha> {
   }
 
   void _preencherCodigo(String texto, int indice) {
+    // replaceall apaga tudo que o padrao identifica como diferente de zero a nove
     final numeros = texto.replaceAll(RegExp(r'[^0-9]'), '');
     if (numeros.length > 1) {
       final inicio = numeros.length >= 6 ? 0 : indice;
@@ -194,6 +197,7 @@ class _TelaRecuperarSenhaState extends State<TelaRecuperarSenha> {
             ? numeros[i - inicio]
             : '';
       }
+      // clamp limita o indice de zero a cinco pra focar um campo que existe
       _focos[(inicio + numeros.length).clamp(0, 5)].requestFocus();
     } else if (numeros.isNotEmpty && indice < 5) {
       _focos[indice + 1].requestFocus();

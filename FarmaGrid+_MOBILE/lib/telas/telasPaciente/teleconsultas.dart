@@ -116,7 +116,9 @@ class _TeleconsultasState extends State<Teleconsultas> {
         ),
       );
     }
+    // where separa as consultas que ainda estao agendadas
     final agendadas = _consultas.where(_agendada).toList();
+    // a negacao inverte o filtro pra pegar as consultas do historico
     final anteriores = _consultas.where((c) => !_agendada(c)).toList();
     return RefreshIndicator(
       onRefresh: _carregar,

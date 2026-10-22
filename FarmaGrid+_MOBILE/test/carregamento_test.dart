@@ -5,6 +5,7 @@ import 'package:farmagrid/widgets/carregamento.dart';
 
 void main() {
   test('encerra somente depois da última operação, mesmo com erro', () async {
+    // permite decidir quando uma tarefa assincrona termina
     final primeira = Completer<void>();
     final segunda = Completer<void>();
     final a = Carregamento.executar('Carregando...', () => primeira.future);

@@ -16,6 +16,7 @@ class ApiService {
 
   static Future<List<Map<String, dynamic>>> getList(String path) async {
     final value = await requisitar('GET', path);
+    // any detecta se veio algum item que nao e um mapa na resposta da api
     if (value is! List || value.any((item) => item is! Map)) {
       throw ApiException(
         'O servidor retornou uma lista inválida. Tente novamente.',

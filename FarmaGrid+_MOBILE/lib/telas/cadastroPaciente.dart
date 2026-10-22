@@ -54,6 +54,7 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
   // aplica mascaras pra telefone, cpf, data e cep ja sairem formatados enquanto digita
   final _telefoneMask = MaskTextInputFormatter(
     mask: '(##) #####-####',
+    // o filtro aceita so digitos de zero a nove nas posicoes da mascara
     filter: {"#": RegExp(r'[0-9]')},
   );
 
@@ -64,11 +65,6 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
 
   final _contatoEmergenciaTelefoneMask = MaskTextInputFormatter(
     mask: '(##) #####-####',
-    filter: {"#": RegExp(r'[0-9]')},
-  );
-
-  final _dataMask = MaskTextInputFormatter(
-    mask: '##/##/####',
     filter: {"#": RegExp(r'[0-9]')},
   );
 
@@ -216,7 +212,8 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
   }
 
   Future<void> _buscarCep() async {
-    // consulta um servico externo de cep e preenche o endereco quando encontra os dados
+    // consulta api de cep e preenche o endereco quando encontra os dados
+    // replaceall apaga tudo que o padrao identifica como diferente de zero a nove
     final cep = _cepCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
 
     if (cep.length != 8) return;
@@ -384,6 +381,7 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
                         if (v == null || v.trim().isEmpty)
                           return "Campo obrigatório!";
                         if (_cepCtrl.text
+                                // replaceall apaga tudo que o padrao identifica como diferente de zero a nove
                                 .replaceAll(RegExp(r'[^0-9]'), '')
                                 .length !=
                             8) {

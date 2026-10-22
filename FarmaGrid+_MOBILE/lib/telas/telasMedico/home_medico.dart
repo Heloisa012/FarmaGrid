@@ -51,6 +51,7 @@ class _TelaHomeMedicoState extends State<TelaHomeMedico> {
               '${hoje.year}-${hoje.month.toString().padLeft(2, '0')}-${hoje.day.toString().padLeft(2, '0')}';
           if (mounted) {
             setState(
+              // where deixa so as consultas com a data de hoje
               () => _consultasHoje = lista.where((c) => c.data == iso).toList(),
             );
           }
@@ -574,6 +575,7 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
   Widget build(BuildContext context) {
     const bgColor = Colors.white;
     const subColor = Colors.grey;
+
 
     return DraggableScrollableSheet(
       initialChildSize: 0.92,

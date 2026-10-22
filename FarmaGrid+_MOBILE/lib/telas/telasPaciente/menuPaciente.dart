@@ -40,6 +40,7 @@ class DrawerPaciente extends StatelessWidget {
     const bgColor = Colors.white;
     const subColor = Colors.grey;
 
+    // cria um painel que pode ser arrastado e rolado
     return DraggableScrollableSheet(
       initialChildSize: 0.88,
       minChildSize: 0.5,
@@ -396,7 +397,7 @@ class DrawerPaciente extends StatelessWidget {
           ),
           GestureDetector(
             onTap: onTap,
-            // essa animacao deixa o seletor deslizar quando a pessoa troca a opcao
+            // deixa o seletor deslizar quando a pessoa troca a opcao
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               width: 46,

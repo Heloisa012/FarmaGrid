@@ -38,6 +38,7 @@ class _TelaFarmaciasProximasState extends State<TelaFarmaciasProximas> {
     }
   }
 
+  // filtra por nome ou endereco e pela opcao de abertas ou fechadas
   List<FarmaciaProxima> get _filtradas => _farmacias.where((f) {
     final buscaOk = '${f.nome} ${f.endereco}'.toLowerCase().contains(
       _busca.text.trim().toLowerCase(),
@@ -310,6 +311,7 @@ class _TelaFarmaciasProximasState extends State<TelaFarmaciasProximas> {
   }
 
   Widget _fonteDados() {
+    // any confere se pelo menos uma farmacia veio do openstreetmap
     final osm = _farmacias.any((f) => f.fonte == 'OpenStreetMap');
     return PacienteCard(
       color: const Color(0xFFEAF5EF),
