@@ -37,8 +37,10 @@ class PacienteService {
       )).map(ProdutoPaciente.fromJson).toList();
 
   static Future<List<CupomPaciente>> listarCupons() async {
-    final itens = await ApiService.getList('/api/pacientes/$idPaciente/cupons');
-    return itens.map(CupomPaciente.fromJson).toList();
+    final itens = await ApiService.getList('/api/cupons/disponiveis');
+    return itens
+        .map((json) => CupomPaciente.fromJson({...json, 'resgatado': false}))
+        .toList();
   }
 
   static Future<CupomPaciente> resgatarCupom(int idCupom) async =>

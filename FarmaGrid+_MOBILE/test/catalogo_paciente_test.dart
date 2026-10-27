@@ -33,18 +33,18 @@ void main() {
     expect(produtos.single.quantidade, 4);
   });
 
-  test('carrega descontos do paciente e preserva os resgatados', () async {
+  test('carrega descontos cadastrados na vitrine de cupons', () async {
     final cupons = await http.runWithClient(
       PacienteService.listarCupons,
       () => MockClient((request) async {
-        expect(request.url.path, '/api/pacientes/10/cupons');
+        expect(request.url.path, '/api/cupons/disponiveis');
         return http.Response(jsonEncode([
-          {'id': 1, 'codigo': 'PROMO', 'resgatado': true},
-          {'id': 2, 'codigo': 'NOVO', 'resgatado': false},
+          {'id': 1, 'codigo': 'PROMO'},
+          {'id': 2, 'codigo': 'NOVO'},
         ]), 200);
       }),
     );
-    expect(cupons.first.resgatado, isTrue);
-    expect(cupons.last.resgatado, isFalse);
+    expect(cupons.map((cupom) => cupom.codigo), ['PROMO', 'NOVO']);
+    expect(cupons.every((cupom) => !cupom.resgatado), isTrue);
   });
 }
