@@ -406,6 +406,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   buscarAlertasValidade: (idFarmacia) => invocar('buscar-alertas-validade', idFarmacia),
   removerLote: (id) => invocar('remover-lote', id),
   buscarCupons: (idFarmacia) => invocar('buscar-cupons', idFarmacia),
+  sincronizarCupons: (idFarmacia) => ipcRenderer.invoke('buscar-cupons', idFarmacia),
   cadastrarCupom: (dados) => invocar('cadastrar-cupom', dados),
   editarCupom: (dados) => invocar('editar-cupom', dados),
   deletarCupom: (id) => invocar('deletar-cupom', id),

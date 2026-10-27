@@ -1050,6 +1050,7 @@
       let cupomAtual = null;
       let usuarioLogado = JSON.parse(localStorage.getItem('usuarioLogado') || '{}');
       let todosOsCupons = [];
+      let sincronizacaoCuponsEmAndamento = false;
 
       window.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('bd').addEventListener('click', () => window.electronAPI.abrirJanelaD());
@@ -1062,7 +1063,7 @@
 
         await carregarCupons();
         // Sincroniza a barra com resgates feitos no aplicativo enquanto a tela estiver aberta.
-        window.setInterval(() => carregarCupons().catch(console.error), 5000);
+        window.setInterval(() => carregarCupons({ silencioso: true }).catch(console.error), 5000);
 
         try {
           const farmacia = await window.electronAPI.buscarDadosFarmacia(usuarioLogado.id_farmacia);
@@ -1081,12 +1082,19 @@
         }
       });
 
-      async function carregarCupons() {
-        todosOsCupons = await window.electronAPI.buscarCupons(
-          usuarioLogado.id_farmacia
-        );
+      async function carregarCupons({ silencioso = false } = {}) {
+        if (silencioso && sincronizacaoCuponsEmAndamento) return;
+        if (silencioso) sincronizacaoCuponsEmAndamento = true;
 
-        renderizarLista(todosOsCupons);
+        try {
+          const cupons = silencioso
+            ? await window.electronAPI.sincronizarCupons(usuarioLogado.id_farmacia)
+            : await window.electronAPI.buscarCupons(usuarioLogado.id_farmacia);
+          todosOsCupons = cupons;
+          renderizarLista(todosOsCupons);
+        } finally {
+          if (silencioso) sincronizacaoCuponsEmAndamento = false;
+        }
       }
 
       function formatarValor(c) {
