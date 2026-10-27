@@ -11,6 +11,7 @@ import {
   login, logout, montarCadastro,
   cadastroPaciente, cadastroMedico, cadastroFarmacia, buscarConfigPaciente,
 } from '../services/authService.js';
+import { useCep } from '../hooks/useCep.js';
 
 // Tipos de cadastro disponíveis. "Farmácia" fica de fora: não existe
 // POST /auth/cadastro/farmacia na API (contas de farmácia só são criadas
@@ -69,6 +70,19 @@ export function Login({ onBack, onLogin, onCadastroSucesso }) {
   const atualizarComMascara = (campo, valor, mascara) => {
     atualizar(campo, mascara(valor));
   };
+
+  // ── Auto-preenchimento de endereço pelo CEP ──
+  const {
+    buscandoCep: buscandoCepPaciente,
+    erroCep: erroCepPaciente,
+    handleCepChange: handleCepPaciente,
+  } = useCep(atualizar, { logradouro: 'rua', bairro: 'bairro', cidade: 'cidade', estado: 'estado', cep: 'cep' });
+
+  const {
+    buscandoCep: buscandoCepFarmacia,
+    erroCep: erroCepFarmacia,
+    handleCepChange: handleCepFarmacia,
+  } = useCep(atualizar, { logradouro: 'farmaciaRua', bairro: 'farmaciaBairro', cidade: 'farmaciaCidade', estado: 'farmaciaEstado', cep: 'farmaciaCep' });
 
   const lerFoto = (arquivo) => new Promise((resolve, reject) => {
     if (!arquivo) return resolve(null);
@@ -226,12 +240,25 @@ export function Login({ onBack, onLogin, onCadastroSucesso }) {
                   </select>
                 </div>
                 <div className="form-group"><label>Data de Nascimento</label><input type="date" value={form.dataNascimento} onChange={e => atualizar('dataNascimento', e.target.value)} required /></div>
-                <div className="form-group"><label>Rua</label><input type="text" value={form.rua} onChange={e => atualizar('rua', e.target.value)} placeholder="Rua das Flores" required /></div>
+                <div className="form-group">
+                  <label>
+                    CEP
+                    {buscandoCepPaciente && <span className="cep-buscando"> ⏳ Buscando...</span>}
+                  </label>
+                  <input
+                    type="text"
+                    value={form.cep}
+                    onChange={e => handleCepPaciente(e.target.value, mascararCEP)}
+                    placeholder="00000-000"
+                    maxLength={9}
+                  />
+                  {erroCepPaciente && <span className="cep-erro">{erroCepPaciente}</span>}
+                </div>
+                <div className="form-group"><label>Rua</label><input type="text" value={form.rua} onChange={e => atualizar('rua', e.target.value)} placeholder="Preenchido pelo CEP" /></div>
                 <div className="form-group"><label>Número</label><input type="number" value={form.numCasa} onChange={e => atualizar('numCasa', e.target.value)} placeholder="123" required /></div>
-                <div className="form-group"><label>Bairro</label><input type="text" value={form.bairro} onChange={e => atualizar('bairro', e.target.value)} placeholder="Centro" required /></div>
-                <div className="form-group"><label>Cidade</label><input type="text" value={form.cidade} onChange={e => atualizar('cidade', e.target.value)} placeholder="Campinas" /></div>
+                <div className="form-group"><label>Bairro</label><input type="text" value={form.bairro} onChange={e => atualizar('bairro', e.target.value)} placeholder="Preenchido pelo CEP" /></div>
+                <div className="form-group"><label>Cidade</label><input type="text" value={form.cidade} onChange={e => atualizar('cidade', e.target.value)} placeholder="Preenchida pelo CEP" /></div>
                 <div className="form-group"><label>Estado</label><input type="text" value={form.estado} onChange={e => atualizar('estado', e.target.value)} placeholder="SP" maxLength={2} /></div>
-                <div className="form-group"><label>CEP</label><input type="text" value={form.cep} onChange={e => atualizarComMascara('cep', e.target.value, mascararCEP)} placeholder="00000-000" maxLength={9} /></div>
               </>
             )}
 
@@ -248,7 +275,22 @@ export function Login({ onBack, onLogin, onCadastroSucesso }) {
               <>
                 <div className="form-group"><label>Nome da Farmácia</label><input type="text" value={form.farmaciaNome} onChange={e => atualizar('farmaciaNome', e.target.value)} placeholder="FarmaGrid Saúde" required /></div>
                 <div className="form-group"><label>CNPJ</label><input type="text" value={form.farmaciaCnpj} onChange={e => atualizarComMascara('farmaciaCnpj', e.target.value, mascararCNPJ)} placeholder="00.000.000/0000-00" inputMode="numeric" maxLength={18} required /></div>
-                <div className="form-group"><label>CEP</label><input type="text" value={form.farmaciaCep} onChange={e => atualizarComMascara('farmaciaCep', e.target.value, mascararCEP)} placeholder="00000-000" inputMode="numeric" maxLength={9} required /></div>
+                <div className="form-group">
+                  <label>
+                    CEP
+                    {buscandoCepFarmacia && <span className="cep-buscando"> ⏳ Buscando...</span>}
+                  </label>
+                  <input
+                    type="text"
+                    value={form.farmaciaCep}
+                    onChange={e => handleCepFarmacia(e.target.value, mascararCEP)}
+                    placeholder="00000-000"
+                    inputMode="numeric"
+                    maxLength={9}
+                    required
+                  />
+                  {erroCepFarmacia && <span className="cep-erro">{erroCepFarmacia}</span>}
+                </div>
                 <div className="form-group"><label>Telefone</label><input type="text" value={form.farmaciaTelefone} onChange={e => atualizarComMascara('farmaciaTelefone', e.target.value, mascararTelefone)} placeholder="(19) 99999-9999" inputMode="tel" maxLength={15} required /></div>
                 <div className="form-group"><label>Cidade (ID)</label><input type="number" min="1" value={form.farmaciaCidade} onChange={e => atualizar('farmaciaCidade', e.target.value)} placeholder="Ex.: 1" required /></div>
                 <div className="form-group"><label>Foto de perfil (opcional)</label><input type="file" accept="image/*" onChange={async e => { try { atualizar('farmaciaFoto', await lerFoto(e.target.files[0])); } catch (err) { setErro(err.message); } }} /></div>
