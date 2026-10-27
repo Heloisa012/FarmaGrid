@@ -287,6 +287,14 @@ public class EndpointsEspecificosController {
         return produtos;
     }
 
+    // Catalogo do paciente, independente da farmacia selecionada no desktop.
+    @GetMapping("/produtos/disponiveis")
+    public List<Produto> listarProdutosDisponiveis() {
+        return produtoRepo.findAllByOrderByNomeAsc().stream()
+            .filter(p -> p.getQuantidade() != null && p.getQuantidade() > 0)
+            .toList();
+    }
+
     @GetMapping("/produtos/estoque-baixo")
     public List<Produto> produtosEstoqueBaixo(@RequestParam Long idFarmacia) {
         return produtoRepo.findEstoqueBaixo(idFarmacia);
