@@ -11,3 +11,6 @@ Desktop/Electron/.env
 # Ignore IDE/editor artifacts
 .vscode/
 .idea/
+
+PI_web/farmagrid/public/downloads/*.apk
+PI_web/farmagrid/public/downloads/*.exe
