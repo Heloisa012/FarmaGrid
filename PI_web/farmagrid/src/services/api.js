@@ -1,4 +1,5 @@
-const API_URL = (import.meta.env.VITE_API_URL || 'https://farmagrid.onrender.com').replace(/\/$/, '');
+//const API_URL = (import.meta.env.VITE_API_URL || 'https://farmagrid.onrender.com').replace(/\/$/, '');
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080').replace(/\/$/, '');
 
 export function getToken() {
   return localStorage.getItem('farmagrid_token');

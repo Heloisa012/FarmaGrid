@@ -49,7 +49,10 @@ export async function cadastroFarmacia(dados) {
     cnpj,
     cep: String(dados.cep || '').replace(/\D/g, ''),
     telefone: String(dados.telefone || '').replace(/\D/g, ''),
-    idCidade: dados.idCidade,
+    rua: dados.rua || '',
+    bairro: dados.bairro || '',
+    cidade: dados.cidade || '',
+    estado: dados.estado || '',
     fotoPerfil: dados.fotoPerfil || null,
     email: dados.email,
   };

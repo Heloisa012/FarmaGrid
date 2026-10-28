@@ -6,6 +6,7 @@ import {
   mascararCEP,
   mascararCNPJ,
   mascararTelefone,
+  validarCPF,
 } from '../utils/maskUtils.js';
 import {
   login, logout, montarCadastro,
@@ -26,10 +27,7 @@ const TIPOS_CADASTRO = [
 // "tipo" numérico mandar pro /auth/login (a API exige isso para achar a
 // linha). Farmácia/balconista/caixa não têm valor confirmado, então não
 // aparecem aqui (ver services/authService.js).
-const TIPOS_LOGIN = [
-  ['paciente',     'Paciente'],
-  ['profissional', 'Médico/Clínica'],
-];
+
 
 export function Login({ onBack, onLogin, onCadastroSucesso }) {
   const [aba, setAba] = useState('login');
@@ -63,6 +61,9 @@ export function Login({ onBack, onLogin, onCadastroSucesso }) {
     farmaciaTelefone: '',
     farmaciaCidade: '',
     farmaciaFoto: '',
+    farmaciaRua: '',
+    farmaciaBairro: '',
+    farmaciaEstado: '',
   });
 
   const atualizar = (campo, valor) => setForm(prev => ({ ...prev, [campo]: valor }));
@@ -96,16 +97,20 @@ export function Login({ onBack, onLogin, onCadastroSucesso }) {
     const cnpj = form.farmaciaCnpj.replace(/\D/g, '');
     const cep = form.farmaciaCep.replace(/\D/g, '');
     const telefone = form.farmaciaTelefone.replace(/\D/g, '');
-    const idCidade = Number(form.farmaciaCidade);
-    if (!form.farmaciaNome.trim() || cnpj.length !== 14 || cep.length !== 8 || telefone.length < 10 || !Number.isInteger(idCidade) || idCidade <= 0) {
-      throw new Error('Informe nome, CNPJ, CEP, telefone e cidade válidos.');
+    if (!form.farmaciaNome.trim() || cnpj.length !== 14 || cep.length !== 8 || telefone.length < 10) {
+      throw new Error('Informe nome, CNPJ, CEP e telefone válidos.');
+    }
+    if (!form.farmaciaCidade.trim() || form.farmaciaEstado.trim().length !== 2) {
+      throw new Error('Informe um CEP válido para preencher cidade e estado.');
     }
     return cadastroFarmacia({
-      nome: form.farmaciaNome.trim(), cnpj, cep, telefone, idCidade, fotoPerfil: form.farmaciaFoto,
+      nome: form.farmaciaNome.trim(), cnpj, cep, telefone,
+      rua: form.farmaciaRua.trim(), bairro: form.farmaciaBairro.trim(),
+      cidade: form.farmaciaCidade.trim(), estado: form.farmaciaEstado.trim().toUpperCase(),
+      fotoPerfil: form.farmaciaFoto,
       email: form.email.trim(), senha: form.senha,
     });
   };
-
   const entrar = async (e) => {
     e.preventDefault();
     setCarregando(true);
@@ -161,7 +166,8 @@ export function Login({ onBack, onLogin, onCadastroSucesso }) {
         });
         return;
       }
-
+      
+ //     if (!validarCPF(form.cpf)) throw new Error('CPF inválido.');
       const payload = montarCadastro(form, form.tipo);
       const res = form.tipo === 'profissional'
         ? await cadastroMedico(payload)
@@ -202,12 +208,6 @@ export function Login({ onBack, onLogin, onCadastroSucesso }) {
 
         {aba === 'login' ? (
           <form onSubmit={entrar}>
-            <div className="form-group">
-              <label>Tipo de Conta</label>
-              <select value={form.tipoLogin} onChange={e => atualizar('tipoLogin', e.target.value)} required>
-                {TIPOS_LOGIN.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-              </select>
-            </div>
             <div className="form-group"><label>Email</label><input type="email" value={form.email} onChange={e => atualizar('email', e.target.value)} placeholder="seu@email.com" required /></div>
             <div className="form-group"><label>Senha</label><input type="password" value={form.senha} onChange={e => atualizar('senha', e.target.value)} placeholder="••••••••" required /></div>
             <button className="btn btn-primary form-submit" type="submit" disabled={carregando}>{carregando ? 'Entrando...' : 'Entrar'}</button>
@@ -292,8 +292,10 @@ export function Login({ onBack, onLogin, onCadastroSucesso }) {
                   {erroCepFarmacia && <span className="cep-erro">{erroCepFarmacia}</span>}
                 </div>
                 <div className="form-group"><label>Telefone</label><input type="text" value={form.farmaciaTelefone} onChange={e => atualizarComMascara('farmaciaTelefone', e.target.value, mascararTelefone)} placeholder="(19) 99999-9999" inputMode="tel" maxLength={15} required /></div>
-                <div className="form-group"><label>Cidade (ID)</label><input type="number" min="1" value={form.farmaciaCidade} onChange={e => atualizar('farmaciaCidade', e.target.value)} placeholder="Ex.: 1" required /></div>
-                <div className="form-group"><label>Foto de perfil (opcional)</label><input type="file" accept="image/*" onChange={async e => { try { atualizar('farmaciaFoto', await lerFoto(e.target.files[0])); } catch (err) { setErro(err.message); } }} /></div>
+                <div className="form-group"><label>Rua</label><input type="text" value={form.farmaciaRua} onChange={e => atualizar('farmaciaRua', e.target.value)} placeholder="Preenchida pelo CEP" /></div>
+                <div className="form-group"><label>Bairro</label><input type="text" value={form.farmaciaBairro} onChange={e => atualizar('farmaciaBairro', e.target.value)} placeholder="Preenchido pelo CEP" /></div>
+                <div className="form-group"><label>Cidade</label><input type="text" value={form.farmaciaCidade} onChange={e => atualizar('farmaciaCidade', e.target.value)} placeholder="Preenchida pelo CEP" required /></div>
+                <div className="form-group"><label>Estado</label><input type="text" value={form.farmaciaEstado} onChange={e => atualizar('farmaciaEstado', e.target.value)} placeholder="SP" maxLength={2} required /></div>                <div className="form-group"><label>Foto de perfil (opcional)</label><input type="file" accept="image/*" onChange={async e => { try { atualizar('farmaciaFoto', await lerFoto(e.target.files[0])); } catch (err) { setErro(err.message); } }} /></div>
               </>
             )}
 

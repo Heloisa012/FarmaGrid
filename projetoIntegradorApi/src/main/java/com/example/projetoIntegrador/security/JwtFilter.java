@@ -95,4 +95,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
         chain.doFilter(request, response);
     }
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return "GET".equals(request.getMethod())
+                && (path.startsWith("/api/cep/") || path.equals("/api/estatisticas"));
+    }
 }

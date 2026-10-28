@@ -41,7 +41,7 @@ public class CepController {
             @SuppressWarnings("unchecked")
             Map<String, Object> resposta = restTemplate.getForObject(uri, Map.class);
 
-            if (resposta == null || Boolean.TRUE.equals(resposta.get("erro"))) {
+            if (resposta == null || resposta.containsKey("erro")) {
                 return ResponseEntity.status(404).body(Map.of("erro", "CEP não encontrado."));
             }
 

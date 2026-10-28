@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import '../styles/inicio.css';
 import { Logo } from '../components/Logo.jsx';
 import { IVideo, IArquivo, IEstoque, IRelogio, IEstrela, IGrafico } from '../components/Icones.jsx';
+import { DOWNLOAD_WINDOWS, DOWNLOAD_ANDROID } from '../config/downloads.js';
+import { apiFetch } from '../services/api.js';
 
 const SERVICOS = [
   [IVideo,    'Teleconsultas',           'Consultas médicas por videochamada com profissionais verificados e especialistas.'],
@@ -38,6 +40,17 @@ export function Inicio({ onLogin }) {
 
   const [menuAberto, setMenuAberto] = useState(false);
   const navegar = (id) => { setMenuAberto(false); rolarAte(id); };
+
+  // Números reais vindos do backend (GET /api/estatisticas)
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    apiFetch('/api/estatisticas')
+      .then(setStats)
+      .catch(() => setStats(null));
+  }, []);
+
+  const formatar = (n) => (n == null ? '—' : Number(n).toLocaleString('pt-BR'));
 
   return (
     <div className="landing">
@@ -80,7 +93,11 @@ export function Inicio({ onLogin }) {
                 <button type="button" className="btn btn-secondary btn-lg" onClick={() => rolarAte('como-funciona')}>Saiba Mais</button>
               </div>
               <div className="hero-stats">
-                {[['50k+', 'Pacientes Ativos'], ['1.200+', 'Médicos Verificados'], ['300+', 'Farmácias Parceiras']].map(([v, l]) => (
+                {[
+                  [formatar(stats?.pacientes), 'Pacientes Cadastrados'],
+                  [formatar(stats?.medicos), 'Médicos Cadastrados'],
+                  [formatar(stats?.farmacias), 'Farmácias Cadastradas'],
+                ].map(([v, l]) => (
                   <div className="stat-pill" key={l}><strong>{v}</strong><span>{l}</span></div>
                 ))}
               </div>
@@ -88,7 +105,7 @@ export function Inicio({ onLogin }) {
             <div className="hero-image">
               <div className="video-responsivo">
                 <video autoPlay loop muted playsInline>
-                  <source src="/midia/ExemploDesktop.mp4" type="video/mp4" />
+                  <source src="/midia/download.mp4" type="video/mp4" />
                 </video>
               </div>
             </div>
@@ -152,14 +169,14 @@ export function Inicio({ onLogin }) {
           <div className="download-content">
             <h2>Baixe o App FarmaGrid</h2>
             <div className="download-btns">
-              <button type="button" className="btn-download">
+              <a className="btn-download" href={DOWNLOAD_WINDOWS} download>
                 <img src="/midia/download3.png" alt="Windows" className="img-download" />
                 <span>Windows</span>
-              </button>
-              <button type="button" className="btn-download">
+              </a>
+              <a className="btn-download" href={DOWNLOAD_ANDROID} download>
                 <img src="/midia/download3.png" alt="Mobile" className="img-download" />
                 <span>Mobile</span>
-              </button>
+              </a>
             </div>
           </div>
         </div>
